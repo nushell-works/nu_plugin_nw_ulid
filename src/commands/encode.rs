@@ -61,7 +61,7 @@ impl PluginCommand for UlidEncodeBase32Command {
                 Value::Binary { val, .. } => val,
                 _ => {
                     return Err(LabeledError::new("Invalid input type")
-                        .with_label("Expected string or binary data", call.head))
+                        .with_label("Expected string or binary data", call.head));
                 }
             }
         } else {
@@ -71,7 +71,7 @@ impl PluginCommand for UlidEncodeBase32Command {
                 PipelineData::Value(Value::Binary { val, .. }, _) => val,
                 _ => {
                     return Err(LabeledError::new("Invalid input type")
-                        .with_label("Expected string or binary data from pipeline", call.head))
+                        .with_label("Expected string or binary data from pipeline", call.head));
                 }
             }
         };
@@ -137,7 +137,7 @@ impl PluginCommand for UlidDecodeBase32Command {
                         Ok(text) => Value::string(text, call.head),
                         Err(_) => {
                             return Err(LabeledError::new("Invalid UTF-8")
-                                .with_label("Decoded data is not valid UTF-8 text", call.head))
+                                .with_label("Decoded data is not valid UTF-8 text", call.head));
                         }
                     }
                 } else {
@@ -211,7 +211,7 @@ impl PluginCommand for UlidEncodeHexCommand {
                 Value::Binary { val, .. } => val,
                 _ => {
                     return Err(LabeledError::new("Invalid input type")
-                        .with_label("Expected string or binary data", call.head))
+                        .with_label("Expected string or binary data", call.head));
                 }
             }
         } else {
@@ -221,7 +221,7 @@ impl PluginCommand for UlidEncodeHexCommand {
                 PipelineData::Value(Value::Binary { val, .. }, _) => val,
                 _ => {
                     return Err(LabeledError::new("Invalid input type")
-                        .with_label("Expected string or binary data from pipeline", call.head))
+                        .with_label("Expected string or binary data from pipeline", call.head));
                 }
             }
         };
@@ -292,7 +292,7 @@ impl PluginCommand for UlidDecodeHexCommand {
                         Ok(text) => Value::string(text, call.head),
                         Err(_) => {
                             return Err(LabeledError::new("Invalid UTF-8")
-                                .with_label("Decoded data is not valid UTF-8 text", call.head))
+                                .with_label("Decoded data is not valid UTF-8 text", call.head));
                         }
                     }
                 } else {

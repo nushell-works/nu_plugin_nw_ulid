@@ -3,42 +3,45 @@ use nu_protocol::{ShellError, Span, Value};
 /// Convert UlidError to Nushell ShellError with user-friendly messages
 pub fn ulid_error_to_shell_error(error: crate::UlidError, span: Span) -> ShellError {
     match error {
-        crate::UlidError::InvalidFormat { input, reason } => {
-            ShellError::GenericError {
-                error: "Invalid ULID format".to_string(),
-                msg: format!("The input '{}' is not a valid ULID", input),
-                span: Some(span),
-                help: Some(format!("{}\n\nValid ULID format: 26 characters using Crockford Base32\nExample: 01AN4Z07BY79KA1307SR9X4MV3", reason)),
-                inner: Vec::new(),
-            }
-        }
-        crate::UlidError::InvalidInput { message } => {
-            ShellError::GenericError {
-                error: "Invalid input".to_string(),
-                msg: message.clone(),
-                span: Some(span),
-                help: Some("Check the command parameters and try again".to_string()),
-                inner: Vec::new(),
-            }
-        }
-        crate::UlidError::TimestampOutOfRange { timestamp, max_timestamp } => {
-            ShellError::GenericError {
-                error: "Timestamp out of range".to_string(),
-                msg: format!("Timestamp {} exceeds maximum allowed value", timestamp),
-                span: Some(span),
-                help: Some(format!("Maximum timestamp: {} (year 10889)\nUse a timestamp between 0 and {}", max_timestamp, max_timestamp)),
-                inner: Vec::new(),
-            }
-        }
-        crate::UlidError::GenerationError { reason } => {
-            ShellError::GenericError {
-                error: "ULID generation failed".to_string(),
-                msg: reason.clone(),
-                span: Some(span),
-                help: Some("This may be due to system randomness issues or resource constraints".to_string()),
-                inner: Vec::new(),
-            }
-        }
+        crate::UlidError::InvalidFormat { input, reason } => ShellError::GenericError {
+            error: "Invalid ULID format".to_string(),
+            msg: format!("The input '{}' is not a valid ULID", input),
+            span: Some(span),
+            help: Some(format!(
+                "{}\n\nValid ULID format: 26 characters using Crockford Base32\nExample: 01AN4Z07BY79KA1307SR9X4MV3",
+                reason
+            )),
+            inner: Vec::new(),
+        },
+        crate::UlidError::InvalidInput { message } => ShellError::GenericError {
+            error: "Invalid input".to_string(),
+            msg: message.clone(),
+            span: Some(span),
+            help: Some("Check the command parameters and try again".to_string()),
+            inner: Vec::new(),
+        },
+        crate::UlidError::TimestampOutOfRange {
+            timestamp,
+            max_timestamp,
+        } => ShellError::GenericError {
+            error: "Timestamp out of range".to_string(),
+            msg: format!("Timestamp {} exceeds maximum allowed value", timestamp),
+            span: Some(span),
+            help: Some(format!(
+                "Maximum timestamp: {} (year 10889)\nUse a timestamp between 0 and {}",
+                max_timestamp, max_timestamp
+            )),
+            inner: Vec::new(),
+        },
+        crate::UlidError::GenerationError { reason } => ShellError::GenericError {
+            error: "ULID generation failed".to_string(),
+            msg: reason.clone(),
+            span: Some(span),
+            help: Some(
+                "This may be due to system randomness issues or resource constraints".to_string(),
+            ),
+            inner: Vec::new(),
+        },
     }
 }
 

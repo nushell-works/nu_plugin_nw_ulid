@@ -106,7 +106,7 @@ impl PluginCommand for UlidGenerateCommand {
                 return Err(LabeledError::new("Invalid format").with_label(
                     format!("Unknown format '{}'. Use 'string', 'json', or 'binary'", f),
                     call.head,
-                ))
+                ));
             }
         };
 
@@ -131,7 +131,7 @@ impl PluginCommand for UlidGenerateCommand {
                                 Ok(ulid) => result.push(ulid),
                                 Err(e) => {
                                     return Err(LabeledError::new("Generation failed")
-                                        .with_label(e.to_string(), call.head))
+                                        .with_label(e.to_string(), call.head));
                                 }
                             }
                         }
@@ -141,7 +141,7 @@ impl PluginCommand for UlidGenerateCommand {
                         Ok(ulids) => ulids,
                         Err(e) => {
                             return Err(LabeledError::new("Bulk generation failed")
-                                .with_label(e.to_string(), call.head))
+                                .with_label(e.to_string(), call.head));
                         }
                     },
                 };

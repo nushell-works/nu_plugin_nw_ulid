@@ -158,8 +158,12 @@ mod performance_tests {
 
         let after_string_conversion = get_memory_usage();
 
-        println!("Memory usage - Initial: {} KB, After generation: {} KB, After string conversion: {} KB",
-                 initial_memory / 1024, after_generation / 1024, after_string_conversion / 1024);
+        println!(
+            "Memory usage - Initial: {} KB, After generation: {} KB, After string conversion: {} KB",
+            initial_memory / 1024,
+            after_generation / 1024,
+            after_string_conversion / 1024
+        );
 
         // Memory usage should be reasonable
         let _generation_overhead = after_generation - initial_memory;
@@ -181,8 +185,8 @@ mod performance_tests {
 
     #[test]
     fn test_concurrent_performance() {
-        use std::sync::atomic::{AtomicUsize, Ordering};
         use std::sync::Arc;
+        use std::sync::atomic::{AtomicUsize, Ordering};
         use std::thread;
 
         let total_ulids = 10_000;

@@ -75,7 +75,7 @@ impl PluginCommand for UlidTimeNowCommand {
                         fmt
                     ),
                     call.head,
-                ))
+                ));
             }
         };
 
@@ -173,7 +173,7 @@ impl PluginCommand for UlidTimeParseCommand {
             }
             _ => {
                 return Err(LabeledError::new("Invalid input type")
-                    .with_label("Expected string, int, or float", call.head))
+                    .with_label("Expected string, int, or float", call.head));
             }
         };
 
@@ -312,7 +312,7 @@ impl PluginCommand for UlidTimeMillisCommand {
             }
             Some(_) => {
                 return Err(LabeledError::new("Invalid input type")
-                    .with_label("Expected string, int, or float", call.head))
+                    .with_label("Expected string, int, or float", call.head));
             }
         };
 

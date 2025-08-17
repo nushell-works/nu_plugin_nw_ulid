@@ -64,7 +64,7 @@ impl PluginCommand for UlidHashSha256Command {
                 Value::Binary { val, .. } => val,
                 _ => {
                     return Err(LabeledError::new("Invalid input type")
-                        .with_label("Expected string or binary data", call.head))
+                        .with_label("Expected string or binary data", call.head));
                 }
             }
         } else {
@@ -74,7 +74,7 @@ impl PluginCommand for UlidHashSha256Command {
                 PipelineData::Value(Value::Binary { val, .. }, _) => val,
                 _ => {
                     return Err(LabeledError::new("Invalid input type")
-                        .with_label("Expected string or binary data from pipeline", call.head))
+                        .with_label("Expected string or binary data from pipeline", call.head));
                 }
             }
         };
@@ -150,7 +150,7 @@ impl PluginCommand for UlidHashSha512Command {
                 Value::Binary { val, .. } => val,
                 _ => {
                     return Err(LabeledError::new("Invalid input type")
-                        .with_label("Expected string or binary data", call.head))
+                        .with_label("Expected string or binary data", call.head));
                 }
             }
         } else {
@@ -160,7 +160,7 @@ impl PluginCommand for UlidHashSha512Command {
                 PipelineData::Value(Value::Binary { val, .. }, _) => val,
                 _ => {
                     return Err(LabeledError::new("Invalid input type")
-                        .with_label("Expected string or binary data from pipeline", call.head))
+                        .with_label("Expected string or binary data from pipeline", call.head));
                 }
             }
         };
@@ -254,7 +254,7 @@ impl PluginCommand for UlidHashBlake3Command {
                 Value::Binary { val, .. } => val,
                 _ => {
                     return Err(LabeledError::new("Invalid input type")
-                        .with_label("Expected string or binary data", call.head))
+                        .with_label("Expected string or binary data", call.head));
                 }
             }
         } else {
@@ -264,7 +264,7 @@ impl PluginCommand for UlidHashBlake3Command {
                 PipelineData::Value(Value::Binary { val, .. }, _) => val,
                 _ => {
                     return Err(LabeledError::new("Invalid input type")
-                        .with_label("Expected string or binary data from pipeline", call.head))
+                        .with_label("Expected string or binary data from pipeline", call.head));
                 }
             }
         };

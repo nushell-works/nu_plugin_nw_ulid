@@ -1,7 +1,7 @@
 [package]
 name = "nu_plugin_ulid"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 authors = ["John Ky <newhoggy@gmail.com>"]
 description = "Professional ULID (Universally Unique Lexicographically Sortable Identifier) utilities plugin for Nushell"
 license = "BSD-3-Clause"
@@ -11,7 +11,7 @@ documentation = "https://docs.rs/nu_plugin_ulid"
 keywords = ["nushell", "plugin", "ulid", "uuid", "identifier"]
 categories = ["command-line-utilities", "development-tools"]
 readme = "README.md"
-rust-version = "1.81.0"
+rust-version = "1.85.0"
 
 [[bin]]
 name = "nu_plugin_ulid"
