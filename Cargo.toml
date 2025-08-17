@@ -26,8 +26,8 @@ name = "nu_plugin_ulid"
 path = "src/lib.rs"
 
 [dependencies]
-nu-plugin = "0.95.0"
-nu-protocol = "0.95.0"
+nu-plugin = "0.106.1"
+nu-protocol = "0.106.1"
 
 # Production dependencies for Phase 3+
 ulid = { version = "1.1", features = ["serde"] }
@@ -42,7 +42,7 @@ uuid = { version = "1.18.0", features = ["v4"] }
 base64 = "0.22.1"
 
 [dev-dependencies]
-nu-test-support = "0.95.0"
+nu-test-support = "0.106.1"
 criterion = { version = "0.5", features = ["html_reports"] }
 
 [profile.release]

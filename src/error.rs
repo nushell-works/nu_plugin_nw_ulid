@@ -64,63 +64,63 @@ pub fn validate_positive_integer(
     value: i64,
     param_name: &str,
     span: Span,
-) -> Result<usize, ShellError> {
+) -> Result<usize, Box<ShellError>> {
     if value < 0 {
-        return Err(ShellError::GenericError {
+        return Err(Box::new(ShellError::GenericError {
             error: "Invalid parameter".to_string(),
             msg: format!("Parameter '{}' must be positive", param_name),
             span: Some(span),
             help: Some(format!("Got: {}, expected: positive integer", value)),
             inner: Vec::new(),
-        });
+        }));
     }
 
     if value > 10_000 {
-        return Err(ShellError::GenericError {
+        return Err(Box::new(ShellError::GenericError {
             error: "Parameter too large".to_string(),
             msg: format!("Parameter '{}' exceeds maximum allowed value", param_name),
             span: Some(span),
             help: Some("Maximum allowed: 10,000 for performance reasons".to_string()),
             inner: Vec::new(),
-        });
+        }));
     }
 
     Ok(value as usize)
 }
 
 /// Validate ULID string with helpful error messages
-pub fn validate_ulid_string(ulid_str: &str, span: Span) -> Result<(), ShellError> {
+pub fn validate_ulid_string(ulid_str: &str, span: Span) -> Result<(), Box<ShellError>> {
     if ulid_str.is_empty() {
-        return Err(ShellError::GenericError {
+        return Err(Box::new(ShellError::GenericError {
             error: "Empty ULID".to_string(),
             msg: "ULID string cannot be empty".to_string(),
             span: Some(span),
             help: Some("Provide a valid ULID string (26 characters)".to_string()),
             inner: Vec::new(),
-        });
+        }));
     }
 
     if ulid_str.len() != 26 {
-        return Err(ShellError::GenericError {
+        return Err(Box::new(ShellError::GenericError {
             error: "Invalid ULID length".to_string(),
             msg: format!("ULID must be exactly 26 characters, got {}", ulid_str.len()),
             span: Some(span),
             help: Some("Valid ULID example: 01AN4Z07BY79KA1307SR9X4MV3".to_string()),
             inner: Vec::new(),
-        });
+        }));
     }
 
     // Check character set
     let valid_chars = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
     for (i, c) in ulid_str.chars().enumerate() {
         if !valid_chars.contains(c) {
-            return Err(ShellError::GenericError {
+            return Err(Box::new(ShellError::GenericError {
                 error: "Invalid ULID character".to_string(),
                 msg: format!("Invalid character '{}' at position {}", c, i),
                 span: Some(span),
                 help: Some(format!("Valid characters: {}", valid_chars)),
                 inner: Vec::new(),
-            });
+            }));
         }
     }
 

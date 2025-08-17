@@ -15,7 +15,7 @@ impl PluginCommand for UlidUuidGenerateCommand {
         "ulid uuid generate"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Generate a random UUID v4"
     }
 
@@ -57,7 +57,7 @@ impl PluginCommand for UlidUuidValidateCommand {
         "ulid uuid validate"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Validate if a string is a valid UUID"
     }
 
@@ -106,7 +106,7 @@ impl PluginCommand for UlidUuidParseCommand {
         "ulid uuid parse"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Parse a UUID string and extract its components"
     }
 

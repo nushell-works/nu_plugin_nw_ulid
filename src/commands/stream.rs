@@ -14,7 +14,7 @@ impl PluginCommand for UlidStreamCommand {
         "ulid stream"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Stream-process large datasets of ULIDs with memory-efficient operations"
     }
 
@@ -342,7 +342,7 @@ impl PluginCommand for UlidGenerateStreamCommand {
         "ulid generate-stream"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Generate a continuous stream of ULIDs with memory-efficient batch processing"
     }
 

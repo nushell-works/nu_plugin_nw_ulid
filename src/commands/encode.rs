@@ -14,7 +14,7 @@ impl PluginCommand for UlidEncodeBase32Command {
         "ulid encode base32"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Encode data to Base32 (Crockford variant, used by ULIDs)"
     }
 
@@ -90,7 +90,7 @@ impl PluginCommand for UlidDecodeBase32Command {
         "ulid decode base32"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Decode Base32 data (Crockford variant, used by ULIDs)"
     }
 
@@ -161,7 +161,7 @@ impl PluginCommand for UlidEncodeHexCommand {
         "ulid encode hex"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Encode data to hexadecimal"
     }
 
@@ -245,7 +245,7 @@ impl PluginCommand for UlidDecodeHexCommand {
         "ulid decode hex"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Decode hexadecimal data"
     }
 

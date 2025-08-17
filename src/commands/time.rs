@@ -15,7 +15,7 @@ impl PluginCommand for UlidTimeNowCommand {
         "ulid time now"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Get the current timestamp in various formats"
     }
 
@@ -92,7 +92,7 @@ impl PluginCommand for UlidTimeParseCommand {
         "ulid time parse"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Parse a timestamp string or number into various formats"
     }
 
@@ -236,7 +236,7 @@ impl PluginCommand for UlidTimeMillisCommand {
         "ulid time millis"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Convert various timestamp formats to milliseconds (ULID timestamp format)"
     }
 

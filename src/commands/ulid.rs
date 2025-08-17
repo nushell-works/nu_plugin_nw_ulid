@@ -14,7 +14,7 @@ impl PluginCommand for UlidGenerateCommand {
         "ulid generate"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Generate a new ULID (Universally Unique Lexicographically Sortable Identifier)"
     }
 
@@ -185,7 +185,7 @@ impl PluginCommand for UlidValidateCommand {
         "ulid validate"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Validate if a string is a valid ULID"
     }
 
@@ -289,7 +289,7 @@ impl PluginCommand for UlidParseCommand {
         "ulid parse"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Parse a ULID string and extract its components"
     }
 
@@ -336,7 +336,7 @@ impl PluginCommand for UlidSecurityAdviceCommand {
         "ulid security-advice"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Show comprehensive security advice for ULID usage"
     }
 

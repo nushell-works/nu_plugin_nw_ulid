@@ -15,7 +15,7 @@ impl PluginCommand for UlidSortCommand {
         "ulid sort"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Sort data by ULID timestamp order"
     }
 
@@ -234,7 +234,7 @@ impl PluginCommand for UlidInspectCommand {
         "ulid inspect"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Extract detailed information and metadata from ULIDs"
     }
 

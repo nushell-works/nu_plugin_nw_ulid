@@ -16,7 +16,7 @@ impl PluginCommand for UlidHashSha256Command {
         "ulid hash sha256"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Compute SHA-256 hash of data"
     }
 
@@ -102,7 +102,7 @@ impl PluginCommand for UlidHashSha512Command {
         "ulid hash sha512"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Compute SHA-512 hash of data"
     }
 
@@ -188,7 +188,7 @@ impl PluginCommand for UlidHashBlake3Command {
         "ulid hash blake3"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Compute BLAKE3 hash of data (fast, secure, modern hash function)"
     }
 
@@ -293,7 +293,7 @@ impl PluginCommand for UlidHashRandomCommand {
         "ulid hash random"
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Generate cryptographically secure random bytes"
     }
 
