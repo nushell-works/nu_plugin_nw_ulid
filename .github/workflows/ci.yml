@@ -147,11 +147,48 @@ jobs:
     - name: Check MSRV
       run: cargo check --all-features
 
+  integration:
+    name: Integration Tests
+    runs-on: ${{ matrix.os }}
+    needs: [test]
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Cargo registry
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-integration-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Install Nushell
+      run: cargo install nu --version 0.106.1 --locked
+
+    - name: Run integration tests (Unix)
+      if: runner.os != 'Windows'
+      run: ./scripts/test-integration.sh
+
+    - name: Run integration tests (Windows)
+      if: runner.os == 'Windows'
+      run: .\scripts\test-integration.ps1
+
   build-release:
     name: Build Release Artifacts
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ${{ matrix.os }}
-    needs: [test, security, msrv]
+    needs: [test, security, msrv, integration]
     strategy:
       matrix:
         include:

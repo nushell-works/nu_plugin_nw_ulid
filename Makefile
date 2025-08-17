@@ -47,6 +47,16 @@ test-verbose: ## Run tests with verbose output
 	@echo "🧪 Running tests (verbose)..."
 	@./scripts/test.sh --verbose
 
+test-integration: ## Run integration tests with Nushell
+	@echo "🧪 Running integration tests..."
+	@if command -v nu >/dev/null 2>&1; then \
+		./scripts/test-integration.sh; \
+	else \
+		echo "❌ Nushell not found. Please install Nushell first."; \
+		echo "Install with: cargo install nu --version 0.106.1"; \
+		exit 1; \
+	fi
+
 # Quality Checks
 check: ## Run quick quality checks
 	@echo "🔍 Running quick quality checks..."
