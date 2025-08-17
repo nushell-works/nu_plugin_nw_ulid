@@ -12,9 +12,11 @@ Please select the relevant option:
 - [ ] ✨ New feature (non-breaking change which adds functionality)
 - [ ] 💥 Breaking change (fix or feature that would cause existing functionality to not work as expected)
 - [ ] 📚 Documentation update (improvements or corrections to documentation)
+- [ ] 📝 Script template (new template or example for common use cases)
 - [ ] 🔧 Maintenance (dependency updates, CI improvements, etc.)
 - [ ] 🎨 Code style/formatting changes
 - [ ] ♻️ Refactoring (no functional changes)
+- [ ] 🏗️ Infrastructure (CI/CD, deployment, build improvements)
 
 ## Related Issues
 

@@ -1,0 +1,191 @@
+name: Script Template Request
+description: Request a new script template or example for common use cases
+title: "[Template]: "
+labels: ["template", "enhancement", "documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new script template! Script templates help users get started quickly with common ULID use cases. Your suggestion helps make nu_plugin_ulid more practical for real-world scenarios.
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use Case Description
+      description: What real-world scenario would this template address?
+      placeholder: |
+        Example: "Managing user session tracking in a web application"
+        Example: "Migrating legacy database IDs to ULIDs"
+        Example: "Log correlation across microservices"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: template_category
+    attributes:
+      label: Template Category
+      description: Which category does this template belong to?
+      options:
+        - Data Management (ETL, migration, validation)
+        - API & Web Services (REST APIs, microservices)
+        - System Administration (logs, monitoring, health checks)
+        - Security & Audit (compliance, tracking, forensics)
+        - DevOps & CI/CD (builds, deployments, automation)
+        - Database Operations (migration, optimization, queries)
+        - File Processing (batch processing, data transformation)
+        - Integration (external systems, message queues)
+        - Monitoring & Analytics (metrics, dashboards, reporting)
+        - Other (please specify in description)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity_level
+    attributes:
+      label: Complexity Level
+      description: What complexity level should this template target?
+      options:
+        - Beginner - Simple, single-purpose scripts
+        - Intermediate - Multi-step workflows with error handling
+        - Advanced - Complex enterprise scenarios with optimization
+        - Expert - Highly specialized or performance-critical use cases
+    validations:
+      required: true
+
+  - type: textarea
+    id: key_features
+    attributes:
+      label: Key Features
+      description: What key features should this template include?
+      placeholder: |
+        - ULID generation with timestamp preservation
+        - Error handling and validation
+        - Batch processing capabilities
+        - Progress reporting
+        - Configuration management
+        - Integration with external APIs
+    validations:
+      required: true
+
+  - type: textarea
+    id: example_workflow
+    attributes:
+      label: Example Workflow
+      description: Describe the step-by-step workflow this template should implement
+      placeholder: |
+        1. Load data from source (file/API/database)
+        2. Validate existing IDs
+        3. Generate ULIDs with preserved timestamps
+        4. Update foreign key references
+        5. Validate migration integrity
+        6. Generate migration report
+    validations:
+      required: true
+
+  - type: textarea
+    id: input_output
+    attributes:
+      label: Input/Output Format
+      description: What input does the template expect and what output should it produce?
+      placeholder: |
+        Input:
+        - JSON file with user records
+        - CSV data with legacy IDs
+        - Database connection parameters
+        
+        Output:
+        - Migrated data with ULIDs
+        - Migration report
+        - Error log
+
+  - type: textarea
+    id: configuration_options
+    attributes:
+      label: Configuration Options
+      description: What configuration options should the template support?
+      placeholder: |
+        - Batch size for processing
+        - Timestamp preservation settings
+        - Error handling behavior
+        - Output format options
+        - Performance tuning parameters
+
+  - type: textarea
+    id: error_scenarios
+    attributes:
+      label: Error Scenarios
+      description: What error scenarios should the template handle?
+      placeholder: |
+        - Invalid input data
+        - Network connectivity issues
+        - Disk space limitations
+        - Permission errors
+        - Data validation failures
+
+  - type: textarea
+    id: performance_requirements
+    attributes:
+      label: Performance Requirements
+      description: Any specific performance requirements or considerations?
+      placeholder: |
+        - Should handle 1M+ records
+        - Memory usage should be bounded
+        - Support for parallel processing
+        - Progress indication for long operations
+
+  - type: textarea
+    id: existing_solutions
+    attributes:
+      label: Existing Solutions
+      description: Are there existing solutions or similar templates you've seen elsewhere?
+      placeholder: |
+        - Similar templates in other projects
+        - Manual processes currently used
+        - Competing tools or approaches
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this template for the community?
+      options:
+        - Low - Nice to have for specific use cases
+        - Medium - Would help many users
+        - High - Common use case that's currently difficult
+        - Critical - Essential for adoption in certain scenarios
+
+  - type: checkboxes
+    id: contribution_offer
+    attributes:
+      label: Contribution
+      description: Can you help with creating this template?
+      options:
+        - label: I can help design the template structure
+        - label: I can provide real-world test data
+        - label: I can write documentation for the template
+        - label: I can test the template with my use case
+        - label: I can provide the complete implementation
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Any additional context, examples, or references
+      placeholder: |
+        - Links to relevant documentation
+        - Examples from other projects
+        - Industry-specific requirements
+        - Integration requirements
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing templates to ensure this is not duplicate
+          required: true
+        - label: This template would benefit multiple users, not just my specific case
+          required: true
+        - label: I have provided sufficient detail for implementation
+          required: true

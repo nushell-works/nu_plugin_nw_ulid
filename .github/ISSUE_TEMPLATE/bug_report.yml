@@ -53,10 +53,12 @@ body:
       label: Environment Information
       description: Information about your environment
       placeholder: |
-        - Plugin version: [e.g., 0.1.0]
-        - Nushell version: [e.g., 0.106.1]
-        - Operating System: [e.g., macOS 14.0, Ubuntu 22.04]
-        - Rust version: [e.g., 1.89.0]
+        - Plugin version: [run `ulid info` to get version]
+        - Nushell version: [run `version` in Nushell]
+        - Operating System: [e.g., macOS 14.0, Ubuntu 22.04, Windows 11]
+        - Rust version: [run `rustc --version`]
+        - Architecture: [e.g., x86_64, aarch64]
+        - Installation method: [cargo install, from source, binary download]
     validations:
       required: true
 

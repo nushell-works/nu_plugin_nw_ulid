@@ -3,15 +3,43 @@ name = "nw-nu_plugin_ulid"
 version = "0.1.0"
 edition = "2024"
 authors = ["John Ky <newhoggy@gmail.com>"]
-description = "Professional ULID (Universally Unique Lexicographically Sortable Identifier) utilities plugin for Nushell"
+description = "Production-grade ULID (Universally Unique Lexicographically Sortable Identifier) utilities plugin for Nushell with cryptographically secure operations, enterprise-grade security, and streaming support"
 license = "BSD-3-Clause"
 repository = "https://github.com/nushell-works/nu_plugin_ulid"
 homepage = "https://github.com/nushell-works/nu_plugin_ulid"
 documentation = "https://docs.rs/nw-nu_plugin_ulid"
-keywords = ["nushell", "plugin", "ulid", "uuid", "identifier"]
-categories = ["command-line-utilities", "development-tools"]
+keywords = ["nushell", "ulid", "uuid", "identifier", "plugin"]
+categories = ["command-line-utilities", "development-tools", "cryptography", "data-structures"]
 readme = "README.md"
 rust-version = "1.85.0"
+include = [
+    "src/**/*",
+    "docs/**/*",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "Cargo.toml",
+    "benches/**/*"
+]
+exclude = [
+    ".github/",
+    ".git/",
+    "target/",
+    "*.swp",
+    "*.swo",
+    ".DS_Store",
+    "test_data/",
+    "scripts/",
+    ".env*",
+    "*.log"
+]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[badges]
+maintenance = { status = "actively-developed" }
 
 [[bin]]
 name = "nu_plugin_ulid"

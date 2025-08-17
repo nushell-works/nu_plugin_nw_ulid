@@ -139,15 +139,15 @@ true
 │ timestamp  │ {record 3 fields}          │
 │ randomness │ {record 1 field}           │
 │ valid      │ true                       │
-╰────────────┴────────────────────────────╮
+╰────────────┴────────────────────────────╯
 
 # Bulk operations
 > ulid generate --count 3
-╭───┬─────────────────────────────╮
+╭───┬────────────────────────────╮
 │ 0 │ 01K2W41TWG3FKYYSK430SR8KW7 │
 │ 1 │ 01K2W41TWG3FKYYSK430SR8KW8 │
 │ 2 │ 01K2W41TWG3FKYYSK430SR8KW9 │
-╰───┴─────────────────────────────╯
+╰───┴────────────────────────────╯
 
 # Stream processing for large datasets
 > echo ["01K2W41TWG3FKYYSK430SR8KW6", "invalid"] | ulid stream validate
@@ -173,7 +173,7 @@ ULIDs (Universally Unique Lexicographically Sortable Identifiers) are 128-bit id
 
 ```
 01ARZ3NDEKTSV4RRFFQ69G5FAV
-|----------|------------|
+|----------|-------------|
   Timestamp    Randomness
    (48-bit)     (80-bit)
 ```
@@ -185,7 +185,7 @@ ULIDs (Universally Unique Lexicographically Sortable Identifiers) are 128-bit id
 Based on benchmarking against reference implementations:
 
 - **ULID Generation**: ~40ns per operation (release mode)
-- **ULID Validation**: ~12ns per operation 
+- **ULID Validation**: ~12ns per operation
 - **Bulk Operations**: Efficient batch processing with configurable sizes
 - **Memory Usage**: Optimized allocation patterns with streaming support
 - **Concurrent Operations**: Thread-safe with parallel processing support
@@ -280,7 +280,7 @@ Licensed under the BSD 3-Clause License. See [LICENSE](LICENSE) for details.
 
 ### Documentation
 - 📚 [API Documentation](docs/scripting/api.md) - Complete API reference
-- 🚀 [Scripting Guide](docs/scripting/README.md) - Automation patterns and helpers  
+- 🚀 [Scripting Guide](docs/scripting/README.md) - Automation patterns and helpers
 - 🔒 [Security Audit](docs/security/audit-report.md) - Comprehensive security assessment
 - ⚡ [Performance Report](docs/quality/phase4-completion-report.md) - Benchmarks and optimization details
 - 🏗️ [Architecture Guide](docs/architecture/plugin-design.md) - Technical design documentation

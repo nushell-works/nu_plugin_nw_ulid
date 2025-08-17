@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/nushell-works/nu_plugin_ulid/discussions
+    about: Ask questions, share ideas, and discuss with the community
+  - name: 🔐 Security Issues
+    url: https://github.com/nushell-works/nu_plugin_ulid/security/advisories
+    about: Report security vulnerabilities privately
+  - name: 📚 Documentation
+    url: https://github.com/nushell-works/nu_plugin_ulid/tree/main/docs
+    about: Read the comprehensive documentation and guides
+  - name: 🚀 Nushell Community
+    url: https://discord.gg/NtAbbGn
+    about: Join the Nushell Discord community

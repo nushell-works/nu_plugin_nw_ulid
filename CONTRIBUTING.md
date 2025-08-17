@@ -150,10 +150,13 @@ cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
 
 ### Test Requirements
 
-- All new features must have comprehensive tests
-- Tests should cover both success and error cases
-- Integration tests for plugin commands
-- Property-based tests for ULID operations
+- **Comprehensive Coverage**: All new features must have comprehensive tests (aim for >90% coverage)
+- **Edge Cases**: Tests should cover both success and error cases, boundary conditions, and edge cases
+- **Integration Tests**: Plugin commands must have integration tests with real Nushell execution
+- **Property-Based Tests**: ULID operations should include property-based tests for mathematical properties
+- **Security Tests**: Security-critical code requires dedicated security tests
+- **Performance Tests**: Performance-sensitive code should include benchmark tests
+- **Documentation Tests**: All examples in documentation must be tested
 
 ### Test Structure
 
@@ -339,12 +342,46 @@ We follow [Semantic Versioning](https://semver.org/):
 - Regular dependency audits
 - Follow Rust security best practices
 
+## Phase 5 Contribution Priorities
+
+### Current Focus Areas
+
+As we complete Phase 5 (Documentation & Release), we welcome contributions in these priority areas:
+
+1. **Documentation Improvements**
+   - User guide enhancements and examples
+   - Tutorial content for common use cases
+   - Video tutorials and demos
+   - Translation to other languages
+
+2. **Community Tools**
+   - Script templates for new use cases
+   - Integration examples with popular tools
+   - Performance optimization guides
+   - Best practices documentation
+
+3. **Quality Assurance**
+   - Bug reports and fixes
+   - Performance optimization
+   - Security improvements
+   - Compatibility testing
+
+4. **Ecosystem Integration**
+   - Nu scripts for common workflows
+   - Integration with popular databases
+   - Cloud platform deployment guides
+   - CI/CD pipeline examples
+
+### Special Recognition
+
+Contributors helping with Phase 5 completion will receive special recognition in the v1.0 release notes.
+
 ## Getting Help
 
 ### Communication Channels
 
-- **Issues**: Bug reports and feature requests
-- **Discussions**: General questions and ideas
+- **Issues**: Bug reports and feature requests - [Create Issue](https://github.com/nushell-works/nu_plugin_ulid/issues/new/choose)
+- **Discussions**: General questions and ideas - [Join Discussion](https://github.com/nushell-works/nu_plugin_ulid/discussions)
 - **Email**: Maintainer contact for sensitive issues
 
 ### Resources
@@ -352,6 +389,9 @@ We follow [Semantic Versioning](https://semver.org/):
 - [Nushell Plugin Development](https://nushell.sh/book/plugins.html)
 - [ULID Specification](https://github.com/ulid/spec)
 - [Rust Documentation](https://doc.rust-lang.org/)
+- [nu_plugin_ulid User Guide](docs/USER_GUIDE.md)
+- [Developer Guide](docs/DEVELOPER_GUIDE.md)
+- [Performance Guide](docs/PERFORMANCE_GUIDE.md)
 
 ## Recognition
 

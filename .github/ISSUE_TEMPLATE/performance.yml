@@ -1,0 +1,192 @@
+name: Performance Issue
+description: Report performance problems or suggest optimizations
+title: "[Performance]: "
+labels: ["performance", "optimization"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a performance issue! Performance is a key focus for nu_plugin_ulid. Please provide detailed information to help us investigate and optimize.
+
+  - type: dropdown
+    id: performance_type
+    attributes:
+      label: Performance Issue Type
+      description: What type of performance issue are you experiencing?
+      options:
+        - Slow command execution
+        - High memory usage
+        - CPU usage too high
+        - Poor scaling with large datasets
+        - Startup time issues
+        - Memory leaks
+        - Inefficient algorithms
+        - Database performance
+        - Network performance
+    validations:
+      required: true
+
+  - type: textarea
+    id: commands_affected
+    attributes:
+      label: Affected Commands
+      description: Which ULID commands are experiencing performance issues?
+      placeholder: |
+        - ulid generate
+        - ulid stream validate --batch-size 10000
+        - ulid parse (with large datasets)
+    validations:
+      required: true
+
+  - type: textarea
+    id: performance_description
+    attributes:
+      label: Performance Issue Description
+      description: Detailed description of the performance problem
+      placeholder: Describe the performance issue in detail...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Reproduction Steps
+      description: How can we reproduce this performance issue?
+      placeholder: |
+        1. Run command: `ulid generate-stream 100000`
+        2. Monitor system resources
+        3. Observe high memory usage / slow execution
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_performance
+    attributes:
+      label: Expected Performance
+      description: What performance did you expect?
+      placeholder: |
+        - Expected completion time: < 5 seconds
+        - Expected memory usage: < 100MB
+        - Expected CPU usage: < 50%
+
+  - type: textarea
+    id: actual_performance
+    attributes:
+      label: Actual Performance
+      description: What performance are you experiencing?
+      placeholder: |
+        - Actual completion time: 45 seconds
+        - Actual memory usage: 2GB
+        - Actual CPU usage: 100%
+    validations:
+      required: true
+
+  - type: textarea
+    id: benchmark_data
+    attributes:
+      label: Benchmark Data
+      description: Any performance measurements or benchmarks
+      render: shell
+      placeholder: |
+        # Example benchmark output
+        time ulid generate-stream 100000
+        
+        # System monitoring output
+        top / htop / Activity Monitor output
+        
+        # Custom benchmark results
+
+  - type: textarea
+    id: dataset_size
+    attributes:
+      label: Dataset Information
+      description: Information about the data you're processing
+      placeholder: |
+        - Number of records: 1,000,000
+        - File size: 50MB
+        - Input format: JSON
+        - Average record size: 50 bytes
+
+  - type: textarea
+    id: system_specs
+    attributes:
+      label: System Specifications
+      description: Your system specifications
+      placeholder: |
+        - CPU: [e.g., Intel i7-12700K, Apple M2, AMD Ryzen 7 5800X]
+        - RAM: [e.g., 16GB DDR4, 32GB DDR5]
+        - Storage: [e.g., NVMe SSD, SATA SSD, HDD]
+        - OS: [e.g., macOS 14.0, Ubuntu 22.04, Windows 11]
+    validations:
+      required: true
+
+  - type: textarea
+    id: comparison_data
+    attributes:
+      label: Performance Comparison
+      description: How does this compare to other tools or expected performance?
+      placeholder: |
+        - Comparison with other ULID libraries
+        - Comparison with previous versions
+        - Comparison with similar operations
+
+  - type: textarea
+    id: profiling_data
+    attributes:
+      label: Profiling Information
+      description: Any profiling data if available
+      render: shell
+      placeholder: |
+        # cargo flamegraph output
+        # perf output
+        # Instruments trace
+        # Other profiling tool output
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Performance Impact
+      description: How severe is this performance issue?
+      options:
+        - Low - Minor inconvenience
+        - Medium - Noticeable slowdown
+        - High - Significantly impacts workflow
+        - Critical - Makes the tool unusable
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: investigation
+    attributes:
+      label: Investigation
+      description: Have you investigated this issue?
+      options:
+        - label: I have profiled the performance issue
+        - label: I have compared with other tools
+        - label: I have tested with different dataset sizes
+        - label: I have checked system resource usage
+        - label: I have potential optimization suggestions
+
+  - type: textarea
+    id: optimization_suggestions
+    attributes:
+      label: Optimization Suggestions
+      description: Do you have any suggestions for optimization?
+      placeholder: |
+        - Use parallel processing
+        - Implement streaming
+        - Optimize memory allocation
+        - Use different algorithms
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues for similar performance problems
+          required: true
+        - label: I have provided benchmark data or performance measurements
+          required: true
+        - label: I have tested with release builds (not debug builds)
+          required: true
