@@ -46,6 +46,9 @@ impl Plugin for UlidPlugin {
             Box::new(UlidHashSha512Command),
             Box::new(UlidHashBlake3Command),
             Box::new(UlidHashRandomCommand),
+            // Streaming utilities
+            Box::new(UlidStreamCommand),
+            Box::new(UlidGenerateStreamCommand),
         ]
     }
 }
@@ -64,7 +67,7 @@ mod tests {
     fn test_plugin_commands() {
         let plugin = UlidPlugin;
         let commands = plugin.commands();
-        assert_eq!(commands.len(), 21);
+        assert_eq!(commands.len(), 23);
 
         // Test key commands to ensure they're registered correctly
         let command_names: Vec<&str> = commands.iter().map(|cmd| cmd.name()).collect();
@@ -79,5 +82,7 @@ mod tests {
         assert!(command_names.contains(&"ulid time now"));
         assert!(command_names.contains(&"ulid encode base32"));
         assert!(command_names.contains(&"ulid hash sha256"));
+        assert!(command_names.contains(&"ulid stream"));
+        assert!(command_names.contains(&"ulid generate-stream"));
     }
 }
