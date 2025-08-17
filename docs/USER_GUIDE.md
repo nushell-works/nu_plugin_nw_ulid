@@ -28,7 +28,7 @@ ULIDs (Universally Unique Lexicographically Sortable Identifiers) are 128-bit id
 
 ```
 01ARZ3NDEKTSV4RRFFQ69G5FAV
-|----------|------------|
+|----------|-------------|
   Timestamp    Randomness
    (48-bit)     (80-bit)
     10 chars     16 chars
@@ -90,7 +90,7 @@ true
 false
 
 # Validate ULIDs in a list
-> ["01K2W41TWG3FKYYSK430SR8KW6", "invalid", "01K2W41TWG3FKYYSK430SR8KW7"] 
+> ["01K2W41TWG3FKYYSK430SR8KW6", "invalid", "01K2W41TWG3FKYYSK430SR8KW7"]
   | each { |ulid| { ulid: $ulid, valid: (ulid validate $ulid) } }
 ╭───┬─────────────────────────────┬───────╮
 │ # │            ulid             │ valid │
@@ -311,11 +311,11 @@ $products_with_ids | ulid sort --column id
 ```nushell
 # Analyze log files with ULID request IDs
 def analyze_request_logs [log_file: string] {
-    open $log_file 
+    open $log_file
     | where (ulid validate $in.request_id)
     | ulid sort --column request_id
-    | group-by { |log| 
-        ulid parse $log.request_id | get timestamp.iso8601 | str substring 0..13 
+    | group-by { |log|
+        ulid parse $log.request_id | get timestamp.iso8601 | str substring 0..13
     }
     | transpose hour logs
     | each { |group|
@@ -336,17 +336,17 @@ def analyze_request_logs [log_file: string] {
 def sync_data [source: list, target: list] {
     let source_ids = ($source | get id)
     let target_ids = ($target | get id)
-    
+
     # Find new and modified records
     let new_records = ($source | where ($it.id not-in $target_ids))
-    let modified_records = ($source 
+    let modified_records = ($source
         | where ($it.id in $target_ids)
         | where ($it.updated_at > ($target | where id == $it.id | first | get updated_at))
     )
-    
+
     # Sort by ULID timestamp for proper sync order
     let sync_order = ([$new_records, $modified_records] | flatten | ulid sort --column id)
-    
+
     {
         new_count: ($new_records | length),
         modified_count: ($modified_records | length),
@@ -362,16 +362,16 @@ def sync_data [source: list, target: list] {
 def check_rate_limit [request_id: string, rate_limit_per_minute: int] {
     let request_time = (ulid parse $request_id | get timestamp.milliseconds)
     let minute_start = ($request_time // 60000 * 60000)
-    
+
     # Check requests in the same minute
-    let recent_requests = ($api_request_log 
-        | where { |req| 
+    let recent_requests = ($api_request_log
+        | where { |req|
             let req_time = (ulid parse $req.id | get timestamp.milliseconds)
             $req_time >= $minute_start and $req_time < ($minute_start + 60000)
         }
         | length
     )
-    
+
     if $recent_requests >= $rate_limit_per_minute {
         {allowed: false, remaining: 0, reset_time: ($minute_start + 60000)}
     } else {
@@ -388,7 +388,7 @@ def check_rate_limit [request_id: string, rate_limit_per_minute: int] {
    ```nushell
    # Good: Use streaming for large datasets
    $large_dataset | ulid stream validate --batch-size 1000
-   
+
    # Avoid: Individual validation for large datasets
    $large_dataset | each { |item| ulid validate $item.id }
    ```
@@ -397,7 +397,7 @@ def check_rate_limit [request_id: string, rate_limit_per_minute: int] {
    ```nushell
    # Good: Generate in bulk
    ulid generate-stream 1000
-   
+
    # Avoid: Individual generation in loops
    0..999 | each { ulid generate }
    ```
@@ -406,7 +406,7 @@ def check_rate_limit [request_id: string, rate_limit_per_minute: int] {
    ```nushell
    # For high memory systems
    ulid stream parse --batch-size 5000
-   
+
    # For constrained systems
    ulid stream parse --batch-size 100
    ```
@@ -545,10 +545,10 @@ $data | ulid stream parse --batch-size 100
    ```nushell
    # Test generation
    ulid generate
-   
+
    # Test validation
    ulid validate (ulid generate)
-   
+
    # Test parsing
    ulid parse (ulid generate)
    ```
