@@ -20,7 +20,11 @@ impl PluginCommand for UlidEncodeBase32Command {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .required("data", SyntaxShape::Any, "Data to encode (string or binary)")
+            .required(
+                "data",
+                SyntaxShape::Any,
+                "Data to encode (string or binary)",
+            )
             .input_output_types(vec![
                 (Type::String, Type::String),
                 (Type::Binary, Type::String),
@@ -73,10 +77,7 @@ impl PluginCommand for UlidEncodeBase32Command {
         };
 
         let encoded = base32::encode(base32::Alphabet::Crockford, &data);
-        Ok(PipelineData::Value(
-            Value::string(encoded, call.head),
-            None,
-        ))
+        Ok(PipelineData::Value(Value::string(encoded, call.head), None))
     }
 }
 
@@ -166,7 +167,11 @@ impl PluginCommand for UlidEncodeHexCommand {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .required("data", SyntaxShape::Any, "Data to encode (string or binary)")
+            .required(
+                "data",
+                SyntaxShape::Any,
+                "Data to encode (string or binary)",
+            )
             .switch("uppercase", "Use uppercase hex letters", Some('u'))
             .input_output_types(vec![
                 (Type::String, Type::String),
@@ -198,7 +203,7 @@ impl PluginCommand for UlidEncodeHexCommand {
         input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
         let uppercase = call.has_flag("uppercase")?;
-        
+
         let data = if let Ok(arg) = call.req::<Value>(0) {
             // Using positional argument
             match arg {
@@ -227,10 +232,7 @@ impl PluginCommand for UlidEncodeHexCommand {
             hex::encode(&data)
         };
 
-        Ok(PipelineData::Value(
-            Value::string(encoded, call.head),
-            None,
-        ))
+        Ok(PipelineData::Value(Value::string(encoded, call.head), None))
     }
 }
 

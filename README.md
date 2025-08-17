@@ -96,7 +96,7 @@ ulid hash random --length 16
 ╭─────────────┬─────────────────────────────────────────────────╮
 │ name        │ nu_plugin_ulid                                  │
 │ version     │ 0.1.0                                           │
-│ description │ Professional ULID utilities plugin for Nushell │
+│ description │ Professional ULID utilities plugin for Nushell  │
 │ authors     │ John Ky <newhoggy@gmail.com>                    │
 │ license     │ BSD-3-Clause                                    │
 │ repository  │ https://github.com/nushell-works/nu_plugin_ulid │

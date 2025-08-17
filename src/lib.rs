@@ -46,7 +46,7 @@ mod tests {
         let plugin = UlidPlugin;
         let commands = plugin.commands();
         assert_eq!(commands.len(), 15);
-        
+
         // Test key commands to ensure they're registered correctly
         let command_names: Vec<&str> = commands.iter().map(|cmd| cmd.name()).collect();
         assert!(command_names.contains(&"ulid info"));

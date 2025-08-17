@@ -65,13 +65,17 @@ impl PluginCommand for UlidTimeNowCommand {
             Some("millis") => Value::int(now.timestamp_millis(), call.head),
             Some("seconds") => Value::int(now.timestamp(), call.head),
             Some("rfc3339") => Value::string(now.to_rfc3339(), call.head),
-            Some("iso8601") | None => Value::string(now.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string(), call.head),
+            Some("iso8601") | None => {
+                Value::string(now.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string(), call.head)
+            }
             Some(fmt) => {
-                return Err(LabeledError::new("Invalid format")
-                    .with_label(
-                        format!("Unknown format '{}'. Valid formats: iso8601, rfc3339, millis, seconds", fmt),
-                        call.head,
-                    ))
+                return Err(LabeledError::new("Invalid format").with_label(
+                    format!(
+                        "Unknown format '{}'. Valid formats: iso8601, rfc3339, millis, seconds",
+                        fmt
+                    ),
+                    call.head,
+                ))
             }
         };
 
@@ -94,7 +98,11 @@ impl PluginCommand for UlidTimeParseCommand {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .required("timestamp", SyntaxShape::Any, "Timestamp to parse (string, int, or number)")
+            .required(
+                "timestamp",
+                SyntaxShape::Any,
+                "Timestamp to parse (string, int, or number)",
+            )
             .input_output_types(vec![(Type::Nothing, Type::Record(vec![].into()))])
             .category(Category::Date)
     }
@@ -171,17 +179,44 @@ impl PluginCommand for UlidTimeParseCommand {
 
         let record = Value::record(
             [
-                ("iso8601".into(), Value::string(datetime.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string(), call.head)),
-                ("rfc3339".into(), Value::string(datetime.to_rfc3339(), call.head)),
-                ("unix_seconds".into(), Value::int(datetime.timestamp(), call.head)),
-                ("unix_millis".into(), Value::int(datetime.timestamp_millis(), call.head)),
+                (
+                    "iso8601".into(),
+                    Value::string(
+                        datetime.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string(),
+                        call.head,
+                    ),
+                ),
+                (
+                    "rfc3339".into(),
+                    Value::string(datetime.to_rfc3339(), call.head),
+                ),
+                (
+                    "unix_seconds".into(),
+                    Value::int(datetime.timestamp(), call.head),
+                ),
+                (
+                    "unix_millis".into(),
+                    Value::int(datetime.timestamp_millis(), call.head),
+                ),
                 ("year".into(), Value::int(datetime.year() as i64, call.head)),
-                ("month".into(), Value::int(datetime.month() as i64, call.head)),
+                (
+                    "month".into(),
+                    Value::int(datetime.month() as i64, call.head),
+                ),
                 ("day".into(), Value::int(datetime.day() as i64, call.head)),
                 ("hour".into(), Value::int(datetime.hour() as i64, call.head)),
-                ("minute".into(), Value::int(datetime.minute() as i64, call.head)),
-                ("second".into(), Value::int(datetime.second() as i64, call.head)),
-                ("nanosecond".into(), Value::int(datetime.nanosecond() as i64, call.head)),
+                (
+                    "minute".into(),
+                    Value::int(datetime.minute() as i64, call.head),
+                ),
+                (
+                    "second".into(),
+                    Value::int(datetime.second() as i64, call.head),
+                ),
+                (
+                    "nanosecond".into(),
+                    Value::int(datetime.nanosecond() as i64, call.head),
+                ),
             ]
             .into_iter()
             .collect(),
@@ -207,7 +242,11 @@ impl PluginCommand for UlidTimeMillisCommand {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .optional("timestamp", SyntaxShape::Any, "Timestamp to convert (defaults to now)")
+            .optional(
+                "timestamp",
+                SyntaxShape::Any,
+                "Timestamp to convert (defaults to now)",
+            )
             .input_output_types(vec![(Type::Nothing, Type::Int)])
             .category(Category::Date)
     }

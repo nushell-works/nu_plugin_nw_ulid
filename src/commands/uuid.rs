@@ -26,13 +26,11 @@ impl PluginCommand for UlidUuidGenerateCommand {
     }
 
     fn examples(&self) -> Vec<Example<'_>> {
-        vec![
-            Example {
-                example: "ulid uuid generate",
-                description: "Generate a random UUID v4",
-                result: None,
-            },
-        ]
+        vec![Example {
+            example: "ulid uuid generate",
+            description: "Generate a random UUID v4",
+            result: None,
+        }]
     }
 
     fn run(
@@ -94,11 +92,8 @@ impl PluginCommand for UlidUuidValidateCommand {
     ) -> Result<PipelineData, LabeledError> {
         let uuid_str: String = call.req(0)?;
         let is_valid = Uuid::parse_str(&uuid_str).is_ok();
-        
-        Ok(PipelineData::Value(
-            Value::bool(is_valid, call.head),
-            None,
-        ))
+
+        Ok(PipelineData::Value(Value::bool(is_valid, call.head), None))
     }
 }
 
@@ -123,13 +118,11 @@ impl PluginCommand for UlidUuidParseCommand {
     }
 
     fn examples(&self) -> Vec<Example<'_>> {
-        vec![
-            Example {
-                example: "ulid uuid parse '550e8400-e29b-41d4-a716-446655440000'",
-                description: "Parse a UUID and show its components",
-                result: None,
-            },
-        ]
+        vec![Example {
+            example: "ulid uuid parse '550e8400-e29b-41d4-a716-446655440000'",
+            description: "Parse a UUID and show its components",
+            result: None,
+        }]
     }
 
     fn run(
@@ -140,7 +133,7 @@ impl PluginCommand for UlidUuidParseCommand {
         _input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
         let uuid_str: String = call.req(0)?;
-        
+
         match Uuid::parse_str(&uuid_str) {
             Ok(uuid) => {
                 let bytes = uuid.as_bytes();
@@ -158,9 +151,18 @@ impl PluginCommand for UlidUuidParseCommand {
                         ("uuid".into(), Value::string(uuid.to_string(), call.head)),
                         ("version".into(), Value::int(version as i64, call.head)),
                         ("variant".into(), Value::string(variant, call.head)),
-                        ("hyphenated".into(), Value::string(uuid.hyphenated().to_string(), call.head)),
-                        ("simple".into(), Value::string(uuid.simple().to_string(), call.head)),
-                        ("urn".into(), Value::string(uuid.urn().to_string(), call.head)),
+                        (
+                            "hyphenated".into(),
+                            Value::string(uuid.hyphenated().to_string(), call.head),
+                        ),
+                        (
+                            "simple".into(),
+                            Value::string(uuid.simple().to_string(), call.head),
+                        ),
+                        (
+                            "urn".into(),
+                            Value::string(uuid.urn().to_string(), call.head),
+                        ),
                         ("bytes".into(), Value::binary(bytes.to_vec(), call.head)),
                     ]
                     .into_iter()

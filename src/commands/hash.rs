@@ -56,7 +56,7 @@ impl PluginCommand for UlidHashSha256Command {
         input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
         let binary_output = call.has_flag("binary")?;
-        
+
         let data = if let Ok(arg) = call.req::<Value>(0) {
             // Using positional argument
             match arg {
@@ -142,7 +142,7 @@ impl PluginCommand for UlidHashSha512Command {
         input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
         let binary_output = call.has_flag("binary")?;
-        
+
         let data = if let Ok(arg) = call.req::<Value>(0) {
             // Using positional argument
             match arg {
@@ -246,7 +246,7 @@ impl PluginCommand for UlidHashBlake3Command {
             return Err(LabeledError::new("Invalid output length")
                 .with_label("Output length must be between 1 and 1024 bytes", call.head));
         }
-        
+
         let data = if let Ok(arg) = call.req::<Value>(0) {
             // Using positional argument
             match arg {
