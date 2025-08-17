@@ -40,6 +40,21 @@ fi
 
 echo -e "${YELLOW}🔗 Plugin path: $PLUGIN_PATH${NC}"
 
+# Ensure Nushell config directory exists
+echo -e "${YELLOW}📁 Setting up Nushell configuration...${NC}"
+NU_CONFIG_DIR="$HOME/.config/nushell"
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+    NU_CONFIG_DIR="$APPDATA/nushell"
+fi
+
+mkdir -p "$NU_CONFIG_DIR"
+
+# Initialize Nushell if needed (this creates the plugin registry)
+if [[ ! -f "$NU_CONFIG_DIR/plugin.msgpackz" ]]; then
+    echo -e "${YELLOW}🔧 Initializing Nushell configuration...${NC}"
+    nu -c "version" > /dev/null 2>&1 || true
+fi
+
 # Test 1: Plugin registration
 echo -e "${YELLOW}🧪 Test 1: Plugin registration${NC}"
 if nu -c "plugin add $PLUGIN_PATH"; then
