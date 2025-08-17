@@ -3,7 +3,7 @@
 [![CI](https://github.com/nushell-works/nu_plugin_ulid/workflows/CI/badge.svg)](https://github.com/nushell-works/nu_plugin_ulid/actions)
 [![Security](https://github.com/nushell-works/nu_plugin_ulid/workflows/Security/badge.svg)](https://github.com/nushell-works/nu_plugin_ulid/actions)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE)
-[![Crates.io](https://img.shields.io/crates/v/nu_plugin_ulid.svg)](https://crates.io/crates/nu_plugin_ulid)
+[![Crates.io](https://img.shields.io/crates/v/nw-nu_plugin_ulid.svg)](https://crates.io/crates/nw-nu_plugin_ulid)
 
 Production-grade ULID (Universally Unique Lexicographically Sortable Identifier) utilities plugin for Nushell. Generate, parse, validate & manipulate ULIDs with cryptographically secure operations, enterprise-grade security, streaming support, and seamless integration with Nushell's structured data model.
 
@@ -23,7 +23,7 @@ Production-grade ULID (Universally Unique Lexicographically Sortable Identifier)
 ### Via Cargo
 
 ```bash
-cargo install nu_plugin_ulid
+cargo install nw-nu_plugin_ulid
 ```
 
 ### From Source

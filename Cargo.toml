@@ -1,5 +1,5 @@
 [package]
-name = "nu_plugin_ulid"
+name = "nw-nu_plugin_ulid"
 version = "0.1.0"
 edition = "2024"
 authors = ["John Ky <newhoggy@gmail.com>"]
@@ -7,7 +7,7 @@ description = "Professional ULID (Universally Unique Lexicographically Sortable 
 license = "BSD-3-Clause"
 repository = "https://github.com/nushell-works/nu_plugin_ulid"
 homepage = "https://github.com/nushell-works/nu_plugin_ulid"
-documentation = "https://docs.rs/nu_plugin_ulid"
+documentation = "https://docs.rs/nw-nu_plugin_ulid"
 keywords = ["nushell", "plugin", "ulid", "uuid", "identifier"]
 categories = ["command-line-utilities", "development-tools"]
 readme = "README.md"
