@@ -1,0 +1,124 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please provide details about your proposal.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Feature Summary
+      description: A brief summary of the feature you'd like to see
+      placeholder: Briefly describe the feature...
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation / Use Case
+      description: Describe the problem this feature would solve or the use case it would enable
+      placeholder: |
+        - What problem does this solve?
+        - How would this feature be used?
+        - Who would benefit from this feature?
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Detailed Description
+      description: A detailed description of the proposed feature
+      placeholder: |
+        Provide a detailed description of:
+        - How the feature should work
+        - What the API/interface should look like
+        - Any relevant implementation details
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Usage Examples
+      description: Show how the feature would be used with Nushell
+      render: nushell
+      placeholder: |
+        # Example 1: Basic usage
+        ulid new-command --option value
+
+        # Example 2: Advanced usage  
+        $data | ulid new-command --flag | where condition
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Describe any alternative solutions or workarounds you've considered
+      placeholder: |
+        - Alternative approach 1...
+        - Alternative approach 2...
+        - Current workarounds...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Low - Nice to have
+        - Medium - Would be helpful
+        - High - Important for my workflow
+        - Critical - Blocking my use case
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Estimated Complexity
+      description: How complex do you think this feature would be to implement?
+      options:
+        - Simple - Minor change or addition
+        - Medium - Moderate implementation effort
+        - Complex - Significant implementation effort
+        - Major - Large architectural changes needed
+        - Unknown - I'm not sure
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Would you be willing to contribute to implementing this feature?
+      options:
+        - label: I would be willing to help implement this feature
+        - label: I would be willing to test this feature
+        - label: I would be willing to help with documentation
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any additional context, mockups, or references
+      placeholder: |
+        - Links to relevant specifications or documentation
+        - References to similar features in other tools
+        - Any other relevant information
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+          required: true
+        - label: This feature aligns with the project's goals and scope
+          required: true
+        - label: I have provided sufficient detail for others to understand the request
+          required: true

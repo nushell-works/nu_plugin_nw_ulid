@@ -1,0 +1,69 @@
+{
+  "name": "nu_plugin_ulid Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/rust:1-1-bullseye",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "vadimcn.vscode-lldb",
+        "serayuzgur.crates",
+        "tamasfe.even-better-toml",
+        "github.vscode-github-actions",
+        "ms-vscode.vscode-json",
+        "redhat.vscode-yaml",
+        "streetsidesoftware.code-spell-checker",
+        "davidanson.vscode-markdownlint",
+        "ms-vscode.github-copilot",
+        "ms-vscode.github-copilot-chat"
+      ],
+      "settings": {
+        "rust-analyzer.check.command": "clippy",
+        "rust-analyzer.check.extraArgs": ["--all-targets", "--all-features"],
+        "rust-analyzer.cargo.allFeatures": true,
+        "rust-analyzer.procMacro.enable": true,
+        "rust-analyzer.imports.granularity.group": "module",
+        "rust-analyzer.completion.addCallParenthesis": false,
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll": "explicit"
+        },
+        "files.watcherExclude": {
+          "**/target/**": true
+        },
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "git.autofetch": true,
+        "git.enableSmartCommit": true
+      }
+    }
+  },
+
+  "onCreateCommand": ".devcontainer/setup.sh",
+  "postCreateCommand": "scripts/setup-dev.sh",
+
+  "remoteUser": "vscode",
+  "workspaceFolder": "/workspaces/nu_plugin_ulid",
+
+  "mounts": [
+    "source=${localWorkspaceFolder}/.git,target=/workspaces/nu_plugin_ulid/.git,type=bind,consistency=cached"
+  ],
+
+  "containerEnv": {
+    "RUST_BACKTRACE": "1",
+    "CARGO_HOME": "/usr/local/cargo",
+    "RUSTUP_HOME": "/usr/local/rustup"
+  },
+
+  "forwardPorts": [],
+
+  "portsAttributes": {},
+
+  "shutdownAction": "stopContainer"
+}
