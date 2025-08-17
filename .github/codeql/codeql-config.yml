@@ -1,0 +1,20 @@
+name: "CodeQL Config"
+
+disable-default-queries: false
+
+queries:
+  - uses: security-and-quality
+  - uses: security-extended
+
+paths-ignore:
+  - target/
+  - .cargo/
+  - docs/
+  - examples/
+
+paths:
+  - src/
+  - tests/
+
+packs:
+  - codeql/rust-queries
