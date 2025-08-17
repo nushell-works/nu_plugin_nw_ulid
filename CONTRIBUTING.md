@@ -1,6 +1,8 @@
-# Contributing to nu_plugin_ulid
+# Contributing to nw-nu_plugin_ulid
 
-We welcome contributions to nu_plugin_ulid! This document provides guidelines and information for contributors.
+We welcome contributions to nw-nu_plugin_ulid! This document provides guidelines and information for contributors.
+
+**Package**: `nw-nu_plugin_ulid` | **Binary**: `nu_plugin_ulid` | **Organization**: nushell-works
 
 ## Table of Contents
 
@@ -36,7 +38,7 @@ Examples of behavior that contributes to creating a positive environment include
 
 Ensure you have the required tools installed:
 
-- **Rust 1.70.0+**: [Install Rust](https://rustup.rs/)
+- **Rust 1.85.0+**: [Install Rust](https://rustup.rs/) (required for Rust edition 2024)
 - **Nushell 0.106.1+**: [Install Nushell](https://nushell.sh/book/installation.html)
 - **Git**: [Install Git](https://git-scm.com/downloads)
 
@@ -358,4 +360,4 @@ Contributors will be recognized in:
 - Release notes for significant contributions
 - Special acknowledgments for major features
 
-Thank you for contributing to nu_plugin_ulid! 🎉
+Thank you for contributing to nw-nu_plugin_ulid! 🎉
