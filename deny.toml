@@ -1,52 +1,47 @@
 # cargo-deny configuration file
 # See: https://embarkstudios.github.io/cargo-deny/
 
-[graph]
-targets = [
-    { triple = "x86_64-unknown-linux-gnu" },
-    { triple = "aarch64-unknown-linux-gnu" },
-    { triple = "x86_64-pc-windows-msvc" },
-    { triple = "x86_64-apple-darwin" },
-    { triple = "aarch64-apple-darwin" },
-]
-
 [advisories]
-version = 2
 # The path where the advisory database is cloned/fetched into
 db-path = "~/.cargo/advisory-db"
 # The url(s) of the advisory databases to use
 db-urls = ["https://github.com/rustsec/advisory-db"]
+# The lint level for security vulnerabilities
+vulnerability = "deny"
+# The lint level for unmaintained crates
+unmaintained = "warn"
+# The lint level for crates with security notices
+notice = "warn"
 # A list of advisory IDs to ignore
 ignore = [
-    # paste crate is unmaintained but used by nushell dependencies
-    # This is a transitive dependency we can't easily control
-    "RUSTSEC-2024-0436",  # paste crate no longer maintained
+    # Add specific advisory IDs to ignore if needed
 ]
 
 [licenses]
-version = 2
-# The confidence threshold for detecting a license from a license text
-confidence-threshold = 0.8
+# The lint level for crates which do not have a detectable license
+unlicensed = "deny"
 # List of explicitly allowed licenses
 allow = [
     "MIT",
     "Apache-2.0",
-    "Apache-2.0 WITH LLVM-exception", 
+    "Apache-2.0 WITH LLVM-exception",
     "BSD-2-Clause",
     "BSD-3-Clause",
-    "0BSD",
     "ISC",
     "Unicode-DFS-2016",
-    "Unicode-3.0",
     "CC0-1.0",
-    "CC-PDDC",
-    "Zlib",
-    "MPL-2.0",
 ]
 # List of explicitly disallowed licenses
-exceptions = [
-    # Allow copyleft licenses for specific crates if needed
+deny = [
+    "GPL-2.0",
+    "GPL-3.0",
+    "AGPL-1.0",
+    "AGPL-3.0",
 ]
+# Lint level for when multiple versions of the same license are detected
+copyleft = "warn"
+# Confidence threshold for detecting a license from a license text
+confidence-threshold = 0.8
 
 [bans]
 # Lint level for when multiple versions of the same crate are detected
