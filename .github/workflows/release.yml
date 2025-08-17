@@ -42,7 +42,7 @@ jobs:
           
           ### Via Cargo
           ```bash
-          cargo install nu_plugin_ulid
+          cargo install nw-nu_plugin_ulid
           ```
           
           ### Via Binary
@@ -154,7 +154,30 @@ jobs:
           ~/.cargo/git
         key: ubuntu-latest-cargo-publish-${{ hashFiles('**/Cargo.lock') }}
 
+    - name: Run quality gates before publishing
+      run: |
+        echo "🔍 Running Quality Gates..."
+        
+        # Code quality
+        echo "📋 Checking code quality..."
+        cargo clippy --all-targets --all-features -- -D warnings
+        cargo fmt --all --check
+        
+        # Testing
+        echo "🧪 Running tests..."
+        cargo test --all-features --release
+        
+        # Security
+        echo "🔒 Security audit..."
+        cargo install cargo-audit --locked
+        cargo audit
+        
+        echo "✅ All quality gates passed!"
+
     - name: Publish to crates.io
       env:
-        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-      run: cargo publish
+        CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_TOKEN }}
+      run: |
+        echo "📦 Publishing to crates.io..."
+        cargo publish --token $CARGO_REGISTRY_TOKEN
+        echo "✅ Successfully published to crates.io!"
