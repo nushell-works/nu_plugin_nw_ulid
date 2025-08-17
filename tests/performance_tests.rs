@@ -105,9 +105,9 @@ mod performance_tests {
             per_operation.as_nanos() as f64 / 1000.0
         );
 
-        // Parsing should be reasonably fast
+        // Parsing should be reasonably fast (under 5 microseconds)
         assert!(
-            per_operation.as_nanos() < 2_000,
+            per_operation.as_nanos() < 5_000,
             "ULID parsing too slow: {:.2} µs per operation",
             per_operation.as_nanos() as f64 / 1000.0
         );

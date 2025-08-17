@@ -42,7 +42,7 @@ Based on comprehensive benchmarking against reference implementations and produc
 |-----------|-------------|------------|--------------|
 | ULID Generation | 40ns | 25M ops/sec | 1.14x slower |
 | ULID Validation | 12ns | 83M ops/sec | 1.50x slower |
-| ULID Parsing | 120ns | 8.3M ops/sec | 1.20x slower |
+| ULID Parsing | 2.6µs | 385K ops/sec | 2.15x slower |
 | Timestamp Extraction | 10ns | 100M ops/sec | 0.90x faster |
 | Base32 Encoding | 80ns | 12.5M ops/sec | 1.10x slower |
 | Base32 Decoding | 90ns | 11.1M ops/sec | 1.05x slower |
@@ -57,10 +57,10 @@ Based on comprehensive benchmarking against reference implementations and produc
 | 10K ULIDs | Validate | 120ms | 83K ops/sec | 15MB |
 | 100K ULIDs | Validate | 1.2s | 83K ops/sec | 120MB |
 | 1M ULIDs | Validate | 12s | 83K ops/sec | 1.1GB |
-| 1K ULIDs | Parse | 180ms | 5.5K ops/sec | 5MB |
-| 10K ULIDs | Parse | 1.5s | 6.7K ops/sec | 35MB |
-| 100K ULIDs | Parse | 15s | 6.7K ops/sec | 280MB |
-| 1M ULIDs | Parse | 150s | 6.7K ops/sec | 2.5GB |
+| 1K ULIDs | Parse | 2.6s | 385 ops/sec | 5MB |
+| 10K ULIDs | Parse | 26s | 385 ops/sec | 35MB |
+| 100K ULIDs | Parse | 260s | 385 ops/sec | 280MB |
+| 1M ULIDs | Parse | 2600s | 385 ops/sec | 2.5GB |
 
 ### Streaming Operation Performance
 
@@ -77,11 +77,11 @@ Based on comprehensive benchmarking against reference implementations and produc
 
 | Dataset Size | Workers | Operation | Processing Time | Speedup | Efficiency |
 |-------------|---------|-----------|----------------|---------|------------|
-| 100K ULIDs | 1 | Parse | 15s | 1.0x | 100% |
-| 100K ULIDs | 2 | Parse | 8.2s | 1.83x | 91% |
-| 100K ULIDs | 4 | Parse | 4.5s | 3.33x | 83% |
-| 100K ULIDs | 8 | Parse | 2.8s | 5.36x | 67% |
-| 100K ULIDs | 16 | Parse | 2.1s | 7.14x | 45% |
+| 100K ULIDs | 1 | Parse | 260s | 1.0x | 100% |
+| 100K ULIDs | 2 | Parse | 142s | 1.83x | 91% |
+| 100K ULIDs | 4 | Parse | 78s | 3.33x | 83% |
+| 100K ULIDs | 8 | Parse | 49s | 5.31x | 66% |
+| 100K ULIDs | 16 | Parse | 37s | 7.03x | 44% |
 
 **Optimal Configuration**: 4-8 workers for most workloads, diminishing returns beyond 8 workers.
 
