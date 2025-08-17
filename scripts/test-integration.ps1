@@ -40,6 +40,45 @@ if ($LASTEXITCODE -ne 0) {
 $pluginPath = "$env:USERPROFILE\.cargo\bin\nu_plugin_ulid.exe"
 Write-Host "🔗 Plugin path: $pluginPath" -ForegroundColor Yellow
 
+# Ensure Nushell config directory exists
+Write-Host "📁 Setting up Nushell configuration..." -ForegroundColor Yellow
+$nuConfigDir = "$env:APPDATA\nushell"
+Write-Host "Config directory: $nuConfigDir" -ForegroundColor Cyan
+if (-not (Test-Path $nuConfigDir)) {
+    Write-Host "Creating config directory..." -ForegroundColor Yellow
+    New-Item -ItemType Directory -Path $nuConfigDir -Force | Out-Null
+} else {
+    Write-Host "Config directory already exists" -ForegroundColor Green
+}
+
+# Initialize Nushell if needed (this creates the plugin registry)
+$pluginRegistry = "$nuConfigDir\plugin.msgpackz"
+Write-Host "Plugin registry path: $pluginRegistry" -ForegroundColor Cyan
+if (-not (Test-Path $pluginRegistry)) {
+    Write-Host "🔧 Initializing Nushell configuration..." -ForegroundColor Yellow
+    try {
+        $initResult = & nu -c "version" 2>&1
+        Write-Host "Nushell initialization result: $initResult" -ForegroundColor Cyan
+    } catch {
+        Write-Host "Error during Nushell initialization: $_" -ForegroundColor Red
+    }
+    # Check if plugin registry was created
+    if (Test-Path $pluginRegistry) {
+        Write-Host "Plugin registry created successfully" -ForegroundColor Green
+    } else {
+        Write-Host "Plugin registry was not created, trying alternative approach..." -ForegroundColor Yellow
+        # Try creating an empty plugin registry
+        try {
+            "" | Out-File -FilePath $pluginRegistry -Encoding UTF8
+            Write-Host "Empty plugin registry created" -ForegroundColor Yellow
+        } catch {
+            Write-Host "Failed to create plugin registry: $_" -ForegroundColor Red
+        }
+    }
+} else {
+    Write-Host "Plugin registry already exists" -ForegroundColor Green
+}
+
 # Test function
 function Test-Command {
     param(
@@ -70,9 +109,21 @@ function Test-Command {
 }
 
 # Test 1: Plugin registration
-if (-not (Test-Command "Test 1: Plugin registration" { 
-    & nu -c "plugin add `"$pluginPath`""
-})) { exit 1 }
+Write-Host "🧪 Test 1: Plugin registration" -ForegroundColor Yellow
+try {
+    $result = & nu -c "plugin add `"$pluginPath`"" 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "✅ Test 1: Plugin registration successful" -ForegroundColor Green
+    } else {
+        Write-Host "❌ Test 1: Plugin registration failed" -ForegroundColor Red
+        Write-Host "Error output: $result" -ForegroundColor Red
+        exit 1
+    }
+} catch {
+    Write-Host "❌ Test 1: Plugin registration failed with exception: $_" -ForegroundColor Red
+    Write-Host "Error output: $result" -ForegroundColor Red
+    exit 1
+}
 
 # Test 2: Plugin info
 if (-not (Test-Command "Test 2: Plugin info" { 

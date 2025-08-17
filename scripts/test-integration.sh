@@ -42,9 +42,15 @@ echo -e "${YELLOW}🔗 Plugin path: $PLUGIN_PATH${NC}"
 
 # Ensure Nushell config directory exists
 echo -e "${YELLOW}📁 Setting up Nushell configuration...${NC}"
-NU_CONFIG_DIR="$HOME/.config/nushell"
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS uses Application Support directory
+    NU_CONFIG_DIR="$HOME/Library/Application Support/nushell"
+elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+    # Windows (if running under MSYS/Cygwin)
     NU_CONFIG_DIR="$APPDATA/nushell"
+else
+    # Linux and other Unix-like systems
+    NU_CONFIG_DIR="$HOME/.config/nushell"
 fi
 
 mkdir -p "$NU_CONFIG_DIR"
