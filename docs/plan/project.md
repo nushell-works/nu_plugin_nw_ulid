@@ -1,9 +1,9 @@
 # nu_plugin_ulid - Project Plan
 
-## 🎯 Current Status: Phase 1 Complete ✅
+## 🎯 Current Status: Phase 3.2 Complete ✅
 **Last Updated**: August 17, 2025  
-**Completion**: Phase 1 (Foundation & Demo) - 100% Complete  
-**Next Phase**: Phase 2 (ULID Specification & Design) or Phase 3 (Production Implementation)  
+**Completion**: Phase 3.2 (Core Plugin Commands) - 100% Complete  
+**Next Phase**: Phase 3.3 (Advanced Features) or Phase 4 (Production Hardening)  
 
 ### Phase 1 Achievements ✅
 - ✅ **Phase 1.1**: Professional infrastructure with enterprise-grade CI/CD
@@ -84,11 +84,11 @@ Create a production-grade Nushell plugin that provides comprehensive ULID functi
 - [ ] Base32 encoding/decoding (Crockford variant)
 
 #### 3.2 Plugin Commands
-- [ ] `ulid generate` - Generate ULIDs with options (timestamp, randomness seed)
-- [ ] `ulid parse` - Parse ULIDs into components (timestamp, randomness)
-- [ ] `ulid validate` - Validate ULID format and integrity
-- [ ] `ulid info` - Extract metadata from ULIDs
-- [ ] `ulid sort` - Sort data by ULID timestamp order
+- [x] `ulid generate` - Generate ULIDs with options (timestamp, randomness seed)
+- [x] `ulid parse` - Parse ULIDs into components (timestamp, randomness)
+- [x] `ulid validate` - Validate ULID format and integrity
+- [x] `ulid inspect` - Extract detailed metadata from ULIDs
+- [x] `ulid sort` - Sort data by ULID timestamp order
 
 #### 3.3 Advanced Features
 - [ ] Bulk operations for high-performance scenarios

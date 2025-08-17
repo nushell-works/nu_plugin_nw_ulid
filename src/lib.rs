@@ -23,6 +23,8 @@ impl Plugin for UlidPlugin {
             Box::new(UlidGenerateCommand),
             Box::new(UlidValidateCommand),
             Box::new(UlidParseCommand),
+            Box::new(UlidInspectCommand),
+            Box::new(UlidSortCommand),
             Box::new(UlidSecurityAdviceCommand),
             // Plugin info
             Box::new(UlidInfoCommand),
@@ -62,13 +64,15 @@ mod tests {
     fn test_plugin_commands() {
         let plugin = UlidPlugin;
         let commands = plugin.commands();
-        assert_eq!(commands.len(), 19);
+        assert_eq!(commands.len(), 21);
 
         // Test key commands to ensure they're registered correctly
         let command_names: Vec<&str> = commands.iter().map(|cmd| cmd.name()).collect();
         assert!(command_names.contains(&"ulid generate"));
         assert!(command_names.contains(&"ulid validate"));
         assert!(command_names.contains(&"ulid parse"));
+        assert!(command_names.contains(&"ulid inspect"));
+        assert!(command_names.contains(&"ulid sort"));
         assert!(command_names.contains(&"ulid security-advice"));
         assert!(command_names.contains(&"ulid info"));
         assert!(command_names.contains(&"ulid uuid generate"));
