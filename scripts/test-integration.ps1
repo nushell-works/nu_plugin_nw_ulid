@@ -114,7 +114,7 @@ if (-not (Test-Command "Test 7: Stream processing" {
 
 # Test 8: Security advice
 if (-not (Test-Command "Test 8: Security advice" { 
-    & nu -c "plugin use ulid; ulid security-advice --context 'testing'"
+    & nu -c "plugin use ulid; ulid security-advice"
 })) { exit 1 }
 
 # Test 9: Inspect command

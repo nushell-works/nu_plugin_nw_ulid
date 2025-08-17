@@ -106,7 +106,7 @@ fi
 
 # Test 8: Security advice
 echo -e "${YELLOW}🧪 Test 8: Security advice${NC}"
-if nu -c "plugin use ulid; ulid security-advice --context 'testing'" &> /dev/null; then
+if nu -c "plugin use ulid; ulid security-advice" &> /dev/null; then
     echo -e "${GREEN}✅ Security advice command works${NC}"
 else
     echo -e "${RED}❌ Security advice command failed${NC}"
