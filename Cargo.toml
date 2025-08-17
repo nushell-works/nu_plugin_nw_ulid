@@ -17,6 +17,10 @@ rust-version = "1.81.0"
 name = "nu_plugin_ulid"
 path = "src/main.rs"
 
+[[bench]]
+name = "performance_benchmarks"
+harness = false
+
 [lib]
 name = "nu_plugin_ulid"
 path = "src/lib.rs"
@@ -39,6 +43,7 @@ base64 = "0.22.1"
 
 [dev-dependencies]
 nu-test-support = "0.95.0"
+criterion = { version = "0.5", features = ["html_reports"] }
 
 [profile.release]
 lto = true
