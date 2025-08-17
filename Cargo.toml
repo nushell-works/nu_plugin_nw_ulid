@@ -5,13 +5,13 @@ edition = "2021"
 authors = ["John Ky <newhoggy@gmail.com>"]
 description = "Professional ULID (Universally Unique Lexicographically Sortable Identifier) utilities plugin for Nushell"
 license = "BSD-3-Clause"
-repository = "https://github.com/newhoggy/nu_plugin_ulid"
-homepage = "https://github.com/newhoggy/nu_plugin_ulid"
+repository = "https://github.com/nushell-works/nu_plugin_ulid"
+homepage = "https://github.com/nushell-works/nu_plugin_ulid"
 documentation = "https://docs.rs/nu_plugin_ulid"
 keywords = ["nushell", "plugin", "ulid", "uuid", "identifier"]
 categories = ["command-line-utilities", "development-tools"]
 readme = "README.md"
-rust-version = "1.70.0"
+rust-version = "1.81.0"
 
 [[bin]]
 name = "nu_plugin_ulid"
@@ -22,11 +22,11 @@ name = "nu_plugin_ulid"
 path = "src/lib.rs"
 
 [dependencies]
-nu-plugin = "0.106.1"
-nu-protocol = "0.106.1"
+nu-plugin = "0.95.0"
+nu-protocol = "0.95.0"
 
 [dev-dependencies]
-nu-test-support = "0.106.1"
+nu-test-support = "0.95.0"
 
 [profile.release]
 lto = true

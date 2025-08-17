@@ -21,6 +21,11 @@ ignore = [
     # paste crate is unmaintained but used by nushell dependencies
     # This is a transitive dependency we can't easily control
     "RUSTSEC-2024-0436",  # paste crate no longer maintained
+    
+    # TODO: Remove this ignore when upgrading to newer Nushell versions
+    # proc-macro-error is unmaintained but used by nu-derive-value in Nushell 0.95.0
+    # This should be resolved in newer Nushell versions that don't use this crate
+    "RUSTSEC-2024-0370",  # proc-macro-error unmaintained
 ]
 
 [licenses]
@@ -36,12 +41,14 @@ allow = [
     "BSD-3-Clause",
     "0BSD",
     "ISC",
-    "Unicode-DFS-2016",
+    # TODO: Review and remove unused license allowances when upgrading dependencies
+    # The following licenses are currently not used but kept for future compatibility
+    # "Unicode-DFS-2016",  # Not currently used
+    # "CC0-1.0",          # Not currently used  
+    # "MPL-2.0",          # Not currently used
     "Unicode-3.0",
-    "CC0-1.0",
     "CC-PDDC",
     "Zlib",
-    "MPL-2.0",
 ]
 # List of explicitly disallowed licenses
 exceptions = [
@@ -50,7 +57,9 @@ exceptions = [
 
 [bans]
 # Lint level for when multiple versions of the same crate are detected
-multiple-versions = "warn"
+# TODO: Change back to "warn" when Nushell ecosystem has fewer duplicate dependencies
+# Currently set to "allow" due to many transitive dependency version conflicts in Nushell 0.95.0
+multiple-versions = "allow"
 # Lint level for when a crate version requirement is `*`
 wildcards = "allow"
 # The graph highlighting used when creating dotgraphs for crates

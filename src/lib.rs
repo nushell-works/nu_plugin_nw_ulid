@@ -22,7 +22,7 @@ impl PluginCommand for UlidInfoCommand {
         "ulid info"
     }
 
-    fn description(&self) -> &str {
+    fn usage(&self) -> &str {
         "Display plugin metadata and diagnostics"
     }
 
