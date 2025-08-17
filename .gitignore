@@ -79,3 +79,6 @@ plugin_registry.msgpack
 
 # AI assistant scratch space
 /.ai/scratch
+
+# Claude Code local settings
+.claude/settings.local.json
