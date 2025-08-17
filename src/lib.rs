@@ -1,5 +1,7 @@
-use nu_plugin::{EngineInterface, EvaluatedCall, Plugin, PluginCommand};
-use nu_protocol::{Example, LabeledError, PipelineData, Signature, Value};
+use nu_plugin::{Plugin, PluginCommand};
+
+mod commands;
+use commands::*;
 
 pub struct UlidPlugin;
 
@@ -9,72 +11,23 @@ impl Plugin for UlidPlugin {
     }
 
     fn commands(&self) -> Vec<Box<dyn PluginCommand<Plugin = Self>>> {
-        vec![Box::new(UlidInfoCommand)]
-    }
-}
-
-pub struct UlidInfoCommand;
-
-impl PluginCommand for UlidInfoCommand {
-    type Plugin = UlidPlugin;
-
-    fn name(&self) -> &str {
-        "ulid info"
-    }
-
-    fn usage(&self) -> &str {
-        "Display plugin metadata and diagnostics"
-    }
-
-    fn signature(&self) -> Signature {
-        Signature::build(self.name())
-    }
-
-    fn examples(&self) -> Vec<Example<'_>> {
-        vec![Example {
-            example: "ulid info",
-            description: "Show plugin information",
-            result: None,
-        }]
-    }
-
-    fn run(
-        &self,
-        _plugin: &Self::Plugin,
-        _engine: &EngineInterface,
-        call: &EvaluatedCall,
-        _input: PipelineData,
-    ) -> Result<PipelineData, LabeledError> {
-        let record = Value::record(
-            [
-                ("name".into(), Value::string("nu_plugin_ulid", call.head)),
-                (
-                    "version".into(),
-                    Value::string(env!("CARGO_PKG_VERSION"), call.head),
-                ),
-                (
-                    "description".into(),
-                    Value::string(env!("CARGO_PKG_DESCRIPTION"), call.head),
-                ),
-                (
-                    "authors".into(),
-                    Value::string(env!("CARGO_PKG_AUTHORS"), call.head),
-                ),
-                (
-                    "license".into(),
-                    Value::string(env!("CARGO_PKG_LICENSE"), call.head),
-                ),
-                (
-                    "repository".into(),
-                    Value::string(env!("CARGO_PKG_REPOSITORY"), call.head),
-                ),
-            ]
-            .into_iter()
-            .collect(),
-            call.head,
-        );
-
-        Ok(PipelineData::Value(record, None))
+        vec![
+            Box::new(UlidInfoCommand),
+            Box::new(UlidUuidGenerateCommand),
+            Box::new(UlidUuidValidateCommand),
+            Box::new(UlidUuidParseCommand),
+            Box::new(UlidTimeNowCommand),
+            Box::new(UlidTimeParseCommand),
+            Box::new(UlidTimeMillisCommand),
+            Box::new(UlidEncodeBase32Command),
+            Box::new(UlidDecodeBase32Command),
+            Box::new(UlidEncodeHexCommand),
+            Box::new(UlidDecodeHexCommand),
+            Box::new(UlidHashSha256Command),
+            Box::new(UlidHashSha512Command),
+            Box::new(UlidHashBlake3Command),
+            Box::new(UlidHashRandomCommand),
+        ]
     }
 }
 
@@ -92,7 +45,14 @@ mod tests {
     fn test_plugin_commands() {
         let plugin = UlidPlugin;
         let commands = plugin.commands();
-        assert_eq!(commands.len(), 1);
-        assert_eq!(commands[0].name(), "ulid info");
+        assert_eq!(commands.len(), 15);
+        
+        // Test key commands to ensure they're registered correctly
+        let command_names: Vec<&str> = commands.iter().map(|cmd| cmd.name()).collect();
+        assert!(command_names.contains(&"ulid info"));
+        assert!(command_names.contains(&"ulid uuid generate"));
+        assert!(command_names.contains(&"ulid time now"));
+        assert!(command_names.contains(&"ulid encode base32"));
+        assert!(command_names.contains(&"ulid hash sha256"));
     }
 }
