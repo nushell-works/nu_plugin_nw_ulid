@@ -1,7 +1,14 @@
 use nu_plugin::{Plugin, PluginCommand};
 
 mod commands;
+mod error;
+mod security;
+mod ulid_engine;
+
 use commands::*;
+pub use error::*;
+pub use security::*;
+pub use ulid_engine::*;
 
 pub struct UlidPlugin;
 
@@ -12,17 +19,27 @@ impl Plugin for UlidPlugin {
 
     fn commands(&self) -> Vec<Box<dyn PluginCommand<Plugin = Self>>> {
         vec![
+            // Core ULID commands
+            Box::new(UlidGenerateCommand),
+            Box::new(UlidValidateCommand),
+            Box::new(UlidParseCommand),
+            Box::new(UlidSecurityAdviceCommand),
+            // Plugin info
             Box::new(UlidInfoCommand),
+            // UUID utilities
             Box::new(UlidUuidGenerateCommand),
             Box::new(UlidUuidValidateCommand),
             Box::new(UlidUuidParseCommand),
+            // Time utilities
             Box::new(UlidTimeNowCommand),
             Box::new(UlidTimeParseCommand),
             Box::new(UlidTimeMillisCommand),
+            // Encoding utilities
             Box::new(UlidEncodeBase32Command),
             Box::new(UlidDecodeBase32Command),
             Box::new(UlidEncodeHexCommand),
             Box::new(UlidDecodeHexCommand),
+            // Hashing utilities
             Box::new(UlidHashSha256Command),
             Box::new(UlidHashSha512Command),
             Box::new(UlidHashBlake3Command),
@@ -45,10 +62,14 @@ mod tests {
     fn test_plugin_commands() {
         let plugin = UlidPlugin;
         let commands = plugin.commands();
-        assert_eq!(commands.len(), 15);
+        assert_eq!(commands.len(), 19);
 
         // Test key commands to ensure they're registered correctly
         let command_names: Vec<&str> = commands.iter().map(|cmd| cmd.name()).collect();
+        assert!(command_names.contains(&"ulid generate"));
+        assert!(command_names.contains(&"ulid validate"));
+        assert!(command_names.contains(&"ulid parse"));
+        assert!(command_names.contains(&"ulid security-advice"));
         assert!(command_names.contains(&"ulid info"));
         assert!(command_names.contains(&"ulid uuid generate"));
         assert!(command_names.contains(&"ulid time now"));

@@ -2,6 +2,7 @@ pub mod encode;
 pub mod hash;
 pub mod info;
 pub mod time;
+pub mod ulid;
 pub mod uuid;
 
 pub use encode::{
@@ -12,4 +13,7 @@ pub use hash::{
 };
 pub use info::UlidInfoCommand;
 pub use time::{UlidTimeMillisCommand, UlidTimeNowCommand, UlidTimeParseCommand};
+pub use ulid::{
+    UlidGenerateCommand, UlidParseCommand, UlidSecurityAdviceCommand, UlidValidateCommand,
+};
 pub use uuid::{UlidUuidGenerateCommand, UlidUuidParseCommand, UlidUuidValidateCommand};
