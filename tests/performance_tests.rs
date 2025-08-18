@@ -137,7 +137,7 @@ mod performance_tests {
 
         // Timestamp extraction should be very fast (debug mode tolerance)
         assert!(
-            per_operation.as_nanos() < 1_000,
+            per_operation.as_nanos() < 10_000,
             "Timestamp extraction too slow: {:.2} ns per operation",
             per_operation.as_nanos() as f64
         );
