@@ -1,38 +1,75 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 0.1.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
 
 env:
   CARGO_TERM_COLOR: always
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
     outputs:
-      upload_url: ${{ steps.release.outputs.upload_url }}
-      version: ${{ steps.version.outputs.version }}
+      version: ${{ inputs.version }}
+      tag_name: v${{ inputs.version }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Get version from tag
-      id: version
-      run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+    - name: Validate version format
+      run: |
+        if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Invalid version format. Expected: x.y.z"
+          exit 1
+        fi
 
-    - name: Create Release
-      id: release
-      uses: actions/create-release@v1
+    - name: Create and push tag
+      run: |
+        TAG_NAME="v${{ inputs.version }}"
+        echo "Creating tag: $TAG_NAME"
+        git tag $TAG_NAME
+        git push origin $TAG_NAME
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Delete existing release if it exists
+      run: |
+        TAG_NAME="v${{ inputs.version }}"
+        echo "Checking for existing release..."
+        if gh release view $TAG_NAME >/dev/null 2>&1; then
+          echo "Release $TAG_NAME exists, deleting..."
+          gh release delete $TAG_NAME --yes
+          echo "Release deleted successfully"
+        else
+          echo "No existing release found"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release v${{ steps.version.outputs.version }}
+        tag_name: v${{ inputs.version }}
+        name: Release v${{ inputs.version }}
         draft: false
-        prerelease: false
+        prerelease: ${{ inputs.prerelease }}
+        generate_release_notes: true
+        fail_on_unmatched_files: false
         body: |
           ## What's Changed
           
@@ -55,6 +92,8 @@ jobs:
           plugin add ./nu_plugin_ulid
           plugin use ulid
           ```
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-and-upload:
     name: Build and Upload
@@ -125,19 +164,33 @@ jobs:
         cd target/${{ matrix.target }}/release
         7z a ../../../${{ matrix.asset_name }} ${{ matrix.artifact_name }}
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.asset_name }}
+        path: ${{ matrix.asset_name }}
+
+  upload-assets:
+    name: Upload Release Assets
+    needs: [create-release, build-and-upload]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      
+    - name: Upload assets to release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ needs.create-release.outputs.tag_name }}
+        files: |
+          **/*.tar.gz
+          **/*.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: ${{ matrix.asset_name }}
-        asset_name: ${{ matrix.asset_name }}
-        asset_content_type: application/octet-stream
 
   publish-crate:
     name: Publish to Crates.io
-    needs: [create-release, build-and-upload]
+    needs: [create-release, upload-assets]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -179,5 +232,5 @@ jobs:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_TOKEN }}
       run: |
         echo "📦 Publishing to crates.io..."
-        cargo publish --token $CARGO_REGISTRY_TOKEN
+        cargo publish --token "$CARGO_REGISTRY_TOKEN"
         echo "✅ Successfully published to crates.io!"
