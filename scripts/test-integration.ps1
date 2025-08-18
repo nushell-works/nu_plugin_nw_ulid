@@ -66,14 +66,8 @@ if (-not (Test-Path $pluginRegistry)) {
     if (Test-Path $pluginRegistry) {
         Write-Host "Plugin registry created successfully" -ForegroundColor Green
     } else {
-        Write-Host "Plugin registry was not created, trying alternative approach..." -ForegroundColor Yellow
-        # Try creating an empty plugin registry
-        try {
-            "" | Out-File -FilePath $pluginRegistry -Encoding UTF8
-            Write-Host "Empty plugin registry created" -ForegroundColor Yellow
-        } catch {
-            Write-Host "Failed to create plugin registry: $_" -ForegroundColor Red
-        }
+        Write-Host "Plugin registry was not created" -ForegroundColor Yellow
+        # Don't create an invalid empty file - let Nushell create it properly
     }
 } else {
     Write-Host "Plugin registry already exists" -ForegroundColor Green
@@ -111,13 +105,32 @@ function Test-Command {
 # Test 1: Plugin registration
 Write-Host "🧪 Test 1: Plugin registration" -ForegroundColor Yellow
 try {
-    $result = & nu -c "plugin add `"$pluginPath`"" 2>&1
+    # Use single quotes to avoid backslash escape issues
+    $result = & nu -c "plugin add '$pluginPath'" 2>&1
     if ($LASTEXITCODE -eq 0) {
         Write-Host "✅ Test 1: Plugin registration successful" -ForegroundColor Green
     } else {
         Write-Host "❌ Test 1: Plugin registration failed" -ForegroundColor Red
         Write-Host "Error output: $result" -ForegroundColor Red
-        exit 1
+        
+        # If the plugin registry is corrupted, try removing it and retry
+        if ($result -match "Error while reading plugin registry file") {
+            Write-Host "🔧 Plugin registry appears corrupted, removing and retrying..." -ForegroundColor Yellow
+            if (Test-Path $pluginRegistry) {
+                Remove-Item $pluginRegistry -Force
+            }
+            # Retry plugin registration
+            $retryResult = & nu -c "plugin add '$pluginPath'" 2>&1
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "✅ Test 1: Plugin registration successful on retry" -ForegroundColor Green
+            } else {
+                Write-Host "❌ Test 1: Plugin registration failed on retry" -ForegroundColor Red
+                Write-Host "Retry error output: $retryResult" -ForegroundColor Red
+                exit 1
+            }
+        } else {
+            exit 1
+        }
     }
 } catch {
     Write-Host "❌ Test 1: Plugin registration failed with exception: $_" -ForegroundColor Red
