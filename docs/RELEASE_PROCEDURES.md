@@ -6,6 +6,22 @@
 
 This document outlines the comprehensive release procedures, versioning strategy, and quality gates for nu_plugin_ulid releases.
 
+## Quick Release Guide
+
+### For Immediate Release (TL;DR)
+
+**Option 1: GitHub CLI**
+```bash
+gh workflow run release.yml --ref main -f version=0.1.0
+```
+
+**Option 2: GitHub Web UI**
+1. Go to **Actions** tab → **Release** workflow → **Run workflow**
+2. Branch: `main`, Version: `0.1.0`, Prerelease: `false`
+3. Click **Run workflow**
+
+The workflow will automatically create tags, build binaries, and publish to Crates.io.
+
 ## Table of Contents
 
 1. [Versioning Strategy](#versioning-strategy)
@@ -183,12 +199,13 @@ cargo bench -- --baseline previous
 
 #### 3.1 Create Release Candidate
 ```bash
-# Tag release candidate
-git tag v1.2.0-rc.1
-git push origin v1.2.0-rc.1
+# Trigger RC build with manual dispatch
+gh workflow run release.yml --ref main -f version=1.2.0-rc.1 -f prerelease=true
 
-# Trigger RC build
-gh workflow run release.yml --ref v1.2.0-rc.1
+# The workflow will automatically:
+# - Create the v1.2.0-rc.1 tag
+# - Mark as prerelease
+# - Build and publish RC binaries
 ```
 
 #### 3.2 Community Testing
@@ -218,14 +235,30 @@ git merge --no-ff release/v1.2.0
 ```
 
 #### 4.2 Create Release
-```bash
-# Create release tag
-git tag v1.2.0
-git push origin v1.2.0
 
-# Trigger release pipeline
-gh workflow run release.yml --ref v1.2.0
+**Option A: Via GitHub CLI**
+```bash
+# Trigger release pipeline with manual dispatch
+gh workflow run release.yml --ref main -f version=1.2.0
+
+# For prerelease versions:
+gh workflow run release.yml --ref main -f version=1.2.0-beta.1 -f prerelease=true
 ```
+
+**Option B: Via GitHub Web Interface**
+1. Navigate to **Actions** tab in GitHub repository
+2. Select **Release** workflow
+3. Click **Run workflow** button
+4. Ensure **Branch: main** is selected
+5. Enter version (e.g., `1.2.0`)
+6. Set prerelease flag if needed
+7. Click **Run workflow**
+
+**Note**: The workflow will automatically:
+- Create the `v1.2.0` tag
+- Build multi-platform binaries
+- Create GitHub release
+- Publish to Crates.io
 
 #### 4.3 Automated Release Steps
 The automated pipeline handles:
@@ -296,43 +329,66 @@ All releases must pass these quality gates:
 # .github/workflows/release.yml
 name: Release
 on:
-  push:
-    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 0.1.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
-  quality-gates:
+  create-release:
+    name: Create Release
     runs-on: ubuntu-latest
     steps:
-      - name: Run Quality Gates
-        run: ./scripts/quality_gates.sh
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Create and push tag
+        run: |
+          git tag v${{ inputs.version }}
+          git push origin v${{ inputs.version }}
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ inputs.version }}
+          prerelease: ${{ inputs.prerelease }}
 
-  build-binaries:
-    needs: quality-gates
+  build-and-upload:
+    name: Build and Upload
+    needs: create-release
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        arch: [x86_64, aarch64]
+        target: [x86_64, aarch64]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Build Release Binary
-        run: cargo build --release --target ${{ matrix.arch }}
+        run: cargo build --release --target ${{ matrix.target }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
 
-  publish-crates:
-    needs: [quality-gates, build-binaries]
+  upload-assets:
+    name: Upload Release Assets
+    needs: [create-release, build-and-upload]
     runs-on: ubuntu-latest
     steps:
-      - name: Publish to Crates.io
-        run: cargo publish --token ${{ secrets.CRATES_TOKEN }}
-
-  create-release:
-    needs: [publish-crates]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create GitHub Release
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+      - name: Upload assets to release
         uses: softprops/action-gh-release@v1
-        with:
-          files: target/release/nu_plugin_ulid*
-          generate_release_notes: true
+
+  publish-crate:
+    name: Publish to Crates.io
+    needs: [create-release, upload-assets]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish to crates.io
+        run: cargo publish --token "$CARGO_REGISTRY_TOKEN"
 ```
 
 ### Release Automation Scripts
