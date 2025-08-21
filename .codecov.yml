@@ -1,0 +1,31 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 2%
+    patch:
+      default:
+        target: 70%
+        threshold: 5%
+
+  ignore:
+    - "tests/*"
+    - "benches/*"
+    - "examples/*"
+    - "**/tests.rs"
+    - "**/test_*.rs"
+    - "**/*_test.rs"
+    - "**/*test*"
+    # Ignore test modules within source files
+    - "**/#[cfg(test)]"
+
+comment:
+  layout: "header, diff, flags, files, footer"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: yes
+
+github_checks:
+  annotations: true
