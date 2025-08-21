@@ -350,7 +350,7 @@ impl PluginCommand for UlidHashRandomCommand {
         }
 
         use rand::RngCore;
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let mut bytes = vec![0u8; byte_count];
         rng.fill_bytes(&mut bytes);
 
