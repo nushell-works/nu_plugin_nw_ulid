@@ -1,4 +1,4 @@
-# Integration test script for nu_plugin_ulid (Windows PowerShell)
+# Integration test script for nu_plugin_nw_ulid (Windows PowerShell)
 # Tests actual plugin installation and execution with Nushell
 
 param(
@@ -7,7 +7,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "🧪 Running integration tests for nu_plugin_ulid" -ForegroundColor Cyan
+Write-Host "🧪 Running integration tests for nu_plugin_nw_ulid" -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan
 
 # Check if Nushell is installed
@@ -37,7 +37,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Get the plugin path
-$pluginPath = "$env:USERPROFILE\.cargo\bin\nu_plugin_ulid.exe"
+$pluginPath = "$env:USERPROFILE\.cargo\bin\nu_plugin_nw_ulid.exe"
 Write-Host "🔗 Plugin path: $pluginPath" -ForegroundColor Yellow
 
 # Ensure Nushell config directory exists
@@ -80,9 +80,9 @@ function Test-Command {
         [scriptblock]$Command,
         [string]$ExpectedPattern = $null
     )
-    
+
     Write-Host "🧪 $TestName" -ForegroundColor Yellow
-    
+
     try {
         $result = & $Command 2>$null
         if ($LASTEXITCODE -eq 0) {
@@ -112,7 +112,7 @@ try {
     } else {
         Write-Host "❌ Test 1: Plugin registration failed" -ForegroundColor Red
         Write-Host "Error output: $result" -ForegroundColor Red
-        
+
         # If the plugin registry is corrupted, try removing it and retry
         if ($result -match "Error while reading plugin registry file") {
             Write-Host "🔧 Plugin registry appears corrupted, removing and retrying..." -ForegroundColor Yellow
@@ -139,12 +139,12 @@ try {
 }
 
 # Test 2: Plugin info
-if (-not (Test-Command "Test 2: Plugin info" { 
-    & nu -c "plugin use ulid; ulid info"
+if (-not (Test-Command "Test 2: Plugin info" {
+    & nu -c "plugin use nw_ulid; ulid info"
 })) { exit 1 }
 
 # Test 3: ULID generation
-$ulid = & nu -c "plugin use ulid; ulid generate" 2>$null
+$ulid = & nu -c "plugin use nw_ulid; ulid generate" 2>$null
 if ($ulid.Length -eq 26) {
     Write-Host "✅ Test 3: ULID generation successful: $ulid" -ForegroundColor Green
 } else {
@@ -153,7 +153,7 @@ if ($ulid.Length -eq 26) {
 }
 
 # Test 4: ULID validation
-$validationResult = & nu -c "plugin use ulid; ulid validate '$ulid'" 2>$null
+$validationResult = & nu -c "plugin use nw_ulid; ulid validate '$ulid'" 2>$null
 if ($validationResult -eq "true") {
     Write-Host "✅ Test 4: ULID validation successful" -ForegroundColor Green
 } else {
@@ -162,34 +162,34 @@ if ($validationResult -eq "true") {
 }
 
 # Test 5: ULID parsing
-if (-not (Test-Command "Test 5: ULID parsing" { 
-    & nu -c "plugin use ulid; ulid parse '$ulid'"
+if (-not (Test-Command "Test 5: ULID parsing" {
+    & nu -c "plugin use nw_ulid; ulid parse '$ulid'"
 })) { exit 1 }
 
 # Test 6: Bulk generation
-if (-not (Test-Command "Test 6: Bulk generation" { 
-    & nu -c "plugin use ulid; ulid generate --count 3"
+if (-not (Test-Command "Test 6: Bulk generation" {
+    & nu -c "plugin use nw_ulid; ulid generate --count 3"
 })) { exit 1 }
 
 # Test 7: Stream processing
-if (-not (Test-Command "Test 7: Stream processing" { 
-    & nu -c "plugin use ulid; echo ['$ulid', 'invalid'] | ulid stream validate"
+if (-not (Test-Command "Test 7: Stream processing" {
+    & nu -c "plugin use nw_ulid; echo ['$ulid', 'invalid'] | ulid stream validate"
 })) { exit 1 }
 
 # Test 8: Security advice
-if (-not (Test-Command "Test 8: Security advice" { 
-    & nu -c "plugin use ulid; ulid security-advice"
+if (-not (Test-Command "Test 8: Security advice" {
+    & nu -c "plugin use nw_ulid; ulid security-advice"
 })) { exit 1 }
 
 # Test 9: Inspect command
-if (-not (Test-Command "Test 9: ULID inspection" { 
-    & nu -c "plugin use ulid; ulid inspect '$ulid'"
+if (-not (Test-Command "Test 9: ULID inspection" {
+    & nu -c "plugin use nw_ulid; ulid inspect '$ulid'"
 })) { exit 1 }
 
 # Test 10: Sort command
-$ulid2 = & nu -c "plugin use ulid; ulid generate" 2>$null
-if (-not (Test-Command "Test 10: ULID sorting" { 
-    & nu -c "plugin use ulid; echo ['$ulid', '$ulid2'] | ulid sort"
+$ulid2 = & nu -c "plugin use nw_ulid; ulid generate" 2>$null
+if (-not (Test-Command "Test 10: ULID sorting" {
+    & nu -c "plugin use nw_ulid; echo ['$ulid', '$ulid2'] | ulid sort"
 })) { exit 1 }
 
 Write-Host ""
@@ -198,5 +198,5 @@ Write-Host "✅ Plugin is working correctly with Nushell" -ForegroundColor Green
 Write-Host ""
 Write-Host "Plugin installed at: $pluginPath"
 Write-Host "You can now use:"
-Write-Host "  nu -c `"plugin use ulid; ulid generate`""
-Write-Host "  nu -c `"plugin use ulid; ulid info`""
+Write-Host "  nu -c `"plugin use nw_ulid; ulid generate`""
+Write-Host "  nu -c `"plugin use nw_ulid; ulid info`""

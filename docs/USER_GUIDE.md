@@ -1,6 +1,6 @@
-# nu_plugin_ulid User Guide
+# nu_plugin_nw_ulid User Guide
 
-Welcome to the comprehensive user guide for nu_plugin_ulid - a production-grade ULID plugin for Nushell.
+Welcome to the comprehensive user guide for nu_plugin_nw_ulid - a production-grade ULID plugin for Nushell.
 
 ## Table of Contents
 
@@ -38,13 +38,13 @@ ULIDs (Universally Unique Lexicographically Sortable Identifiers) are 128-bit id
 
 1. **Install the plugin:**
    ```bash
-   cargo install nw-nu_plugin_ulid
+   cargo install nu_plugin_nw_ulid
    ```
 
 2. **Register with Nushell:**
    ```bash
-   plugin add ~/.cargo/bin/nu_plugin_ulid
-   plugin use ulid
+   plugin add ~/.cargo/bin/nu_plugin_nw_ulid
+   plugin use nw_ulid
    ```
 
 3. **Verify installation:**
@@ -490,13 +490,13 @@ ulid security-advice --context "public-urls"     # Public URL generation
 
 #### 1. Plugin Not Found
 ```
-Error: Plugin nu_plugin_ulid was not found
+Error: Plugin nu_plugin_nw_ulid was not found
 ```
 **Solution:**
 ```bash
 # Re-register the plugin
-plugin add ~/.cargo/bin/nu_plugin_ulid
-plugin use ulid
+plugin add ~/.cargo/bin/nu_plugin_nw_ulid
+plugin use nw_ulid
 ```
 
 #### 2. Invalid ULID Errors
@@ -563,9 +563,9 @@ $data | ulid stream parse --batch-size 100
 - **Plugin information**: `ulid info`
 - **Command help**: `help ulid generate`, `help ulid parse`, etc.
 - **Security guidance**: `ulid security-advice`
-- **GitHub Issues**: [Report bugs and feature requests](https://github.com/nushell-works/nu_plugin_ulid/issues)
-- **Documentation**: [Complete documentation](https://github.com/nushell-works/nu_plugin_ulid/tree/main/docs)
+- **GitHub Issues**: [Report bugs and feature requests](https://github.com/nushell-works/nu_plugin_nw_ulid/issues)
+- **Documentation**: [Complete documentation](https://github.com/nushell-works/nu_plugin_nw_ulid/tree/main/docs)
 
 ---
 
-This user guide provides comprehensive coverage of nu_plugin_ulid functionality with practical examples for real-world usage. For more advanced topics, see the [API Reference](scripting/api.md) and [Scripting Guide](scripting/README.md).
+This user guide provides comprehensive coverage of nu_plugin_nw_ulid functionality with practical examples for real-world usage. For more advanced topics, see the [API Reference](scripting/api.md) and [Scripting Guide](scripting/README.md).

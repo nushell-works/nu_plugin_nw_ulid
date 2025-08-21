@@ -1,11 +1,11 @@
-# Makefile for nu_plugin_ulid
+# Makefile for nu_plugin_nw_ulid
 # Provides convenient shortcuts for common development tasks
 
 .PHONY: help setup build test check check-all clean install format lint audit coverage watch docs
 
 # Default target
 help: ## Show this help message
-	@echo "nu_plugin_ulid Development Commands"
+	@echo "nu_plugin_nw_ulid Development Commands"
 	@echo "=================================="
 	@echo ""
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -175,9 +175,9 @@ commit-check: ## Check if ready to commit
 # Plugin-specific targets
 plugin-info: ## Show plugin information
 	@echo "🔌 Plugin information..."
-	@if [ -f "target/release/nu_plugin_ulid" ]; then \
-		echo "Binary: target/release/nu_plugin_ulid"; \
-		ls -lh target/release/nu_plugin_ulid; \
+	@if [ -f "target/release/nu_plugin_nw_ulid" ]; then \
+		echo "Binary: target/release/nu_plugin_nw_ulid"; \
+		ls -lh target/release/nu_plugin_nw_ulid; \
 	else \
 		echo "Plugin not built. Run 'make build' first."; \
 	fi
@@ -185,9 +185,9 @@ plugin-info: ## Show plugin information
 plugin-test: ## Test plugin with Nushell
 	@echo "🧪 Testing plugin with Nushell..."
 	@if command -v nu >/dev/null 2>&1; then \
-		if [ -f "target/release/nu_plugin_ulid" ]; then \
+		if [ -f "target/release/nu_plugin_nw_ulid" ]; then \
 			echo "Testing plugin registration..."; \
-			nu -c "plugin add target/release/nu_plugin_ulid; plugin use ulid; ulid info"; \
+			nu -c "plugin add target/release/nu_plugin_nw_ulid; plugin use nw_ulid; ulid info"; \
 		else \
 			echo "Plugin not built. Run 'make build' first."; \
 		fi; \
@@ -214,7 +214,7 @@ tree: ## Show dependency tree
 
 # Project Information
 info: ## Show project information
-	@echo "nu_plugin_ulid Project Information"
+	@echo "nu_plugin_nw_ulid Project Information"
 	@echo "================================="
 	@echo "Version: $(shell cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')"
 	@echo "Rust Version: $(shell rustc --version)"
@@ -222,4 +222,4 @@ info: ## Show project information
 	@echo "Project Size: $(shell du -sh . 2>/dev/null | cut -f1)"
 	@if [ -d "target" ]; then echo "Build Artifacts: $(shell du -sh target 2>/dev/null | cut -f1)"; fi
 	@echo "License: BSD-3-Clause"
-	@echo "Repository: https://github.com/nushell-works/nu_plugin_ulid"
+	@echo "Repository: https://github.com/nushell-works/nu_plugin_nw_ulid"

@@ -1,6 +1,6 @@
-# nu_plugin_ulid Developer Guide
+# nu_plugin_nw_ulid Developer Guide
 
-This guide is for developers who want to contribute to nu_plugin_ulid or understand its internal architecture.
+This guide is for developers who want to contribute to nu_plugin_nw_ulid or understand its internal architecture.
 
 ## Table of Contents
 
@@ -17,7 +17,7 @@ This guide is for developers who want to contribute to nu_plugin_ulid or underst
 
 ### Design Principles
 
-nu_plugin_ulid follows enterprise-grade development principles:
+nu_plugin_nw_ulid follows enterprise-grade development principles:
 
 - **Modular Design**: Each command is implemented as a separate module
 - **Security First**: All operations include security validation and context awareness
@@ -28,7 +28,7 @@ nu_plugin_ulid follows enterprise-grade development principles:
 ### Component Architecture
 
 ```
-nu_plugin_ulid/
+nu_plugin_nw_ulid/
 ├── src/
 │   ├── lib.rs              # Plugin registration and main entry point
 │   ├── commands/           # Command implementations
@@ -143,8 +143,8 @@ impl UlidError {
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/nushell-works/nu_plugin_ulid.git
-   cd nu_plugin_ulid
+   git clone https://github.com/nushell-works/nu_plugin_nw_ulid.git
+   cd nu_plugin_nw_ulid
    ```
 
 2. **Install development dependencies:**
@@ -579,10 +579,10 @@ fn process_sequential_batches(
 ```bash
 # CPU profiling
 cargo install flamegraph
-cargo flamegraph --bin nu_plugin_ulid
+cargo flamegraph --bin nu_plugin_nw_ulid
 
 # Memory profiling
-valgrind --tool=massif target/release/nu_plugin_ulid
+valgrind --tool=massif target/release/nu_plugin_nw_ulid
 
 # Benchmark profiling
 cargo bench -- --profile-time=10
@@ -670,4 +670,4 @@ cargo bench -- --profile-time=10
    - Escape special characters in error messages
    - Implement length limits for input data
 
-This developer guide provides comprehensive information for contributing to nu_plugin_ulid while maintaining enterprise-grade quality standards.
+This developer guide provides comprehensive information for contributing to nu_plugin_nw_ulid while maintaining enterprise-grade quality standards.

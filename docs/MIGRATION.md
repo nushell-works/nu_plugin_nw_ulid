@@ -1,6 +1,6 @@
 # Migration Guide and Compatibility Information
 
-This document provides comprehensive guidance for migrating to nw-nu_plugin_ulid from other ULID implementations, upgrading between versions, and ensuring compatibility across different environments.
+This document provides comprehensive guidance for migrating to nu_plugin_nw_ulid from other ULID implementations, upgrading between versions, and ensuring compatibility across different environments.
 
 ## Table of Contents
 
@@ -18,27 +18,27 @@ This document provides comprehensive guidance for migrating to nw-nu_plugin_ulid
 
 ### Official Package Details
 
-- **Crates.io Package**: `nw-nu_plugin_ulid`
-- **Binary Name**: `nu_plugin_ulid` (required by Nushell)
+- **Crates.io Package**: `nu_plugin_nw_ulid`
+- **Binary Name**: `nu_plugin_nw_ulid` (required by Nushell)
 - **Organization**: nushell-works
-- **Repository**: https://github.com/nushell-works/nu_plugin_ulid
+- **Repository**: https://github.com/nushell-works/nu_plugin_nw_ulid
 
 ### Installation
 
 ```bash
 # Install from crates.io
-cargo install nw-nu_plugin_ulid
+cargo install nu_plugin_nw_ulid
 
-# Register with Nushell (binary name must be nu_plugin_ulid)
-plugin add ~/.cargo/bin/nu_plugin_ulid
-plugin use ulid
+# Register with Nushell (binary name must be nu_plugin_nw_ulid)
+plugin add ~/.cargo/bin/nu_plugin_nw_ulid
+plugin use nw_ulid
 ```
 
 ### Why "nw-" Prefix?
 
 The `nw-` prefix stands for "nushell-works" (the GitHub organization) and was chosen because:
-- The original `nu_plugin_ulid` package name was already taken on crates.io
-- Nushell requires the binary to be named `nu_plugin_ulid`
+- The original `nu_plugin_nw_ulid` package name was already taken on crates.io
+- Nushell requires the binary to be named `nu_plugin_nw_ulid`
 - This naming convention allows clear identification of official nushell-works packages
 
 ## Version Migration
@@ -68,9 +68,9 @@ GPU Acceleration         | No                  | Yes (bulk ops)
 
 ## From Other ULID Libraries
 
-### Migrating from `nu_plugin_ulid` (Original Package)
+### Migrating from `nu_plugin_nw_ulid` (Original Package)
 
-If you were using the original `nu_plugin_ulid` package (v0.15.0), here's how to migrate:
+If you were using the original `nu_plugin_nw_ulid` package (v0.15.0), here's how to migrate:
 
 #### 1. Uninstall Old Package
 ```bash
@@ -78,17 +78,17 @@ If you were using the original `nu_plugin_ulid` package (v0.15.0), here's how to
 plugin remove ulid
 
 # Uninstall old package
-cargo uninstall nu_plugin_ulid
+cargo uninstall nu_plugin_nw_ulid
 ```
 
 #### 2. Install New Package
 ```bash
 # Install nushell-works version
-cargo install nw-nu_plugin_ulid
+cargo install nu_plugin_nw_ulid
 
 # Register new plugin (same binary name)
-plugin add ~/.cargo/bin/nu_plugin_ulid
-plugin use ulid
+plugin add ~/.cargo/bin/nu_plugin_nw_ulid
+plugin use nw_ulid
 ```
 
 #### 3. Verify Migration
@@ -111,7 +111,7 @@ let ulid = Ulid::new();
 let string = ulid.to_string();
 let timestamp = ulid.datetime();
 
-// nw-nu_plugin_ulid (Nushell)
+// nu_plugin_nw_ulid (Nushell)
 let ulid = (ulid generate)
 let parsed = (ulid parse $ulid)
 let timestamp = $parsed.formatted_time
@@ -119,7 +119,7 @@ let timestamp = $parsed.formatted_time
 
 #### Feature Comparison
 ```
-Feature              | ulid-rs        | nw-nu_plugin_ulid
+Feature              | ulid-rs        | nu_plugin_nw_ulid
 ---------------------|----------------|------------------
 ULID Generation      | ✅             | ✅
 ULID Validation      | ✅             | ✅
@@ -133,12 +133,12 @@ Performance Metrics  | ❌             | ✅
 
 #### Migration Script
 ```nu
-# Convert from ulid-rs format to nw-nu_plugin_ulid
+# Convert from ulid-rs format to nu_plugin_nw_ulid
 def migrate_from_ulid_rs [input_file: path, output_file: path] {
-    print $"🔄 Converting ULIDs from ($input_file) to nw-nu_plugin_ulid format"
-    
+    print $"🔄 Converting ULIDs from ($input_file) to nu_plugin_nw_ulid format"
+
     let data = (open $input_file)
-    
+
     let converted = ($data | each { |record|
         # Validate existing ULIDs
         if (ulid validate $record.id) {
@@ -147,12 +147,12 @@ def migrate_from_ulid_rs [input_file: path, output_file: path] {
         } else {
             # Generate new ULID if invalid
             let new_ulid = (ulid generate)
-            $record 
+            $record
             | upsert id $new_ulid
             | insert migration_note "Generated new ULID - original was invalid"
         }
     })
-    
+
     $converted | save $output_file
     print $"✅ Converted ($data | length) records to ($output_file)"
 }
@@ -215,7 +215,7 @@ def transition_to_ulid_primary [records: list] {
 # Remove UUID fields after transition period
 def remove_legacy_uuids [records: list, retention_days: int = 90] {
     let cutoff_date = ((date now) - ($retention_days * 24 * 60 * 60 * 1000))
-    
+
     $records | each { |record|
         if ($record.migrated_at | into int) < ($cutoff_date | into int) {
             $record | reject legacy_uuid
@@ -249,13 +249,13 @@ ALTER TABLE users ADD PRIMARY KEY (ulid);
 # MongoDB collection migration example
 def migrate_mongodb_collection [collection: string] {
     print $"🔄 Migrating MongoDB collection: ($collection)"
-    
+
     # This is conceptual - adapt to your MongoDB driver
     let documents = (mongo_find $collection {})
-    
+
     let migrated = ($documents | each { |doc|
         let ulid_id = (ulid generate)
-        
+
         {
             _id: $ulid_id,
             legacy_id: $doc._id,
@@ -263,7 +263,7 @@ def migrate_mongodb_collection [collection: string] {
             migration_timestamp: (date now)
         }
     })
-    
+
     print $"✅ Prepared ($migrated | length) documents for migration"
     $migrated
 }
@@ -274,7 +274,7 @@ def migrate_mongodb_collection [collection: string] {
 ### Supported Versions
 
 ```
-nw-nu_plugin_ulid | Nushell Version | Rust Requirement | Status
+nu_plugin_nw_ulid | Nushell Version | Rust Requirement | Status
 ------------------|-----------------|-------------------|--------
 0.1.0             | 0.106.1+        | 1.85.0+          | ✅ Current
 Future 0.2.x      | 0.110.0+        | 1.90.0+          | 🔄 Planned
@@ -298,11 +298,11 @@ Async Support          | No        | No         | Yes
 def test_nushell_compatibility [] {
     let nu_version = (version | get version)
     let plugin_info = (ulid info)
-    
+
     print $"Nushell version: ($nu_version)"
     print $"Plugin version: ($plugin_info.version)"
-    print $"Plugin package: nw-nu_plugin_ulid"
-    
+    print $"Plugin package: nu_plugin_nw_ulid"
+
     # Test core functionality
     let test_cases = [
         { test: "generation", command: { ulid generate } },
@@ -310,7 +310,7 @@ def test_nushell_compatibility [] {
         { test: "parsing", command: { ulid parse "01ARZ3NDEKTSV4RRFFQ69G5FAV" } },
         { test: "stream", command: { ["01ARZ3NDEKTSV4RRFFQ69G5FAV"] | ulid stream validate } }
     ]
-    
+
     let results = ($test_cases | each { |case|
         try {
             let result = (do $case.command)
@@ -319,7 +319,7 @@ def test_nushell_compatibility [] {
             { test: $case.test, status: "❌ FAILED", error: $error.msg }
         }
     })
-    
+
     $results
 }
 ```
@@ -331,7 +331,7 @@ def test_nushell_compatibility [] {
 ```
 Aspect               | Demo Version  | v0.1.0 Production
 ---------------------|---------------|-------------------
-Package Name         | nu_plugin_ulid| nw-nu_plugin_ulid
+Package Name         | nu_plugin_nw_ulid| nu_plugin_nw_ulid
 API Stability        | Experimental  | Stable
 Error Handling       | Basic         | Comprehensive
 Security Features    | None          | Full security analysis
@@ -348,7 +348,7 @@ Planned but not yet implemented:
 # Current (v0.1.x): Basic bulk operations
 ulid generate --count 10
 
-# Future (v0.2.x): Enhanced batch operations  
+# Future (v0.2.x): Enhanced batch operations
 ulid batch generate --size 10 --async
 
 # Current: String errors
@@ -367,8 +367,8 @@ match (ulid validate "invalid") {
 
 ```nu
 def check_migration_readiness [] {
-    print "🔍 Checking migration readiness for nw-nu_plugin_ulid..."
-    
+    print "🔍 Checking migration readiness for nu_plugin_nw_ulid..."
+
     let checks = [
         {
             name: "Nushell Version",
@@ -376,7 +376,7 @@ def check_migration_readiness [] {
             fix: "Update Nushell: cargo install nu --version 0.106.1"
         },
         {
-            name: "Rust Version", 
+            name: "Rust Version",
             check: { (rustc --version | parse "rustc {version}" | get version.0) >= "1.85.0" },
             fix: "Update Rust: rustup update"
         },
@@ -387,11 +387,11 @@ def check_migration_readiness [] {
         },
         {
             name: "New Plugin Installed",
-            check: { try { ulid info | get package } == "nw-nu_plugin_ulid" catch { false } },
-            fix: "Install: cargo install nw-nu_plugin_ulid && plugin add ~/.cargo/bin/nu_plugin_ulid"
+            check: { try { ulid info | get package } == "nu_plugin_nw_ulid" catch { false } },
+            fix: "Install: cargo install nu_plugin_nw_ulid && plugin add ~/.cargo/bin/nu_plugin_nw_ulid"
         }
     ]
-    
+
     $checks | each { |check|
         let result = (do $check.check)
         if $result {
@@ -410,17 +410,17 @@ def check_migration_readiness [] {
 ```nu
 def validate_data_migration [original: list, migrated: list] {
     print "🔍 Validating data migration..."
-    
+
     let validation = {
         record_count_match: (($original | length) == ($migrated | length)),
         all_ulids_valid: ($migrated | all { |record| ulid validate $record.id }),
         no_duplicate_ulids: (($migrated | get id | uniq | length) == ($migrated | length)),
         timestamp_ordering: ($migrated | get id | ulid sort | length) == ($migrated | length),
-        package_info: (ulid info | get package) == "nw-nu_plugin_ulid"
+        package_info: (ulid info | get package) == "nu_plugin_nw_ulid"
     }
-    
+
     let all_passed = ($validation | values | all { |v| $v })
-    
+
     if $all_passed {
         print "✅ Migration validation passed"
     } else {
@@ -431,7 +431,7 @@ def validate_data_migration [original: list, migrated: list] {
             }
         }
     }
-    
+
     $validation
 }
 ```
@@ -440,8 +440,8 @@ def validate_data_migration [original: list, migrated: list] {
 
 ```nu
 def compare_migration_performance [old_impl: string, iterations: int = 1000] {
-    print $"🔄 Comparing performance: ($old_impl) vs nw-nu_plugin_ulid"
-    
+    print $"🔄 Comparing performance: ($old_impl) vs nu_plugin_nw_ulid"
+
     # Test new implementation
     let start_new = (date now | into int)
     for $i in 1..$iterations {
@@ -450,10 +450,10 @@ def compare_migration_performance [old_impl: string, iterations: int = 1000] {
     }
     let end_new = (date now | into int)
     let new_duration = ($end_new - $start_new)
-    
+
     {
         old_implementation: $old_impl,
-        new_implementation: "nw-nu_plugin_ulid",
+        new_implementation: "nu_plugin_nw_ulid",
         iterations: $iterations,
         new_duration_ms: $new_duration,
         new_ops_per_sec: ($iterations * 1000 / $new_duration),
@@ -469,11 +469,11 @@ def compare_migration_performance [old_impl: string, iterations: int = 1000] {
 ```
 OS                   | Architecture | Status | Binary Location
 ---------------------|-------------|--------|---------------------------
-Linux (Ubuntu 20.04+)| x86_64      | ✅     | ~/.cargo/bin/nu_plugin_ulid
-Linux (Ubuntu 20.04+)| aarch64     | ✅     | ~/.cargo/bin/nu_plugin_ulid
-macOS 11+            | x86_64      | ✅     | ~/.cargo/bin/nu_plugin_ulid
-macOS 11+            | aarch64     | ✅     | ~/.cargo/bin/nu_plugin_ulid
-Windows 10+          | x86_64      | ✅     | %USERPROFILE%\.cargo\bin\nu_plugin_ulid.exe
+Linux (Ubuntu 20.04+)| x86_64      | ✅     | ~/.cargo/bin/nu_plugin_nw_ulid
+Linux (Ubuntu 20.04+)| aarch64     | ✅     | ~/.cargo/bin/nu_plugin_nw_ulid
+macOS 11+            | x86_64      | ✅     | ~/.cargo/bin/nu_plugin_nw_ulid
+macOS 11+            | aarch64     | ✅     | ~/.cargo/bin/nu_plugin_nw_ulid
+Windows 10+          | x86_64      | ✅     | %USERPROFILE%\.cargo\bin\nu_plugin_nw_ulid.exe
 FreeBSD              | x86_64      | ⚠️     | Community supported
 ```
 
@@ -482,9 +482,9 @@ FreeBSD              | x86_64      | ⚠️     | Community supported
 ```
 Package Manager | Installation Command | Status
 ----------------|---------------------|--------
-Cargo           | cargo install nw-nu_plugin_ulid | ✅ Primary
+Cargo           | cargo install nu_plugin_nw_ulid | ✅ Primary
 Homebrew        | Not available | ❌ Future
-APT             | Not available | ❌ Future  
+APT             | Not available | ❌ Future
 Chocolatey      | Not available | ❌ Future
 Nixpkgs         | Not available | ❌ Future
 ```
@@ -495,19 +495,19 @@ Nixpkgs         | Not available | ❌ Future
 
 #### Package Not Found
 ```bash
-# Symptom: "package `nw-nu_plugin_ulid` not found"
+# Symptom: "package `nu_plugin_nw_ulid` not found"
 # Solution: Verify package name spelling
-cargo search nw-nu_plugin_ulid
-cargo install nw-nu_plugin_ulid
+cargo search nu_plugin_nw_ulid
+cargo install nu_plugin_nw_ulid
 ```
 
 #### Plugin Not Loading
 ```nu
 # Symptom: "Plugin not found" error after installation
 # Solution: Check binary installation and registration
-ls ~/.cargo/bin/nu_plugin_ulid  # Should exist
-plugin add ~/.cargo/bin/nu_plugin_ulid
-plugin use ulid
+ls ~/.cargo/bin/nu_plugin_nw_ulid  # Should exist
+plugin add ~/.cargo/bin/nu_plugin_nw_ulid
+plugin use nw_ulid
 ```
 
 #### Version Conflicts
@@ -515,33 +515,33 @@ plugin use ulid
 # Symptom: Multiple plugin versions or conflicts
 # Solution: Clean installation
 plugin remove ulid
-cargo uninstall nu_plugin_ulid nw-nu_plugin_ulid  # Remove any old versions
-cargo install nw-nu_plugin_ulid
-plugin add ~/.cargo/bin/nu_plugin_ulid
-plugin use ulid
+cargo uninstall nu_plugin_nw_ulid nu_plugin_nw_ulid  # Remove any old versions
+cargo install nu_plugin_nw_ulid
+plugin add ~/.cargo/bin/nu_plugin_nw_ulid
+plugin use nw_ulid
 ```
 
 #### Performance Issues After Migration
 ```nu
 def diagnose_performance_issues [] {
     print "🔍 Diagnosing performance issues..."
-    
+
     let baseline = {
         generation: 600000,  # ops/sec expected
         validation: 7000000, # ops/sec expected
     }
-    
+
     # Test current performance
     let start = (date now | into int)
     let test_ulids = (1..1000 | each { ulid generate })
     let gen_end = (date now | into int)
     let gen_rate = (1000 * 1000 / ($gen_end - $start))
-    
+
     let val_start = (date now | into int)
     $test_ulids | each { |ulid| ulid validate $ulid } | ignore
     let val_end = (date now | into int)
     let val_rate = (1000 * 1000 / ($val_end - $val_start))
-    
+
     {
         plugin_package: (ulid info | get package),
         generation_rate: $gen_rate,
@@ -558,15 +558,15 @@ def diagnose_performance_issues [] {
 
 ```nu
 def migration_checklist [] {
-    print "📋 nw-nu_plugin_ulid Migration Checklist"
+    print "📋 nu_plugin_nw_ulid Migration Checklist"
     print "========================================"
-    
+
     let items = [
         "✅ Backup of original data created",
         "✅ Old plugin uninstalled (if applicable)",
         "✅ Nushell version 0.106.1+ verified",
         "✅ Rust version 1.85.0+ verified",
-        "✅ nw-nu_plugin_ulid installed from crates.io",
+        "✅ nu_plugin_nw_ulid installed from crates.io",
         "✅ Plugin registered with correct binary name",
         "✅ Basic functionality verified",
         "✅ Performance benchmarks acceptable",
@@ -575,12 +575,12 @@ def migration_checklist [] {
         "✅ Documentation updated",
         "✅ CI/CD updated with new package name"
     ]
-    
+
     $items | each { |item| print $item }
-    
+
     print ""
-    print "🎯 Package: nw-nu_plugin_ulid"
-    print "🎯 Binary: nu_plugin_ulid"
+    print "🎯 Package: nu_plugin_nw_ulid"
+    print "🎯 Binary: nu_plugin_nw_ulid"
     print "🎯 Organization: nushell-works"
 }
 ```
@@ -588,9 +588,9 @@ def migration_checklist [] {
 ### Getting Help
 
 #### Support Channels
-- **GitHub Issues**: https://github.com/nushell-works/nu_plugin_ulid/issues
-- **GitHub Discussions**: https://github.com/nushell-works/nu_plugin_ulid/discussions
-- **Documentation**: https://docs.rs/nw-nu_plugin_ulid
+- **GitHub Issues**: https://github.com/nushell-works/nu_plugin_nw_ulid/issues
+- **GitHub Discussions**: https://github.com/nushell-works/nu_plugin_nw_ulid/discussions
+- **Documentation**: https://docs.rs/nu_plugin_nw_ulid
 - **Nushell Community**: Discord/Matrix channels
 
 #### Reporting Issues
@@ -606,8 +606,8 @@ def generate_issue_report [] {
         plugin_info: (try { ulid info } catch { "Plugin not available" }),
         cargo_version: (cargo --version)
     }
-    
-    print "🐛 Migration Issue Report for nw-nu_plugin_ulid"
+
+    print "🐛 Migration Issue Report for nu_plugin_nw_ulid"
     print "=============================================="
     print ""
     print "**System Information:**"
@@ -616,7 +616,7 @@ def generate_issue_report [] {
     print "**Migration Context:**"
     print "- Migrating from: [Previous ULID implementation]"
     print "- Migration step: [Which step failed]"
-    print "- Package installed: nw-nu_plugin_ulid"
+    print "- Package installed: nu_plugin_nw_ulid"
     print ""
     print "**Issue Description:**"
     print "[Describe the migration issue]"
@@ -625,6 +625,6 @@ def generate_issue_report [] {
 
 ---
 
-*Migration guide for nw-nu_plugin_ulid*  
-*Last updated: December 2024*  
-*Package: nw-nu_plugin_ulid | Binary: nu_plugin_ulid | Org: nushell-works*
+*Migration guide for nu_plugin_nw_ulid*
+*Last updated: December 2024*
+*Package: nu_plugin_nw_ulid | Binary: nu_plugin_nw_ulid | Org: nushell-works*

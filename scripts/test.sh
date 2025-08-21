@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🧪 Running nu_plugin_ulid test suite..."
+echo "🧪 Running nu_plugin_nw_ulid test suite..."
 
 # Source cargo environment if it exists
 if [[ -f "$HOME/.cargo/env" ]]; then
@@ -91,7 +91,7 @@ if [[ "$COVERAGE" == "true" ]]; then
         # Generate HTML report if possible
         if command -v genhtml &> /dev/null; then
             echo "📊 Generating HTML coverage report..."
-            genhtml lcov.info --output-directory coverage --title "nu_plugin_ulid Coverage Report"
+            genhtml lcov.info --output-directory coverage --title "nu_plugin_nw_ulid Coverage Report"
             echo "✅ HTML coverage report generated at: coverage/index.html"
         fi
         

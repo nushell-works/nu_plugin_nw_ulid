@@ -1,6 +1,6 @@
 # Development Environment
 
-This document describes the development environment setup and requirements for the `nu_plugin_ulid` project.
+This document describes the development environment setup and requirements for the `nu_plugin_nw_ulid` project.
 
 ## Verified Environment
 

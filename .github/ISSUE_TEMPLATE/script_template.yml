@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for suggesting a new script template! Script templates help users get started quickly with common ULID use cases. Your suggestion helps make nu_plugin_ulid more practical for real-world scenarios.
+        Thank you for suggesting a new script template! Script templates help users get started quickly with common ULID use cases. Your suggestion helps make nu_plugin_nw_ulid more practical for real-world scenarios.
 
   - type: textarea
     id: use_case

@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-# Demo script to test all nu_plugin_ulid capabilities
+# Demo script to test all nu_plugin_nw_ulid capabilities
 # Run this with: nu test_demo.nu
 
 print "🧪 ULID Plugin Demo - Testing All Capabilities"
@@ -8,14 +8,14 @@ print "==============================================="
 print ""
 
 # Register the plugin (user would need to do this once)
-print "📦 Using plugin from: ./target/release/nu_plugin_ulid"
+print "📦 Using plugin from: ./target/release/nu_plugin_nw_ulid"
 print ""
 
 # Test 1: Plugin Information
 print "1️⃣  PLUGIN INFORMATION"
 print "---------------------"
 try {
-    let info = (^./target/release/nu_plugin_ulid | from msgpack | get "Call" | get "input" | get "Value" | get "Record" | get "val")
+    let info = (^./target/release/nu_plugin_nw_ulid | from msgpack | get "Call" | get "input" | get "Value" | get "Record" | get "val")
     $info | from msgpack
 } catch {
     print "❌ Plugin info test failed"

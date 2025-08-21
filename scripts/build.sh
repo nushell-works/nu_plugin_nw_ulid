@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Build script for nu_plugin_ulid
+# Build script for nu_plugin_nw_ulid
 # Builds optimized release version with comprehensive checks
 
 set -e
 
-echo "🔨 Building nu_plugin_ulid..."
+echo "🔨 Building nu_plugin_nw_ulid..."
 
 # Source cargo environment if it exists
 if [[ -f "$HOME/.cargo/env" ]]; then
@@ -125,7 +125,7 @@ if [[ "$CHECK_ONLY" == "false" ]]; then
     echo "📦 Build Information:"
     
     if [[ "$MODE" == "release" ]]; then
-        BINARY_PATH="target/release/nu_plugin_ulid"
+        BINARY_PATH="target/release/nu_plugin_nw_ulid"
         if [[ -f "$BINARY_PATH" ]]; then
             SIZE=$(ls -lh "$BINARY_PATH" | awk '{print $5}')
             echo "   Binary: $BINARY_PATH"
@@ -145,7 +145,7 @@ if [[ "$CHECK_ONLY" == "false" ]]; then
             fi
         fi
     else
-        BINARY_PATH="target/debug/nu_plugin_ulid"
+        BINARY_PATH="target/debug/nu_plugin_nw_ulid"
         if [[ -f "$BINARY_PATH" ]]; then
             SIZE=$(ls -lh "$BINARY_PATH" | awk '{print $5}')
             echo "   Binary: $BINARY_PATH"

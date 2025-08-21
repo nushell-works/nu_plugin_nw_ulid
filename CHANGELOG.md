@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to nu_plugin_ulid will be documented in this file.
+All notable changes to nu_plugin_nw_ulid will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -54,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-08-18
 
 ### Added
-- Initial release of nu_plugin_ulid with production-grade functionality
+- Initial release of nu_plugin_nw_ulid with production-grade functionality
 - 23 comprehensive ULID commands covering all aspects of ULID operations
 - Professional plugin architecture with modular command structure
 - Enterprise-grade security implementation with cryptographic validation
@@ -143,14 +143,14 @@ Pre-release versions use suffixes:
 ## Support
 
 For questions about this changelog or specific versions:
-- [GitHub Issues](https://github.com/nushell-works/nu_plugin_ulid/issues)
-- [GitHub Discussions](https://github.com/nushell-works/nu_plugin_ulid/discussions)
-- [Documentation](https://docs.rs/nw-nu_plugin_ulid)
+- [GitHub Issues](https://github.com/nushell-works/nu_plugin_nw_ulid/issues)
+- [GitHub Discussions](https://github.com/nushell-works/nu_plugin_nw_ulid/discussions)
+- [Documentation](https://docs.rs/nu_plugin_nw_ulid)
 
 ## Links
 
-- [Repository](https://github.com/nushell-works/nu_plugin_ulid)
-- [Crates.io](https://crates.io/crates/nw-nu_plugin_ulid)
-- [Documentation](https://docs.rs/nw-nu_plugin_ulid)
+- [Repository](https://github.com/nushell-works/nu_plugin_nw_ulid)
+- [Crates.io](https://crates.io/crates/nu_plugin_nw_ulid)
+- [Documentation](https://docs.rs/nu_plugin_nw_ulid)
 - [User Guide](docs/USER_GUIDE.md)
 - [Contributing](CONTRIBUTING.md)

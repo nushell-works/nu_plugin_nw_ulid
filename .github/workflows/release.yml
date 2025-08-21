@@ -72,25 +72,25 @@ jobs:
         fail_on_unmatched_files: false
         body: |
           ## What's Changed
-          
+
           See [CHANGELOG.md](CHANGELOG.md) for detailed changes.
-          
+
           ## Installation
-          
+
           ### Via Cargo
           ```bash
-          cargo install nw-nu_plugin_ulid
+          cargo install nu_plugin_nw_ulid
           ```
-          
+
           ### Via Binary
           Download the appropriate binary for your platform from the assets below.
-          
+
           ## Usage
-          
+
           After installation, register the plugin with Nushell:
           ```bash
-          plugin add ./nu_plugin_ulid
-          plugin use ulid
+          plugin add ./nu_plugin_nw_ulid
+          plugin use nw_ulid
           ```
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -104,24 +104,24 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            artifact_name: nu_plugin_ulid
-            asset_name: nu_plugin_ulid-v${{ needs.create-release.outputs.version }}-linux-x86_64.tar.gz
+            artifact_name: nu_plugin_nw_ulid
+            asset_name: nu_plugin_nw_ulid-v${{ needs.create-release.outputs.version }}-linux-x86_64.tar.gz
           - os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
-            artifact_name: nu_plugin_ulid
-            asset_name: nu_plugin_ulid-v${{ needs.create-release.outputs.version }}-linux-aarch64.tar.gz
+            artifact_name: nu_plugin_nw_ulid
+            asset_name: nu_plugin_nw_ulid-v${{ needs.create-release.outputs.version }}-linux-aarch64.tar.gz
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact_name: nu_plugin_ulid.exe
-            asset_name: nu_plugin_ulid-v${{ needs.create-release.outputs.version }}-windows-x86_64.zip
+            artifact_name: nu_plugin_nw_ulid.exe
+            asset_name: nu_plugin_nw_ulid-v${{ needs.create-release.outputs.version }}-windows-x86_64.zip
           - os: macos-latest
             target: x86_64-apple-darwin
-            artifact_name: nu_plugin_ulid
-            asset_name: nu_plugin_ulid-v${{ needs.create-release.outputs.version }}-macos-x86_64.tar.gz
+            artifact_name: nu_plugin_nw_ulid
+            asset_name: nu_plugin_nw_ulid-v${{ needs.create-release.outputs.version }}-macos-x86_64.tar.gz
           - os: macos-latest
             target: aarch64-apple-darwin
-            artifact_name: nu_plugin_ulid
-            asset_name: nu_plugin_ulid-v${{ needs.create-release.outputs.version }}-macos-aarch64.tar.gz
+            artifact_name: nu_plugin_nw_ulid
+            asset_name: nu_plugin_nw_ulid-v${{ needs.create-release.outputs.version }}-macos-aarch64.tar.gz
 
     steps:
     - name: Checkout code
@@ -177,7 +177,7 @@ jobs:
     steps:
     - name: Download all artifacts
       uses: actions/download-artifact@v4
-      
+
     - name: Upload assets to release
       uses: softprops/action-gh-release@v2
       with:
@@ -210,21 +210,21 @@ jobs:
     - name: Run quality gates before publishing
       run: |
         echo "🔍 Running Quality Gates..."
-        
+
         # Code quality
         echo "📋 Checking code quality..."
         cargo clippy --all-targets --all-features -- -D warnings
         cargo fmt --all --check
-        
+
         # Testing
         echo "🧪 Running tests..."
         cargo test --all-features --release
-        
+
         # Security
         echo "🔒 Security audit..."
         cargo install cargo-audit --locked
         cargo audit
-        
+
         echo "✅ All quality gates passed!"
 
     - name: Publish to crates.io

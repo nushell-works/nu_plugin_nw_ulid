@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Development environment setup script
-# Sets up the development environment for nu_plugin_ulid
+# Sets up the development environment for nu_plugin_nw_ulid
 
 set -e
 
-echo "🚀 Setting up nu_plugin_ulid development environment..."
+echo "🚀 Setting up nu_plugin_nw_ulid development environment..."
 
 # Check if we're in the right directory
 if [[ ! -f "Cargo.toml" ]] || [[ ! -f "src/lib.rs" ]]; then
@@ -151,7 +151,7 @@ if [[ ! -f ".vscode/launch.json" ]]; then
             "cargo": {
                 "args": ["test", "--no-run", "--lib"],
                 "filter": {
-                    "name": "nu_plugin_ulid",
+                    "name": "nu_plugin_nw_ulid",
                     "kind": "lib"
                 }
             },
@@ -163,9 +163,9 @@ if [[ ! -f ".vscode/launch.json" ]]; then
             "request": "launch",
             "name": "Debug plugin binary",
             "cargo": {
-                "args": ["build", "--bin=nu_plugin_ulid"],
+                "args": ["build", "--bin=nu_plugin_nw_ulid"],
                 "filter": {
-                    "name": "nu_plugin_ulid",
+                    "name": "nu_plugin_nw_ulid",
                     "kind": "bin"
                 }
             },

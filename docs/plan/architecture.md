@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-This document defines the production architecture for nu_plugin_ulid, transitioning from Phase 1.2 demo commands to a complete ULID implementation. The design prioritizes security-first principles, performance optimization, and seamless Nushell integration based on Phase 2.1 research findings.
+This document defines the production architecture for nu_plugin_nw_ulid, transitioning from Phase 1.2 demo commands to a complete ULID implementation. The design prioritizes security-first principles, performance optimization, and seamless Nushell integration based on Phase 2.1 research findings.
 
 ## Core Architecture Principles
 

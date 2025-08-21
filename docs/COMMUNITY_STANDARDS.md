@@ -1,10 +1,10 @@
-# nu_plugin_ulid Community Standards
+# nu_plugin_nw_ulid Community Standards
 
 **Version**: 1.0  
 **Last Updated**: August 18, 2025  
 **Applies to**: All community members, contributors, and maintainers
 
-This document outlines the community standards for nu_plugin_ulid, establishing expectations for participation and contribution to create a welcoming, productive, and sustainable open-source community.
+This document outlines the community standards for nu_plugin_nw_ulid, establishing expectations for participation and contribution to create a welcoming, productive, and sustainable open-source community.
 
 ## Table of Contents
 
@@ -21,7 +21,7 @@ This document outlines the community standards for nu_plugin_ulid, establishing 
 
 ### Mission Statement
 
-The nu_plugin_ulid community aims to:
+The nu_plugin_nw_ulid community aims to:
 
 - **Deliver Excellence**: Create a production-grade ULID plugin that sets the standard for Nushell plugin development
 - **Foster Learning**: Provide a welcoming environment where developers can learn Rust, Nushell, and ULID concepts
@@ -376,6 +376,6 @@ We encourage feedback on these standards:
 
 ---
 
-These community standards help ensure nu_plugin_ulid remains a welcoming, productive, and high-quality open-source project. By following these guidelines, we can build a strong community that delivers excellent software while supporting each other's growth and success.
+These community standards help ensure nu_plugin_nw_ulid remains a welcoming, productive, and high-quality open-source project. By following these guidelines, we can build a strong community that delivers excellent software while supporting each other's growth and success.
 
-For questions about these standards or suggestions for improvement, please use our [community discussions](https://github.com/nushell-works/nu_plugin_ulid/discussions).
+For questions about these standards or suggestions for improvement, please use our [community discussions](https://github.com/nushell-works/nu_plugin_nw_ulid/discussions).

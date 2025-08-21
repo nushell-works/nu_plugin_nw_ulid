@@ -1,8 +1,8 @@
-# Contributing to nw-nu_plugin_ulid
+# Contributing to nu_plugin_nw_ulid
 
-We welcome contributions to nw-nu_plugin_ulid! This document provides guidelines and information for contributors.
+We welcome contributions to nu_plugin_nw_ulid! This document provides guidelines and information for contributors.
 
-**Package**: `nw-nu_plugin_ulid` | **Binary**: `nu_plugin_ulid` | **Organization**: nushell-works
+**Package**: `nu_plugin_nw_ulid` | **Binary**: `nu_plugin_nw_ulid` | **Organization**: nushell-works
 
 ## Table of Contents
 
@@ -47,8 +47,8 @@ Ensure you have the required tools installed:
 1. Fork the repository on GitHub
 2. Clone your fork:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/nu_plugin_ulid.git
-   cd nu_plugin_ulid
+   git clone https://github.com/YOUR_USERNAME/nu_plugin_nw_ulid.git
+   cd nu_plugin_nw_ulid
    ```
 
 ## Development Setup
@@ -82,8 +82,8 @@ To test your changes:
 cargo build --release
 
 # Register with Nushell
-plugin add ./target/release/nu_plugin_ulid
-plugin use ulid
+plugin add ./target/release/nu_plugin_nw_ulid
+plugin use nw_ulid
 
 # Test the plugin
 ulid info
@@ -169,10 +169,10 @@ mod tests {
     fn test_feature_name() {
         // Arrange
         let input = setup_test_data();
-        
+
         // Act
         let result = function_under_test(input);
-        
+
         // Assert
         assert_eq!(result, expected_output);
     }
@@ -199,16 +199,16 @@ mod tests {
 Example:
 ```rust
 /// Generates a new ULID with the current timestamp.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// let ulid = generate_ulid();
 /// assert_eq!(ulid.len(), 26);
 /// ```
-/// 
+///
 /// # Errors
-/// 
+///
 /// Returns an error if the system clock is unavailable.
 pub fn generate_ulid() -> Result<String, UlidError> {
     // Implementation
@@ -258,18 +258,18 @@ cargo build --release
    ```markdown
    ## Description
    Brief description of changes
-   
+
    ## Type of Change
    - [ ] Bug fix
    - [ ] New feature
    - [ ] Breaking change
    - [ ] Documentation update
-   
+
    ## Testing
    - [ ] Tests added/updated
    - [ ] All tests passing
    - [ ] Manual testing completed
-   
+
    ## Checklist
    - [ ] Code follows style guidelines
    - [ ] Self-review completed
@@ -298,7 +298,7 @@ All PRs must pass:
 
 We follow [Semantic Versioning](https://semver.org/):
 - **MAJOR**: Incompatible API changes
-- **MINOR**: Backwards-compatible new features  
+- **MINOR**: Backwards-compatible new features
 - **PATCH**: Backwards-compatible bug fixes
 
 ### Release Workflow
@@ -380,8 +380,8 @@ Contributors helping with Phase 5 completion will receive special recognition in
 
 ### Communication Channels
 
-- **Issues**: Bug reports and feature requests - [Create Issue](https://github.com/nushell-works/nu_plugin_ulid/issues/new/choose)
-- **Discussions**: General questions and ideas - [Join Discussion](https://github.com/nushell-works/nu_plugin_ulid/discussions)
+- **Issues**: Bug reports and feature requests - [Create Issue](https://github.com/nushell-works/nu_plugin_nw_ulid/issues/new/choose)
+- **Discussions**: General questions and ideas - [Join Discussion](https://github.com/nushell-works/nu_plugin_nw_ulid/discussions)
 - **Email**: Maintainer contact for sensitive issues
 
 ### Resources
@@ -389,7 +389,7 @@ Contributors helping with Phase 5 completion will receive special recognition in
 - [Nushell Plugin Development](https://nushell.sh/book/plugins.html)
 - [ULID Specification](https://github.com/ulid/spec)
 - [Rust Documentation](https://doc.rust-lang.org/)
-- [nu_plugin_ulid User Guide](docs/USER_GUIDE.md)
+- [nu_plugin_nw_ulid User Guide](docs/USER_GUIDE.md)
 - [Developer Guide](docs/DEVELOPER_GUIDE.md)
 - [Performance Guide](docs/PERFORMANCE_GUIDE.md)
 
@@ -400,4 +400,4 @@ Contributors will be recognized in:
 - Release notes for significant contributions
 - Special acknowledgments for major features
 
-Thank you for contributing to nw-nu_plugin_ulid! 🎉
+Thank you for contributing to nu_plugin_nw_ulid! 🎉

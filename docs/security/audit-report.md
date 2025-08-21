@@ -1,4 +1,4 @@
-# Security Audit Report - nu_plugin_ulid
+# Security Audit Report - nu_plugin_nw_ulid
 
 **Date**: August 17, 2025  
 **Version**: v0.1.0  
@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-This security audit evaluates the nu_plugin_ulid codebase for potential vulnerabilities, cryptographic security, input validation, and defensive programming practices. The plugin implements ULID generation and manipulation functionality with security-first design principles.
+This security audit evaluates the nu_plugin_nw_ulid codebase for potential vulnerabilities, cryptographic security, input validation, and defensive programming practices. The plugin implements ULID generation and manipulation functionality with security-first design principles.
 
 ## Security Assessment
 
@@ -170,7 +170,7 @@ This security audit evaluates the nu_plugin_ulid codebase for potential vulnerab
 
 ## Conclusion
 
-The nu_plugin_ulid codebase demonstrates strong security fundamentals with Rust's memory safety, proper input validation, and secure cryptographic practices. The identified risks are primarily low-severity concerns that can be addressed through targeted improvements.
+The nu_plugin_nw_ulid codebase demonstrates strong security fundamentals with Rust's memory safety, proper input validation, and secure cryptographic practices. The identified risks are primarily low-severity concerns that can be addressed through targeted improvements.
 
 **Overall Security Rating**: **B+ (Good)**
 

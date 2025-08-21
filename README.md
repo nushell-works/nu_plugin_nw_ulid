@@ -1,9 +1,9 @@
-# nu_plugin_ulid
+# nu_plugin_nw_ulid
 
-[![CI](https://github.com/nushell-works/nu_plugin_ulid/workflows/CI/badge.svg)](https://github.com/nushell-works/nu_plugin_ulid/actions)
-[![Security](https://github.com/nushell-works/nu_plugin_ulid/workflows/Security/badge.svg)](https://github.com/nushell-works/nu_plugin_ulid/actions)
+[![CI](https://github.com/nushell-works/nu_plugin_nw_ulid/workflows/CI/badge.svg)](https://github.com/nushell-works/nu_plugin_nw_ulid/actions)
+[![Security](https://github.com/nushell-works/nu_plugin_nw_ulid/workflows/Security/badge.svg)](https://github.com/nushell-works/nu_plugin_nw_ulid/actions)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE)
-[![Crates.io](https://img.shields.io/crates/v/nw-nu_plugin_ulid.svg)](https://crates.io/crates/nw-nu_plugin_ulid)
+[![Crates.io](https://img.shields.io/crates/v/nu_plugin_nw_ulid.svg)](https://crates.io/crates/nu_plugin_nw_ulid)
 
 Production-grade ULID (Universally Unique Lexicographically Sortable Identifier) utilities plugin for Nushell. Generate, parse, validate & manipulate ULIDs with cryptographically secure operations, enterprise-grade security, streaming support, and seamless integration with Nushell's structured data model.
 
@@ -23,14 +23,14 @@ Production-grade ULID (Universally Unique Lexicographically Sortable Identifier)
 ### Via Cargo
 
 ```bash
-cargo install nw-nu_plugin_ulid
+cargo install nu_plugin_nw_ulid
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/nushell-works/nu_plugin_ulid.git
-cd nu_plugin_ulid
+git clone https://github.com/nushell-works/nu_plugin_nw_ulid.git
+cd nu_plugin_nw_ulid
 cargo install --path .
 ```
 
@@ -39,8 +39,8 @@ cargo install --path .
 After installation, register the plugin with Nushell:
 
 ```bash
-plugin add ~/.cargo/bin/nu_plugin_ulid
-plugin use ulid
+plugin add ~/.cargo/bin/nu_plugin_nw_ulid
+plugin use nw_ulid
 ```
 
 ## Quick Start
@@ -117,13 +117,13 @@ ulid security-advice --context "api-keys"   # Get security recommendations
 # Plugin information
 > ulid info
 ╭─────────────┬────────────────────────────────────────────────────────────────╮
-│ name        │ nu_plugin_ulid                                                 │
+│ name        │ nu_plugin_nw_ulid                                                 │
 │ version     │ 0.1.0                                                          │
 │ description │ Professional ULID (Universally Unique Lexicographically        │
 │             │ Sortable Identifier) utilities plugin for Nushell              │
 │ authors     │ John Ky <newhoggy@gmail.com>                                   │
 │ license     │ BSD-3-Clause                                                   │
-│ repository  │ https://github.com/nushell-works/nu_plugin_ulid                │
+│ repository  │ https://github.com/nushell-works/nu_plugin_nw_ulid                │
 ╰─────────────┴────────────────────────────────────────────────────────────────╯
 
 # Generate and work with ULIDs
@@ -217,8 +217,8 @@ Based on benchmarking against reference implementations:
 ### Building
 
 ```bash
-git clone https://github.com/nushell-works/nu_plugin_ulid.git
-cd nu_plugin_ulid
+git clone https://github.com/nushell-works/nu_plugin_nw_ulid.git
+cd nu_plugin_nw_ulid
 cargo build --release
 ```
 
@@ -286,10 +286,10 @@ Licensed under the BSD 3-Clause License. See [LICENSE](LICENSE) for details.
 - 🏗️ [Architecture Guide](docs/architecture/plugin-design.md) - Technical design documentation
 
 ### Community & Support
-- 🐛 [Issue Tracker](https://github.com/nushell-works/nu_plugin_ulid/issues) - Bug reports and feature requests
-- 💬 [Discussions](https://github.com/nushell-works/nu_plugin_ulid/discussions) - Community discussions
+- 🐛 [Issue Tracker](https://github.com/nushell-works/nu_plugin_nw_ulid/issues) - Bug reports and feature requests
+- 💬 [Discussions](https://github.com/nushell-works/nu_plugin_nw_ulid/discussions) - Community discussions
 - 🤝 [Contributing](CONTRIBUTING.md) - Contribution guidelines
-- 📦 [Crates.io](https://crates.io/crates/nu_plugin_ulid) - Package repository
+- 📦 [Crates.io](https://crates.io/crates/nu_plugin_nw_ulid) - Package repository
 
 ---
 

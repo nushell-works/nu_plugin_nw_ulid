@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for helping improve our documentation! Your suggestions help make nu_plugin_ulid more accessible to everyone.
+        Thank you for helping improve our documentation! Your suggestions help make nu_plugin_nw_ulid more accessible to everyone.
 
   - type: dropdown
     id: doc_type

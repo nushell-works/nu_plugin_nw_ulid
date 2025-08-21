@@ -1,10 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-# Integration test script for nu_plugin_ulid
+# Integration test script for nu_plugin_nw_ulid
 # Tests actual plugin installation and execution with Nushell
 
-echo "🧪 Running integration tests for nu_plugin_ulid"
+echo "🧪 Running integration tests for nu_plugin_nw_ulid"
 echo "================================================"
 
 # Colors for output
@@ -33,9 +33,9 @@ echo -e "${YELLOW}📦 Installing plugin...${NC}"
 cargo install --path .
 
 # Get the plugin path
-PLUGIN_PATH="$HOME/.cargo/bin/nu_plugin_ulid"
+PLUGIN_PATH="$HOME/.cargo/bin/nu_plugin_nw_ulid"
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
-    PLUGIN_PATH="$HOME/.cargo/bin/nu_plugin_ulid.exe"
+    PLUGIN_PATH="$HOME/.cargo/bin/nu_plugin_nw_ulid.exe"
 fi
 
 echo -e "${YELLOW}🔗 Plugin path: $PLUGIN_PATH${NC}"
@@ -72,7 +72,7 @@ fi
 
 # Test 2: Plugin info
 echo -e "${YELLOW}🧪 Test 2: Plugin info${NC}"
-if nu -c "plugin use ulid; ulid info" &> /dev/null; then
+if nu -c "plugin use nw_ulid; ulid info" &> /dev/null; then
     echo -e "${GREEN}✅ Plugin info command works${NC}"
 else
     echo -e "${RED}❌ Plugin info command failed${NC}"
@@ -81,7 +81,7 @@ fi
 
 # Test 3: ULID generation
 echo -e "${YELLOW}🧪 Test 3: ULID generation${NC}"
-ULID=$(nu -c "plugin use ulid; ulid generate" 2>/dev/null)
+ULID=$(nu -c "plugin use nw_ulid; ulid generate" 2>/dev/null)
 if [[ ${#ULID} -eq 26 ]]; then
     echo -e "${GREEN}✅ ULID generation successful: $ULID${NC}"
 else
@@ -91,7 +91,7 @@ fi
 
 # Test 4: ULID validation
 echo -e "${YELLOW}🧪 Test 4: ULID validation${NC}"
-if nu -c "plugin use ulid; ulid validate '$ULID'" | grep -q "true"; then
+if nu -c "plugin use nw_ulid; ulid validate '$ULID'" | grep -q "true"; then
     echo -e "${GREEN}✅ ULID validation successful${NC}"
 else
     echo -e "${RED}❌ ULID validation failed${NC}"
@@ -100,7 +100,7 @@ fi
 
 # Test 5: ULID parsing
 echo -e "${YELLOW}🧪 Test 5: ULID parsing${NC}"
-if nu -c "plugin use ulid; ulid parse '$ULID'" &> /dev/null; then
+if nu -c "plugin use nw_ulid; ulid parse '$ULID'" &> /dev/null; then
     echo -e "${GREEN}✅ ULID parsing successful${NC}"
 else
     echo -e "${RED}❌ ULID parsing failed${NC}"
@@ -109,7 +109,7 @@ fi
 
 # Test 6: Bulk generation
 echo -e "${YELLOW}🧪 Test 6: Bulk generation${NC}"
-if nu -c "plugin use ulid; ulid generate --count 3" &> /dev/null; then
+if nu -c "plugin use nw_ulid; ulid generate --count 3" &> /dev/null; then
     echo -e "${GREEN}✅ Bulk generation successful${NC}"
 else
     echo -e "${RED}❌ Bulk generation failed${NC}"
@@ -118,7 +118,7 @@ fi
 
 # Test 7: Stream processing
 echo -e "${YELLOW}🧪 Test 7: Stream processing${NC}"
-if nu -c "plugin use ulid; echo ['$ULID', 'invalid'] | ulid stream validate" &> /dev/null; then
+if nu -c "plugin use nw_ulid; echo ['$ULID', 'invalid'] | ulid stream validate" &> /dev/null; then
     echo -e "${GREEN}✅ Stream processing successful${NC}"
 else
     echo -e "${RED}❌ Stream processing failed${NC}"
@@ -127,7 +127,7 @@ fi
 
 # Test 8: Security advice
 echo -e "${YELLOW}🧪 Test 8: Security advice${NC}"
-if nu -c "plugin use ulid; ulid security-advice" &> /dev/null; then
+if nu -c "plugin use nw_ulid; ulid security-advice" &> /dev/null; then
     echo -e "${GREEN}✅ Security advice command works${NC}"
 else
     echo -e "${RED}❌ Security advice command failed${NC}"
@@ -136,7 +136,7 @@ fi
 
 # Test 9: Inspect command
 echo -e "${YELLOW}🧪 Test 9: ULID inspection${NC}"
-if nu -c "plugin use ulid; ulid inspect '$ULID'" &> /dev/null; then
+if nu -c "plugin use nw_ulid; ulid inspect '$ULID'" &> /dev/null; then
     echo -e "${GREEN}✅ ULID inspection successful${NC}"
 else
     echo -e "${RED}❌ ULID inspection failed${NC}"
@@ -145,8 +145,8 @@ fi
 
 # Test 10: Sort command
 echo -e "${YELLOW}🧪 Test 10: ULID sorting${NC}"
-ULID2=$(nu -c "plugin use ulid; ulid generate" 2>/dev/null)
-if nu -c "plugin use ulid; echo ['$ULID', '$ULID2'] | ulid sort" &> /dev/null; then
+ULID2=$(nu -c "plugin use nw_ulid; ulid generate" 2>/dev/null)
+if nu -c "plugin use nw_ulid; echo ['$ULID', '$ULID2'] | ulid sort" &> /dev/null; then
     echo -e "${GREEN}✅ ULID sorting successful${NC}"
 else
     echo -e "${RED}❌ ULID sorting failed${NC}"
@@ -159,5 +159,5 @@ echo -e "${GREEN}✅ Plugin is working correctly with Nushell${NC}"
 echo ""
 echo "Plugin installed at: $PLUGIN_PATH"
 echo "You can now use:"
-echo "  nu -c \"plugin use ulid; ulid generate\""
-echo "  nu -c \"plugin use ulid; ulid info\""
+echo "  nu -c \"plugin use nw_ulid; ulid generate\""
+echo "  nu -c \"plugin use nw_ulid; ulid info\""

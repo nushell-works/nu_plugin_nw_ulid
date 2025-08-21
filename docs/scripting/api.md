@@ -900,7 +900,7 @@ def analyze_ulid_patterns [ulids: list] {
 
 ## API Reference Summary
 
-This comprehensive API reference provides detailed specifications for all nu_plugin_ulid commands. Key features:
+This comprehensive API reference provides detailed specifications for all nu_plugin_nw_ulid commands. Key features:
 
 - **Type-safe operations** with comprehensive input/output type specifications
 - **Performance optimization** through streaming and parallel processing

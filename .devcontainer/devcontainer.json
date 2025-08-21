@@ -1,5 +1,5 @@
 {
-  "name": "nu_plugin_ulid Development Environment",
+  "name": "nu_plugin_nw_ulid Development Environment",
   "image": "mcr.microsoft.com/devcontainers/rust:1-1-bullseye",
   
   "features": {
@@ -49,10 +49,10 @@
   "postCreateCommand": "scripts/setup-dev.sh",
 
   "remoteUser": "vscode",
-  "workspaceFolder": "/workspaces/nu_plugin_ulid",
+  "workspaceFolder": "/workspaces/nu_plugin_nw_ulid",
 
   "mounts": [
-    "source=${localWorkspaceFolder}/.git,target=/workspaces/nu_plugin_ulid/.git,type=bind,consistency=cached"
+    "source=${localWorkspaceFolder}/.git,target=/workspaces/nu_plugin_nw_ulid/.git,type=bind,consistency=cached"
   ],
 
   "containerEnv": {

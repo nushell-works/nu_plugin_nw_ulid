@@ -1,10 +1,10 @@
 # Community Announcement and Feedback Collection Plan
 
-**Version**: 1.0  
-**Last Updated**: August 18, 2025  
+**Version**: 1.0
+**Last Updated**: August 18, 2025
 **Target Audience**: Maintainers and community managers
 
-This document outlines the comprehensive strategy for announcing nu_plugin_ulid to the community and collecting valuable feedback to guide future development.
+This document outlines the comprehensive strategy for announcing nu_plugin_nw_ulid to the community and collecting valuable feedback to guide future development.
 
 ## Table of Contents
 
@@ -22,7 +22,7 @@ This document outlines the comprehensive strategy for announcing nu_plugin_ulid 
 ### Core Messaging
 
 #### Primary Value Proposition
-"nu_plugin_ulid brings production-grade ULID (Universally Unique Lexicographically Sortable Identifier) functionality to Nushell with enterprise security, competitive performance, and comprehensive automation support."
+"nu_plugin_nw_ulid brings production-grade ULID (Universally Unique Lexicographically Sortable Identifier) functionality to Nushell with enterprise security, competitive performance, and comprehensive automation support."
 
 #### Key Differentiators
 - **Enterprise-Grade Security**: A- security rating with cryptographically secure operations
@@ -32,7 +32,7 @@ This document outlines the comprehensive strategy for announcing nu_plugin_ulid 
 - **Professional Quality**: 90% test coverage, zero clippy warnings, comprehensive documentation
 
 #### Target Outcomes
-1. **Awareness**: Introduce nu_plugin_ulid to the Nushell community
+1. **Awareness**: Introduce nu_plugin_nw_ulid to the Nushell community
 2. **Adoption**: Drive initial usage and feedback
 3. **Contribution**: Attract contributors and community involvement
 4. **Validation**: Gather feedback on design decisions and priorities
@@ -147,9 +147,9 @@ This document outlines the comprehensive strategy for announcing nu_plugin_ulid 
 ### GitHub Release Announcement
 
 ```markdown
-# 🎉 nu_plugin_ulid v0.1.0 Released!
+# 🎉 nu_plugin_nw_ulid v0.1.0 Released!
 
-We're excited to announce the first release of nu_plugin_ulid - a production-grade ULID plugin for Nushell!
+We're excited to announce the first release of nu_plugin_nw_ulid - a production-grade ULID plugin for Nushell!
 
 ## 🚀 What's New
 
@@ -177,9 +177,9 @@ Complete ULID functionality including generation, validation, parsing, streaming
 ## 📦 Installation
 
 ```bash
-cargo install nw-nu_plugin_ulid
-plugin add ~/.cargo/bin/nu_plugin_ulid
-plugin use ulid
+cargo install nu_plugin_nw_ulid
+plugin add ~/.cargo/bin/nu_plugin_nw_ulid
+plugin use nw_ulid
 ```
 
 ## 🔗 Resources
@@ -193,8 +193,8 @@ plugin use ulid
 
 We welcome feedback, contributions, and questions!
 
-- 🐛 [Report Issues](https://github.com/nushell-works/nu_plugin_ulid/issues)
-- 💬 [Discussions](https://github.com/nushell-works/nu_plugin_ulid/discussions)
+- 🐛 [Report Issues](https://github.com/nushell-works/nu_plugin_nw_ulid/issues)
+- 💬 [Discussions](https://github.com/nushell-works/nu_plugin_nw_ulid/discussions)
 - 🤝 [Contributing Guide](CONTRIBUTING.md)
 
 Thank you to everyone who helped make this release possible! 🙏
@@ -205,7 +205,7 @@ Thank you to everyone who helped make this release possible! 🙏
 ```
 🎉 **New Plugin Alert!** 🎉
 
-I'm excited to share **nu_plugin_ulid** - a production-grade ULID plugin for Nushell!
+I'm excited to share **nu_plugin_nw_ulid** - a production-grade ULID plugin for Nushell!
 
 **What are ULIDs?** Universally Unique Lexicographically Sortable Identifiers - like UUIDs but sortable by creation time! Perfect for database keys, log correlation, and distributed systems.
 
@@ -218,16 +218,16 @@ I'm excited to share **nu_plugin_ulid** - a production-grade ULID plugin for Nus
 
 **🚀 Quick Start:**
 ```bash
-cargo install nw-nu_plugin_ulid
-plugin add ~/.cargo/bin/nu_plugin_ulid
-plugin use ulid
+cargo install nu_plugin_nw_ulid
+plugin add ~/.cargo/bin/nu_plugin_nw_ulid
+plugin use nw_ulid
 ulid generate --count 5
 ```
 
 **📚 Resources:**
-• GitHub: https://github.com/nushell-works/nu_plugin_ulid
-• Crates.io: https://crates.io/crates/nw-nu_plugin_ulid
-• User Guide: https://github.com/nushell-works/nu_plugin_ulid/blob/main/docs/USER_GUIDE.md
+• GitHub: https://github.com/nushell-works/nu_plugin_nw_ulid
+• Crates.io: https://crates.io/crates/nu_plugin_nw_ulid
+• User Guide: https://github.com/nushell-works/nu_plugin_nw_ulid/blob/main/docs/USER_GUIDE.md
 
 Love to hear your feedback and ideas! This started as a learning project but evolved into something I'm proud to share with the community. 🦀✨
 
@@ -237,9 +237,9 @@ Love to hear your feedback and ideas! This started as a learning project but evo
 ### Reddit Post Template (r/nushell)
 
 ```markdown
-# nu_plugin_ulid: Production-grade ULID support for Nushell
+# nu_plugin_nw_ulid: Production-grade ULID support for Nushell
 
-I've just released nu_plugin_ulid, a comprehensive ULID (Universally Unique Lexicographically Sortable Identifier) plugin for Nushell. This started as a learning project but evolved into something production-ready.
+I've just released nu_plugin_nw_ulid, a comprehensive ULID (Universally Unique Lexicographically Sortable Identifier) plugin for Nushell. This started as a learning project but evolved into something production-ready.
 
 ## What are ULIDs?
 
@@ -277,8 +277,8 @@ $large_dataset | ulid stream validate --batch-size 1000
 
 ## Resources
 
-- **GitHub**: https://github.com/nushell-works/nu_plugin_ulid
-- **Crates.io**: https://crates.io/crates/nw-nu_plugin_ulid
+- **GitHub**: https://github.com/nushell-works/nu_plugin_nw_ulid
+- **Crates.io**: https://crates.io/crates/nu_plugin_nw_ulid
 - **User Guide**: Complete examples and tutorials
 - **API Docs**: Comprehensive command reference
 
@@ -467,6 +467,6 @@ Would love to hear how you might use ULIDs in your Nushell workflows!
 
 ---
 
-This community announcement and feedback collection plan ensures nu_plugin_ulid receives the visibility it deserves while building a sustainable and engaged community around the project. Regular review and adaptation of these strategies based on actual results will optimize community growth and project success.
+This community announcement and feedback collection plan ensures nu_plugin_nw_ulid receives the visibility it deserves while building a sustainable and engaged community around the project. Regular review and adaptation of these strategies based on actual results will optimize community growth and project success.
 
-For questions about this plan or suggestions for improvement, please use our [community discussions](https://github.com/nushell-works/nu_plugin_ulid/discussions).
+For questions about this plan or suggestions for improvement, please use our [community discussions](https://github.com/nushell-works/nu_plugin_nw_ulid/discussions).

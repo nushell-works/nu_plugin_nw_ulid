@@ -1,4 +1,4 @@
-# nu_plugin_ulid - Project Plan
+# nu_plugin_nw_ulid - Project Plan
 
 ## 🎯 Current Status: Phase 5 Near Completion ⚡
 **Last Updated**: August 18, 2025  
@@ -41,7 +41,7 @@
 
 ## Project Overview
 
-**Name**: `nu_plugin_ulid`  
+**Name**: `nu_plugin_nw_ulid`  
 **Purpose**: Professional ULID (Universally Unique Lexicographically Sortable Identifier) utilities plugin for Nushell  
 **License**: BSD 3-Clause  
 **Strategy**: Start as demo/learning project, evolve into production ULID implementation
