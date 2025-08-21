@@ -132,8 +132,8 @@ fi
 
 # Final binary size check
 echo "📏 Checking binary size..."
-if [[ -f "target/release/nu_plugin_ulid" ]]; then
-    SIZE=$(ls -lh target/release/nu_plugin_ulid | awk '{print $5}')
+if [[ -f "target/release/nu_plugin_nw_ulid" ]]; then
+    SIZE=$(ls -lh target/release/nu_plugin_nw_ulid | awk '{print $5}')
     echo "✅ Release binary size: $SIZE"
 else
     echo "⚠️  Release binary not found"

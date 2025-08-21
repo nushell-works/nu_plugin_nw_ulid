@@ -1,8 +1,8 @@
-# Comprehensive Test Plan for nu_plugin_ulid
+# Comprehensive Test Plan for nu_plugin_nw_ulid
 
 ## Overview
 
-This document outlines a comprehensive testing strategy for the nu_plugin_ulid project, defining what should be tested as unit tests vs integration tests, and establishing clear coverage goals.
+This document outlines a comprehensive testing strategy for the nu_plugin_nw_ulid project, defining what should be tested as unit tests vs integration tests, and establishing clear coverage goals.
 
 ## Current State Analysis
 

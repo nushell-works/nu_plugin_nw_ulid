@@ -172,8 +172,8 @@ For answers to common questions about this code of conduct, see the FAQ at [http
 For questions about this Code of Conduct or to report violations:
 
 * **Primary Contact**: Project Maintainers
-* **Repository**: [https://github.com/nushell-works/nu_plugin_ulid](https://github.com/nushell-works/nu_plugin_ulid)
-* **Community Discussions**: [https://github.com/nushell-works/nu_plugin_ulid/discussions](https://github.com/nushell-works/nu_plugin_ulid/discussions)
+* **Repository**: [https://github.com/nushell-works/nu_plugin_nw_ulid](https://github.com/nushell-works/nu_plugin_nw_ulid)
+* **Community Discussions**: [https://github.com/nushell-works/nu_plugin_nw_ulid/discussions](https://github.com/nushell-works/nu_plugin_nw_ulid/discussions)
 
 ---
 

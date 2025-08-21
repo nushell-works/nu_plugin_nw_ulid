@@ -5,8 +5,8 @@ edition = "2024"
 authors = ["John Ky <newhoggy@gmail.com>"]
 description = "Production-grade ULID (Universally Unique Lexicographically Sortable Identifier) utilities plugin for Nushell with cryptographically secure operations, enterprise-grade security, and streaming support"
 license = "BSD-3-Clause"
-repository = "https://github.com/nushell-works/nu_plugin_ulid"
-homepage = "https://github.com/nushell-works/nu_plugin_ulid"
+repository = "https://github.com/nushell-works/nu_plugin_nw_ulid"
+homepage = "https://github.com/nushell-works/nu_plugin_nw_ulid"
 documentation = "https://docs.rs/nu_plugin_nw_ulid"
 keywords = ["nushell", "ulid", "uuid", "identifier", "plugin"]
 categories = ["command-line-utilities", "development-tools", "cryptography", "data-structures"]
@@ -42,7 +42,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 maintenance = { status = "actively-developed" }
 
 [[bin]]
-name = "nu_plugin_ulid"
+name = "nu_plugin_nw_ulid"
 path = "src/main.rs"
 
 [[bench]]
@@ -50,7 +50,7 @@ name = "performance_benchmarks"
 harness = false
 
 [lib]
-name = "nu_plugin_ulid"
+name = "nu_plugin_nw_ulid"
 path = "src/lib.rs"
 
 [dependencies]

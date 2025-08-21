@@ -1,10 +1,10 @@
 # Release Procedures and Versioning Strategy
 
-**Version**: 1.0  
-**Last Updated**: August 18, 2025  
+**Version**: 1.0
+**Last Updated**: August 18, 2025
 **Target Audience**: Maintainers and release managers
 
-This document outlines the comprehensive release procedures, versioning strategy, and quality gates for nu_plugin_ulid releases.
+This document outlines the comprehensive release procedures, versioning strategy, and quality gates for nu_plugin_nw_ulid releases.
 
 ## Quick Release Guide
 
@@ -38,7 +38,7 @@ The workflow will automatically create tags, build binaries, and publish to Crat
 
 ### Semantic Versioning
 
-nu_plugin_ulid follows [Semantic Versioning 2.0.0](https://semver.org/) with the format `MAJOR.MINOR.PATCH`:
+nu_plugin_nw_ulid follows [Semantic Versioning 2.0.0](https://semver.org/) with the format `MAJOR.MINOR.PATCH`:
 
 - **MAJOR**: Incompatible API changes or breaking changes
 - **MINOR**: Backwards-compatible new features and functionality
@@ -584,9 +584,9 @@ Brief description of the critical issue that required emergency release.
 ### Release Announcement Template
 
 ```markdown
-# nu_plugin_ulid v1.2.0 Released 🎉
+# nu_plugin_nw_ulid v1.2.0 Released 🎉
 
-We're excited to announce the release of nu_plugin_ulid v1.2.0! This release includes [brief summary of major changes].
+We're excited to announce the release of nu_plugin_nw_ulid v1.2.0! This release includes [brief summary of major changes].
 
 ## 🚀 What's New
 
@@ -621,7 +621,7 @@ We're excited to announce the release of nu_plugin_ulid v1.2.0! This release inc
 ## 🛠️ Installation
 
 ```bash
-cargo install nw-nu_plugin_ulid@1.2.0
+cargo install nu_plugin_nw_ulid@1.2.0
 ```
 
 ## 📚 Documentation
@@ -638,9 +638,9 @@ Special thanks to all contributors who made this release possible:
 
 ## 📞 Support
 
-- [GitHub Issues](https://github.com/nushell-works/nu_plugin_ulid/issues)
-- [Discussions](https://github.com/nushell-works/nu_plugin_ulid/discussions)
-- [Documentation](https://github.com/nushell-works/nu_plugin_ulid/tree/main/docs)
+- [GitHub Issues](https://github.com/nushell-works/nu_plugin_nw_ulid/issues)
+- [Discussions](https://github.com/nushell-works/nu_plugin_nw_ulid/discussions)
+- [Documentation](https://github.com/nushell-works/nu_plugin_nw_ulid/tree/main/docs)
 
 Happy coding! 🦀
 ```

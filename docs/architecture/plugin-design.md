@@ -1,10 +1,10 @@
 # Plugin Architecture
 
-This document describes the architectural design of the nu_plugin_ulid plugin.
+This document describes the architectural design of the nu_plugin_nw_ulid plugin.
 
 ## Overview
 
-The nu_plugin_ulid plugin follows a modular, enterprise-grade architecture designed for:
+The nu_plugin_nw_ulid plugin follows a modular, enterprise-grade architecture designed for:
 
 - **Maintainability**: Clear separation of concerns
 - **Testability**: Comprehensive test coverage at all levels

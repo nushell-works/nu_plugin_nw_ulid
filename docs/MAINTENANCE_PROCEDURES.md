@@ -4,7 +4,7 @@
 **Last Updated**: August 18, 2025  
 **Target Audience**: Maintainers and core contributors
 
-This document provides detailed maintenance procedures for nu_plugin_ulid, ensuring consistent operational excellence, security, and long-term project health.
+This document provides detailed maintenance procedures for nu_plugin_nw_ulid, ensuring consistent operational excellence, security, and long-term project health.
 
 ## Table of Contents
 
@@ -24,7 +24,7 @@ This document provides detailed maintenance procedures for nu_plugin_ulid, ensur
 #### CI/CD Health Check
 ```bash
 # Check CI/CD pipeline status
-gh workflow list --repo nushell-works/nu_plugin_ulid
+gh workflow list --repo nushell-works/nu_plugin_nw_ulid
 gh run list --workflow=ci.yml --limit=5
 gh run list --workflow=security.yml --limit=5
 ```
@@ -36,7 +36,7 @@ cargo audit --deny warnings
 cargo deny check
 
 # Check for new CVE reports
-gh api repos/nushell-works/nu_plugin_ulid/vulnerability-alerts
+gh api repos/nushell-works/nu_plugin_nw_ulid/vulnerability-alerts
 ```
 
 #### Issue Triage
@@ -160,11 +160,11 @@ find docs/ -name "*.md" -mtime +30 -ls
 ./scripts/security_weekly.sh
 
 # Check GitHub security advisories
-gh api repos/nushell-works/nu_plugin_ulid/security-advisories
+gh api repos/nushell-works/nu_plugin_nw_ulid/security-advisories
 
 # Review access permissions
 gh auth status
-gh repo view nushell-works/nu_plugin_ulid --json collaborators
+gh repo view nushell-works/nu_plugin_nw_ulid --json collaborators
 ```
 
 ### Weekly Community Health
@@ -733,6 +733,6 @@ echo "📈 Weekly benchmarking complete!"
 
 ---
 
-These maintenance procedures ensure nu_plugin_ulid maintains high operational standards, security posture, and performance excellence. Regular execution of these procedures, combined with continuous improvement based on lessons learned, helps maintain project health and user satisfaction.
+These maintenance procedures ensure nu_plugin_nw_ulid maintains high operational standards, security posture, and performance excellence. Regular execution of these procedures, combined with continuous improvement based on lessons learned, helps maintain project health and user satisfaction.
 
-For questions about maintenance procedures or to suggest improvements, please use our [community discussions](https://github.com/nushell-works/nu_plugin_ulid/discussions).
+For questions about maintenance procedures or to suggest improvements, please use our [community discussions](https://github.com/nushell-works/nu_plugin_nw_ulid/discussions).

@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🔌 Installing nu_plugin_ulid for Nushell..."
+echo "🔌 Installing nu_plugin_nw_ulid for Nushell..."
 
 # Source cargo environment if it exists
 if [[ -f "$HOME/.cargo/env" ]]; then
@@ -67,7 +67,7 @@ done
 
 # Determine installation path
 if [[ -z "$INSTALL_PATH" ]]; then
-    INSTALL_PATH="$HOME/.cargo/bin/nu_plugin_ulid"
+    INSTALL_PATH="$HOME/.cargo/bin/nu_plugin_nw_ulid"
 fi
 
 echo "📋 Installation Configuration:"
@@ -94,13 +94,13 @@ echo "✅ Plugin built successfully"
 
 # Install the plugin
 echo "📦 Installing plugin..."
-if [[ "$INSTALL_PATH" == "$HOME/.cargo/bin/nu_plugin_ulid" ]]; then
+if [[ "$INSTALL_PATH" == "$HOME/.cargo/bin/nu_plugin_nw_ulid" ]]; then
     # Use cargo install for standard location
     cargo install --path . --force
     echo "✅ Plugin installed via cargo install"
 else
     # Copy to custom location
-    cp target/release/nu_plugin_ulid "$INSTALL_PATH"
+    cp target/release/nu_plugin_nw_ulid "$INSTALL_PATH"
     chmod +x "$INSTALL_PATH"
     echo "✅ Plugin copied to: $INSTALL_PATH"
 fi
@@ -128,7 +128,7 @@ echo "🔌 Registering plugin with Nushell..."
 TEMP_SCRIPT=$(mktemp)
 cat > "$TEMP_SCRIPT" << EOF
 plugin add $INSTALL_PATH
-plugin use ulid
+plugin use nw_ulid
 ulid info
 EOF
 
@@ -178,7 +178,7 @@ echo "   Get help: help ulid"
 echo ""
 echo "🔧 Manual registration (if needed):"
 echo "   plugin add $INSTALL_PATH"
-echo "   plugin use ulid"
+echo "   plugin use nw_ulid"
 echo ""
 echo "📚 Documentation:"
 echo "   README.md - Usage examples and commands"

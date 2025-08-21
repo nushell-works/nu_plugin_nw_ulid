@@ -1,4 +1,4 @@
-use nu_plugin_ulid::UlidEngine;
+use nu_plugin_nw_ulid::UlidEngine;
 use std::collections::HashMap;
 
 #[cfg(test)]

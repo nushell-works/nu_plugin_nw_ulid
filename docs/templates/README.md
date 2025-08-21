@@ -60,15 +60,15 @@ template-name.nu
 
 1. **Install the ULID plugin:**
    ```bash
-   cargo install nw-nu_plugin_ulid
-   plugin add ~/.cargo/bin/nu_plugin_ulid
-   plugin use ulid
+   cargo install nu_plugin_nw_ulid
+   plugin add ~/.cargo/bin/nu_plugin_nw_ulid
+   plugin use nw_ulid
    ```
 
 2. **Download templates:**
    ```bash
-   git clone https://github.com/nushell-works/nu_plugin_ulid.git
-   cd nu_plugin_ulid/docs/templates
+   git clone https://github.com/nushell-works/nu_plugin_nw_ulid.git
+   cd nu_plugin_nw_ulid/docs/templates
    ```
 
 3. **Copy desired template:**
@@ -124,7 +124,7 @@ def safe_operation [data: any] {
 def log [level: string, message: string] {
     let timestamp = date now | format date "%Y-%m-%d %H:%M:%S"
     let log_entry = $"[$timestamp] [($level | str upcase)] ($message)"
-    
+
     print $log_entry
     $log_entry | save --append application.log
 }
@@ -144,7 +144,7 @@ def test_ulid_generation [] {
 ```nu
 # Use streaming for large datasets
 def process_large_dataset [data: list] {
-    $data 
+    $data
     | chunks $CONFIG.batch_size
     | each { |chunk|
         $chunk | ulid stream validate --parallel
@@ -176,8 +176,8 @@ We welcome contributions of new templates! To contribute:
 
 - 📖 [User Guide](../USER_GUIDE.md) - Comprehensive user documentation
 - 🔧 [API Reference](../scripting/api.md) - Complete API documentation
-- 💬 [Discussions](https://github.com/nushell-works/nu_plugin_ulid/discussions) - Community support
-- 🐛 [Issues](https://github.com/nushell-works/nu_plugin_ulid/issues) - Bug reports and feature requests
+- 💬 [Discussions](https://github.com/nushell-works/nu_plugin_nw_ulid/discussions) - Community support
+- 🐛 [Issues](https://github.com/nushell-works/nu_plugin_nw_ulid/issues) - Bug reports and feature requests
 
 ---
 

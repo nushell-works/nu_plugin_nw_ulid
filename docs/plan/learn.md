@@ -1,8 +1,8 @@
-# nu_plugin_ulid - Learning Plan
+# nu_plugin_nw_ulid - Learning Plan
 
 ## Learning Objectives
 
-Master all technical skills and knowledge required to independently develop, maintain, and evolve the `nu_plugin_ulid` project to professional standards, including effective AI collaboration patterns.
+Master all technical skills and knowledge required to independently develop, maintain, and evolve the `nu_plugin_nw_ulid` project to professional standards, including effective AI collaboration patterns.
 
 ---
 
@@ -327,7 +327,7 @@ Master all technical skills and knowledge required to independently develop, mai
 - [ ] Integrate ULID functionality into Nushell plugin
 
 ### Final Assessment: Project Completion
-- [ ] Professional-grade nu_plugin_ulid with full ULID functionality
+- [ ] Professional-grade nu_plugin_nw_ulid with full ULID functionality
 - [ ] Comprehensive documentation and examples
 - [ ] Complete CI/CD automation and security practices
 - [ ] Demonstrated mastery of all learning objectives
@@ -378,4 +378,4 @@ Master all technical skills and knowledge required to independently develop, mai
 - [ ] Can teach AI collaboration patterns to others
 - [ ] Can adapt AI workflows to new technologies and domains
 
-This learning plan provides a comprehensive roadmap for mastering all skills needed to independently develop and maintain the nu_plugin_ulid project at professional standards.
+This learning plan provides a comprehensive roadmap for mastering all skills needed to independently develop and maintain the nu_plugin_nw_ulid project at professional standards.

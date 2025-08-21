@@ -1,10 +1,10 @@
-# nu_plugin_ulid Performance Guide
+# nu_plugin_nw_ulid Performance Guide
 
 **Version**: 0.1.0  
 **Last Updated**: August 17, 2025  
 **Benchmark Environment**: Release mode with optimizations enabled
 
-This comprehensive guide covers performance characteristics, benchmarks, optimization techniques, and best practices for nu_plugin_ulid in production environments.
+This comprehensive guide covers performance characteristics, benchmarks, optimization techniques, and best practices for nu_plugin_nw_ulid in production environments.
 
 ## Table of Contents
 
@@ -21,7 +21,7 @@ This comprehensive guide covers performance characteristics, benchmarks, optimiz
 
 ### Key Performance Metrics
 
-nu_plugin_ulid delivers enterprise-grade performance with the following characteristics:
+nu_plugin_nw_ulid delivers enterprise-grade performance with the following characteristics:
 
 - **ULID Generation**: ~40ns per operation (25M ops/sec)
 - **ULID Validation**: ~12ns per operation (83M ops/sec)
@@ -682,4 +682,4 @@ def diagnose_throughput [data: list] {
 
 ---
 
-This performance guide provides comprehensive information for optimizing nu_plugin_ulid performance across different scales and environments. Regular monitoring and profiling will help maintain optimal performance in production deployments.
+This performance guide provides comprehensive information for optimizing nu_plugin_nw_ulid performance across different scales and environments. Regular monitoring and profiling will help maintain optimal performance in production deployments.

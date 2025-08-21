@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🚀 Setting up nu_plugin_ulid development environment..."
+echo "🚀 Setting up nu_plugin_nw_ulid development environment..."
 
 # Update package lists
 echo "📦 Updating package lists..."
@@ -64,7 +64,7 @@ fi
 echo "🔗 Setting up shell aliases..."
 cat >> ~/.bashrc << 'EOF'
 
-# nu_plugin_ulid development aliases
+# nu_plugin_nw_ulid development aliases
 alias ll='exa -la'
 alias la='exa -la'
 alias lt='exa --tree'

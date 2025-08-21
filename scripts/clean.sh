@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Clean script for nu_plugin_ulid
+# Clean script for nu_plugin_nw_ulid
 # Removes build artifacts and temporary files
 
 set -e
 
-echo "🧹 Cleaning nu_plugin_ulid project..."
+echo "🧹 Cleaning nu_plugin_nw_ulid project..."
 
 # Source cargo environment if it exists
 if [[ -f "$HOME/.cargo/env" ]]; then

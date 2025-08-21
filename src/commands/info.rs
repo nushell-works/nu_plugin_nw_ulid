@@ -37,7 +37,7 @@ impl PluginCommand for UlidInfoCommand {
     ) -> Result<PipelineData, LabeledError> {
         let record = Value::record(
             [
-                ("name".into(), Value::string("nu_plugin_ulid", call.head)),
+                ("name".into(), Value::string("nu_plugin_nw_ulid", call.head)),
                 (
                     "version".into(),
                     Value::string(env!("CARGO_PKG_VERSION"), call.head),

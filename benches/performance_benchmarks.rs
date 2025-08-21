@@ -1,5 +1,5 @@
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
-use nu_plugin_ulid::UlidEngine;
+use nu_plugin_nw_ulid::UlidEngine;
 use std::hint::black_box;
 
 fn benchmark_ulid_generation(c: &mut Criterion) {

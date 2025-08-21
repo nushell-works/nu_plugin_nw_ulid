@@ -4,7 +4,7 @@
 **Last Updated**: August 18, 2025  
 **Target Audience**: Maintainers, contributors, and support personnel
 
-This guide outlines comprehensive support procedures, maintenance schedules, and operational guidelines for nu_plugin_ulid to ensure long-term sustainability and excellent user experience.
+This guide outlines comprehensive support procedures, maintenance schedules, and operational guidelines for nu_plugin_nw_ulid to ensure long-term sustainability and excellent user experience.
 
 ## Table of Contents
 
@@ -515,6 +515,6 @@ cargo bench --bench streaming_performance
 
 ---
 
-This support and maintenance guide ensures nu_plugin_ulid maintains excellent user experience, strong community health, and long-term sustainability. Regular review and improvement of these procedures help maintain support excellence as the project grows and evolves.
+This support and maintenance guide ensures nu_plugin_nw_ulid maintains excellent user experience, strong community health, and long-term sustainability. Regular review and improvement of these procedures help maintain support excellence as the project grows and evolves.
 
-For questions about support procedures or suggestions for improvement, please use our [community discussions](https://github.com/nushell-works/nu_plugin_ulid/discussions).
+For questions about support procedures or suggestions for improvement, please use our [community discussions](https://github.com/nushell-works/nu_plugin_nw_ulid/discussions).

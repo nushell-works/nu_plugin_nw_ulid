@@ -5,7 +5,7 @@
 
 ## Overview
 
-The nu_plugin_ulid scripting API provides complete programmatic access to ULID functionality for Nushell users building automation workflows, data processing pipelines, and custom scripts.
+The nu_plugin_nw_ulid scripting API provides complete programmatic access to ULID functionality for Nushell users building automation workflows, data processing pipelines, and custom scripts.
 
 ## Design Principles
 
@@ -312,4 +312,4 @@ def correlate-request-logs [logs] {
 - [ ] Integration testing with real-world workflows
 - [ ] User cookbook with common automation patterns
 
-This scripting API design ensures that nu_plugin_ulid becomes a powerful tool for automation and data processing workflows, not just interactive command-line usage.
+This scripting API design ensures that nu_plugin_nw_ulid becomes a powerful tool for automation and data processing workflows, not just interactive command-line usage.

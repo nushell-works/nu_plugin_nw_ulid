@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting a performance issue! Performance is a key focus for nu_plugin_ulid. Please provide detailed information to help us investigate and optimize.
+        Thank you for reporting a performance issue! Performance is a key focus for nu_plugin_nw_ulid. Please provide detailed information to help us investigate and optimize.
 
   - type: dropdown
     id: performance_type
