@@ -1114,6 +1114,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "nu_plugin_nw_ulid"
+version = "0.1.1"
+dependencies = [
+ "base32",
+ "base64",
+ "blake3",
+ "chrono",
+ "criterion",
+ "hex",
+ "nu-plugin",
+ "nu-protocol",
+ "nu-test-support",
+ "rand",
+ "serde",
+ "sha2",
+ "ulid",
+ "uuid",
+]
+
+[[package]]
 name = "num-format"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1130,26 +1150,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
 dependencies = [
  "autocfg",
-]
-
-[[package]]
-name = "nw-nu_plugin_ulid"
-version = "0.1.0"
-dependencies = [
- "base32",
- "base64",
- "blake3",
- "chrono",
- "criterion",
- "hex",
- "nu-plugin",
- "nu-protocol",
- "nu-test-support",
- "rand",
- "serde",
- "sha2",
- "ulid",
- "uuid",
 ]
 
 [[package]]
