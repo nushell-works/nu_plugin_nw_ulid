@@ -7,15 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- Production-grade ULID plugin for Nushell with 23 comprehensive commands
-- Cryptographically secure ULID generation with configurable entropy sources
-- Enterprise-grade security features with A- security rating
-- High-performance streaming operations for large datasets
-- Complete documentation suite including user guides, developer guides, and API documentation
-- Comprehensive test suite with >90% coverage including security and performance tests
-- Cross-platform support for Linux, macOS, and Windows
-- Production-ready release procedures and community standards
+## [0.1.1] - 2025-08-21
+
+### Changed
+- **BREAKING**: Renamed project from `nu_plugin_ulid` to `nu_plugin_nw_ulid` to reflect GitHub repository rename
+- Updated all documentation, configuration files, and references to use new project name
+- Updated GitHub repository URLs throughout codebase
+- Updated binary name in build configuration and integration tests
+- Plugin now registers with Nushell as `nw_ulid` instead of `ulid`
+
+### Fixed
+- Updated integration test scripts to use correct plugin name (`plugin use nw_ulid`)
+- Fixed Windows PowerShell integration test script plugin references
+- Updated CI/CD workflows to use new binary name `nu_plugin_nw_ulid`
+- Corrected plugin info command to display new project name
+
+### Migration
+- Users upgrading from 0.1.0 need to:
+  1. Uninstall old plugin: `cargo uninstall nu_plugin_ulid` (if previously installed)
+  2. Remove old plugin registration: `plugin rm ulid` (if previously registered)
+  3. Install new version: `cargo install nu_plugin_nw_ulid`
+  4. Register new plugin: `plugin add ~/.cargo/bin/nu_plugin_nw_ulid; plugin use nw_ulid`
 
 ### Commands
 - Core ULID operations: `generate`, `validate`, `parse`, `inspect`, `sort`
