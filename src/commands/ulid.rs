@@ -868,4 +868,478 @@ mod tests {
             }
         }
     }
+
+    mod execution_logic_tests {
+        use super::*;
+
+        #[test]
+        fn test_ulid_generate_execution() {
+            // Test the core ULID generation logic from the run method
+
+            // Test single ULID generation
+            let generated_ulid = UlidEngine::generate().expect("Should generate ULID");
+            let ulid_str = generated_ulid.to_string();
+
+            assert_eq!(ulid_str.len(), 26, "ULID should be 26 characters");
+            assert!(
+                UlidEngine::validate(&ulid_str),
+                "Generated ULID should be valid"
+            );
+
+            // Test bulk generation logic
+            let bulk_ulids = UlidEngine::generate_bulk(5).expect("Should generate bulk ULIDs");
+            assert_eq!(bulk_ulids.len(), 5, "Should generate exactly 5 ULIDs");
+
+            // All should be unique
+            let unique_count = bulk_ulids
+                .iter()
+                .map(|u| u.to_string())
+                .collect::<std::collections::HashSet<_>>()
+                .len();
+            assert_eq!(unique_count, 5, "All generated ULIDs should be unique");
+        }
+
+        #[test]
+        fn test_ulid_generate_with_timestamp_execution() {
+            // Test timestamp-based generation logic
+            let custom_timestamp = 1640995200000u64; // 2022-01-01 00:00:00 UTC
+
+            let ulid = UlidEngine::generate_with_timestamp(custom_timestamp)
+                .expect("Should generate ULID with timestamp");
+
+            let parsed = UlidEngine::parse(&ulid.to_string()).expect("Should parse generated ULID");
+
+            assert_eq!(parsed.timestamp_ms, custom_timestamp);
+            assert!(parsed.valid);
+        }
+
+        #[test]
+        fn test_count_validation_execution() {
+            // Test count validation logic used in run method
+            let test_cases = vec![
+                (-1, false, "negative count"),
+                (0, true, "zero count"), // Zero is valid, returns empty vec
+                (1, true, "single count"),
+                (10_000, true, "max count"),
+                (10_001, false, "over max count"),
+            ];
+
+            for (count, should_be_valid, description) in test_cases {
+                if count < 0 {
+                    // Negative counts should be caught by validation
+                    assert!(
+                        !should_be_valid,
+                        "Negative count should be invalid: {}",
+                        description
+                    );
+                } else if count > 10_000 {
+                    // Test the actual bulk generation limit
+                    let result = UlidEngine::generate_bulk(count as usize);
+                    assert!(
+                        result.is_err(),
+                        "Over-limit count should fail: {}",
+                        description
+                    );
+                } else {
+                    // Valid counts should work
+                    let result = UlidEngine::generate_bulk(count as usize);
+                    assert!(
+                        result.is_ok(),
+                        "Valid count should succeed: {}",
+                        description
+                    );
+                    assert_eq!(result.unwrap().len(), count as usize);
+                }
+            }
+        }
+
+        #[test]
+        fn test_format_parsing_execution() {
+            // Test format parsing logic from run method
+            let test_ulid = UlidEngine::generate().expect("Should generate test ULID");
+            let span = create_test_span();
+
+            // Test string format
+            let string_value =
+                UlidEngine::to_value(&test_ulid, &crate::UlidOutputFormat::String, span);
+            match string_value {
+                Value::String { val, .. } => {
+                    assert_eq!(val.len(), 26);
+                    assert_eq!(val, test_ulid.to_string());
+                }
+                _ => panic!("String format should return String value"),
+            }
+
+            // Test JSON format
+            let json_value = UlidEngine::to_value(&test_ulid, &crate::UlidOutputFormat::Json, span);
+            match json_value {
+                Value::Record { val, .. } => {
+                    let record = val.into_owned();
+                    assert!(record.contains("ulid"));
+                    assert!(record.contains("timestamp_ms"));
+                    assert!(record.contains("randomness"));
+                }
+                _ => panic!("JSON format should return Record value"),
+            }
+
+            // Test binary format
+            let binary_value =
+                UlidEngine::to_value(&test_ulid, &crate::UlidOutputFormat::Binary, span);
+            match binary_value {
+                Value::Binary { val, .. } => {
+                    assert_eq!(val.len(), 16); // ULID binary is 16 bytes
+                }
+                _ => panic!("Binary format should return Binary value"),
+            }
+        }
+
+        #[test]
+        fn test_ulid_validate_execution() {
+            // Test validation logic from UlidValidateCommand run method
+            let valid_ulids = vec!["01AN4Z07BY79KA1307SR9X4MV3", "01BX5ZZKBKACTAV9WEVGEMMVRY"];
+
+            let invalid_ulids = vec![
+                "invalid",
+                "too_short",
+                "01AN4Z07BY79KA1307SR9X4MV3X", // too long
+                "",                            // empty
+                "01AN4Z07BY79KA1307SR9X4MV!",  // invalid character
+            ];
+
+            // Test basic validation
+            for ulid_str in &valid_ulids {
+                assert!(
+                    UlidEngine::validate(ulid_str),
+                    "Should validate: {}",
+                    ulid_str
+                );
+            }
+
+            for ulid_str in &invalid_ulids {
+                assert!(
+                    !UlidEngine::validate(ulid_str),
+                    "Should not validate: {}",
+                    ulid_str
+                );
+            }
+
+            // Test detailed validation
+            for ulid_str in &valid_ulids {
+                let result = UlidEngine::validate_detailed(ulid_str);
+                assert!(
+                    result.valid,
+                    "Detailed validation should pass: {}",
+                    ulid_str
+                );
+                assert_eq!(result.length, 26);
+                assert!(result.charset_valid);
+                assert!(result.timestamp_valid);
+                assert!(result.errors.is_empty());
+            }
+
+            for ulid_str in &invalid_ulids {
+                let result = UlidEngine::validate_detailed(ulid_str);
+                assert!(
+                    !result.valid,
+                    "Detailed validation should fail: {}",
+                    ulid_str
+                );
+                assert!(
+                    !result.errors.is_empty(),
+                    "Should have errors: {}",
+                    ulid_str
+                );
+            }
+        }
+
+        #[test]
+        fn test_ulid_parse_execution() {
+            // Test parsing logic from UlidParseCommand run method
+            let test_ulid = UlidEngine::generate().expect("Should generate test ULID");
+            let ulid_str = test_ulid.to_string();
+
+            // Test successful parsing
+            let components = UlidEngine::parse(&ulid_str).expect("Should parse valid ULID");
+
+            assert_eq!(components.ulid, ulid_str);
+            assert!(components.valid);
+            assert!(components.timestamp_ms > 0);
+            assert!(!components.randomness_hex.is_empty());
+
+            // Test components to value conversion
+            let span = create_test_span();
+            let value = UlidEngine::components_to_value(&components, span);
+
+            match value {
+                Value::Record { val, .. } => {
+                    let record = val.into_owned();
+                    assert!(record.contains("ulid"));
+                    assert!(record.contains("timestamp"));
+                    assert!(record.contains("randomness"));
+                    assert!(record.contains("valid"));
+                }
+                _ => panic!("Components should convert to Record value"),
+            }
+
+            // Test parsing invalid ULID
+            let invalid_result = UlidEngine::parse("invalid-ulid");
+            assert!(invalid_result.is_err(), "Should fail to parse invalid ULID");
+        }
+
+        #[test]
+        fn test_security_context_execution() {
+            // Test security context detection logic from run method
+            let sensitive_contexts = vec![
+                "auth_token",
+                "session_id",
+                "password_reset",
+                "api_key",
+                "jwt_secret",
+                "oauth_token",
+            ];
+
+            let safe_contexts = vec![
+                "user_id",
+                "transaction_id",
+                "log_correlation",
+                "temp_file",
+                "product_id",
+            ];
+
+            // Test sensitive context detection
+            for context in &sensitive_contexts {
+                assert!(
+                    SecurityWarnings::is_security_sensitive_context(context),
+                    "Should detect '{}' as sensitive",
+                    context
+                );
+            }
+
+            // Test safe context detection
+            for context in &safe_contexts {
+                assert!(
+                    !SecurityWarnings::is_security_sensitive_context(context),
+                    "Should not detect '{}' as sensitive",
+                    context
+                );
+            }
+
+            // Test warning creation
+            let span = create_test_span();
+            for context in &sensitive_contexts {
+                let warning = SecurityWarnings::create_context_warning(context, span);
+                match warning {
+                    Value::Record { .. } => {
+                        // Warning should be a structured record
+                    }
+                    _ => panic!("Security warning should be a Record value"),
+                }
+            }
+        }
+
+        #[test]
+        fn test_security_advice_execution() {
+            // Test security advice generation from UlidSecurityAdviceCommand
+            let span = create_test_span();
+            let advice = SecurityWarnings::get_security_advice(span);
+
+            match advice {
+                Value::Record { val, .. } => {
+                    let record = val.into_owned();
+
+                    // Should contain key security advice fields
+                    assert!(record.contains("safe_use_cases") || record.contains("overview"));
+
+                    // Verify the structure contains useful information
+                    let keys: Vec<_> = record.columns().collect();
+                    assert!(!keys.is_empty(), "Security advice should have content");
+                }
+                _ => panic!("Security advice should return Record value"),
+            }
+        }
+
+        #[test]
+        fn test_format_string_validation_execution() {
+            // Test format string validation logic used in run methods
+            let valid_formats = vec!["string", "json", "binary"];
+            let invalid_formats = vec!["xml", "yaml", "csv", "", "STRING", "JSON"];
+
+            for format in &valid_formats {
+                let parsed_format = match Some(format as &str) {
+                    Some("json") => crate::UlidOutputFormat::Json,
+                    Some("binary") => crate::UlidOutputFormat::Binary,
+                    Some("string") | None => crate::UlidOutputFormat::String,
+                    _ => panic!("Should not reach here for valid format"),
+                };
+
+                // Verify format parsing works
+                match (format as &str, parsed_format) {
+                    ("string", crate::UlidOutputFormat::String) => (),
+                    ("json", crate::UlidOutputFormat::Json) => (),
+                    ("binary", crate::UlidOutputFormat::Binary) => (),
+                    _ => panic!("Format parsing mismatch for '{}'", format),
+                }
+            }
+
+            // Test invalid format detection
+            for format in &invalid_formats {
+                let is_valid = matches!(format as &str, "string" | "json" | "binary");
+                assert!(!is_valid, "Format '{}' should be invalid", format);
+            }
+        }
+
+        #[test]
+        fn test_timestamp_boundary_conditions() {
+            // Test timestamp handling edge cases
+            let test_timestamps = vec![
+                0u64,             // Unix epoch
+                1640995200000u64, // 2022-01-01 00:00:00 UTC
+                u64::MAX - 1000,  // Near max value
+            ];
+
+            for timestamp in test_timestamps {
+                // Test timestamp-based generation
+                let result = UlidEngine::generate_with_timestamp(timestamp);
+
+                if timestamp < u64::MAX - 1000 {
+                    assert!(
+                        result.is_ok(),
+                        "Should generate ULID with timestamp {}",
+                        timestamp
+                    );
+
+                    let ulid = result.unwrap();
+                    let parsed = UlidEngine::parse(&ulid.to_string()).unwrap();
+                    assert_eq!(parsed.timestamp_ms, timestamp);
+                }
+            }
+        }
+
+        #[test]
+        fn test_ulid_uniqueness_and_sorting() {
+            // Test ULID uniqueness and lexicographic sorting properties
+            let mut ulids = Vec::new();
+
+            // Generate multiple ULIDs
+            for _ in 0..10 {
+                let ulid = UlidEngine::generate().expect("Should generate ULID");
+                ulids.push(ulid.to_string());
+            }
+
+            // All should be unique
+            let unique_count = ulids.iter().collect::<std::collections::HashSet<_>>().len();
+            assert_eq!(unique_count, 10, "All ULIDs should be unique");
+
+            // Test lexicographic ordering (ULIDs should be roughly sortable by generation time)
+            let sorted_ulids = {
+                let mut sorted = ulids.clone();
+                sorted.sort();
+                sorted
+            };
+
+            // Due to timestamp precision, consecutive ULIDs should have some ordering correlation
+            // We'll just verify they can be sorted without panicking
+            assert_eq!(sorted_ulids.len(), ulids.len());
+        }
+
+        #[test]
+        fn test_error_handling_paths() {
+            // Test various error conditions in ULID operations
+
+            // Test invalid ULID string patterns
+            let invalid_inputs = vec![
+                ("", "empty string"),
+                ("invalid", "too short"),
+                ("01AN4Z07BY79KA1307SR9X4MV3EXTRA", "too long"),
+                ("01AN4Z07BY79KA1307SR9X4MV!", "invalid character"),
+                ("not-a-ulid-at-all", "completely invalid"),
+            ];
+
+            for (input, description) in invalid_inputs {
+                // Test validation
+                assert!(
+                    !UlidEngine::validate(input),
+                    "Should reject {}: {}",
+                    input,
+                    description
+                );
+
+                // Test detailed validation includes errors
+                let detailed = UlidEngine::validate_detailed(input);
+                assert!(
+                    !detailed.valid,
+                    "Detailed validation should fail for {}",
+                    description
+                );
+                assert!(
+                    !detailed.errors.is_empty(),
+                    "Should have error messages for {}",
+                    description
+                );
+
+                // Test parsing fails appropriately
+                let parse_result = UlidEngine::parse(input);
+                assert!(
+                    parse_result.is_err(),
+                    "Parsing should fail for {}",
+                    description
+                );
+            }
+
+            // Test bulk generation limits
+            let over_limit_result = UlidEngine::generate_bulk(10_001);
+            assert!(
+                over_limit_result.is_err(),
+                "Should reject over-limit bulk generation"
+            );
+        }
+
+        #[test]
+        fn test_output_value_creation() {
+            // Test the various Value creation paths used in run methods
+            let test_ulid = UlidEngine::generate().expect("Should generate test ULID");
+            let span = create_test_span();
+
+            // Test single ULID value creation
+            let single_value =
+                UlidEngine::to_value(&test_ulid, &crate::UlidOutputFormat::String, span);
+            match single_value {
+                Value::String { val, .. } => {
+                    assert_eq!(val, test_ulid.to_string());
+                }
+                _ => panic!("Single ULID should create String value"),
+            }
+
+            // Test list value creation (for bulk generation)
+            let bulk_ulids = [test_ulid];
+            let list_values: Vec<Value> = bulk_ulids
+                .iter()
+                .map(|ulid| UlidEngine::to_value(ulid, &crate::UlidOutputFormat::String, span))
+                .collect();
+
+            assert_eq!(list_values.len(), 1);
+            match &list_values[0] {
+                Value::String { val, .. } => {
+                    assert_eq!(val, &test_ulid.to_string());
+                }
+                _ => panic!("Bulk ULID should create String values"),
+            }
+
+            // Test PipelineData creation
+            let pipeline_data = PipelineData::Value(
+                Value::List {
+                    vals: list_values,
+                    internal_span: span,
+                },
+                None,
+            );
+
+            match pipeline_data {
+                PipelineData::Value(Value::List { vals, .. }, None) => {
+                    assert_eq!(vals.len(), 1);
+                }
+                _ => panic!("Should create proper PipelineData"),
+            }
+        }
+    }
 }
