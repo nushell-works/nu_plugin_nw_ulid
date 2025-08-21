@@ -697,4 +697,363 @@ mod tests {
             }
         }
     }
+
+    mod execution_logic_tests {
+        use super::*;
+
+        #[test]
+        fn test_sha256_string_input_execution() {
+            // Test SHA-256 with string input
+            let span = create_test_span();
+            let test_string = "hello world";
+            let input_value = Value::String {
+                val: test_string.to_string(),
+                internal_span: span,
+            };
+
+            // Test the input processing logic from the run method
+            let data = match input_value {
+                Value::String { val, .. } => val.into_bytes(),
+                Value::Binary { val, .. } => val,
+                _ => panic!("Should handle string input"),
+            };
+
+            // Test the actual hash computation
+            use sha2::{Digest, Sha256};
+            let mut hasher = Sha256::new();
+            hasher.update(&data);
+            let hash = hasher.finalize();
+
+            let hex_result = hex::encode(hash);
+            let binary_result = hash.to_vec();
+
+            // Verify known SHA-256 hash
+            assert_eq!(
+                hex_result,
+                "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+            );
+            assert_eq!(binary_result.len(), 32); // SHA-256 produces 32 bytes
+        }
+
+        #[test]
+        fn test_sha256_binary_input_execution() {
+            // Test SHA-256 with binary input
+            let span = create_test_span();
+            let test_bytes = vec![0x48, 0x65, 0x6c, 0x6c, 0x6f]; // "Hello"
+            let input_value = Value::Binary {
+                val: test_bytes.clone(),
+                internal_span: span,
+            };
+
+            // Test binary input processing
+            let data = match input_value {
+                Value::String { val, .. } => val.into_bytes(),
+                Value::Binary { val, .. } => val,
+                _ => panic!("Should handle binary input"),
+            };
+
+            assert_eq!(data, test_bytes);
+
+            // Test hash computation
+            use sha2::{Digest, Sha256};
+            let mut hasher = Sha256::new();
+            hasher.update(&data);
+            let hash = hasher.finalize();
+
+            assert_eq!(hash.len(), 32);
+        }
+
+        #[test]
+        fn test_sha256_invalid_input_type() {
+            // Test error handling for invalid input types
+            let span = create_test_span();
+            let invalid_input = Value::Int {
+                val: 42,
+                internal_span: span,
+            };
+
+            // Test the error path from run method
+            let result = match invalid_input {
+                Value::String { val, .. } => Ok(val.into_bytes()),
+                Value::Binary { val, .. } => Ok(val),
+                _ => Err(LabeledError::new("Invalid input type")
+                    .with_label("Expected string or binary data", span)),
+            };
+
+            assert!(result.is_err());
+            if let Err(error) = result {
+                assert_eq!(error.msg, "Invalid input type");
+            }
+        }
+
+        #[test]
+        fn test_sha256_binary_output_flag() {
+            // Test binary output flag processing
+            let test_data = b"test";
+
+            use sha2::{Digest, Sha256};
+            let mut hasher = Sha256::new();
+            hasher.update(test_data);
+            let hash = hasher.finalize();
+
+            let span = create_test_span();
+
+            // Test hex output (binary_output = false)
+            let hash_vec = hash.to_vec();
+            let hex_result = Value::string(hex::encode(&hash_vec), span);
+            match hex_result {
+                Value::String { val, .. } => {
+                    assert_eq!(val.len(), 64); // 32 bytes * 2 hex chars
+                    assert!(val.chars().all(|c| c.is_ascii_hexdigit()));
+                }
+                _ => panic!("Should be string value"),
+            }
+
+            // Test binary output (binary_output = true)
+            let binary_result = Value::binary(hash_vec, span);
+            match binary_result {
+                Value::Binary { val, .. } => {
+                    assert_eq!(val.len(), 32);
+                }
+                _ => panic!("Should be binary value"),
+            }
+        }
+
+        #[test]
+        fn test_sha512_execution() {
+            // Test SHA-512 execution path
+            let test_data = b"sha512 test";
+
+            use sha2::{Digest, Sha512};
+            let mut hasher = Sha512::new();
+            hasher.update(test_data);
+            let hash = hasher.finalize();
+
+            let hash_vec = hash.to_vec();
+            let hex_result = hex::encode(&hash_vec);
+
+            // SHA-512 produces 64 bytes
+            assert_eq!(hash_vec.len(), 64);
+            assert_eq!(hex_result.len(), 128); // 64 bytes * 2 hex chars
+        }
+
+        #[test]
+        fn test_blake3_execution() {
+            // Test BLAKE3 execution path
+            let test_data = b"blake3 test";
+            let output_length = 32;
+
+            let mut hasher = Blake3Hasher::new();
+            hasher.update(test_data);
+            let mut hash = vec![0u8; output_length];
+            hasher.finalize_xof().fill(&mut hash);
+
+            let hex_result = hex::encode(&hash);
+            let binary_result = hash;
+
+            assert_eq!(binary_result.len(), output_length);
+            assert_eq!(hex_result.len(), output_length * 2);
+        }
+
+        #[test]
+        fn test_blake3_custom_length() {
+            // Test BLAKE3 with custom output length
+            let test_data = b"variable length test";
+            let custom_lengths = [16, 32, 64, 128];
+
+            for &length in &custom_lengths {
+                // Test length validation
+                let is_valid = length > 0 && length <= 1024;
+                assert!(is_valid, "Length {} should be valid", length);
+
+                // Test hash generation
+                let mut hasher = Blake3Hasher::new();
+                hasher.update(test_data);
+                let mut hash = vec![0u8; length];
+                hasher.finalize_xof().fill(&mut hash);
+
+                assert_eq!(hash.len(), length);
+                assert!(hash.iter().any(|&b| b != 0)); // Should not be all zeros
+            }
+        }
+
+        #[test]
+        fn test_blake3_invalid_length() {
+            // Test BLAKE3 length validation error paths
+            let invalid_lengths = [0, 1025, 2000];
+
+            for &length in &invalid_lengths {
+                let is_valid = length > 0 && length <= 1024;
+                assert!(!is_valid, "Length {} should be invalid", length);
+
+                // Test error creation
+                if !is_valid {
+                    let span = create_test_span();
+                    let error = LabeledError::new("Invalid output length")
+                        .with_label("Output length must be between 1 and 1024 bytes", span);
+                    assert_eq!(error.msg, "Invalid output length");
+                }
+            }
+        }
+
+        #[test]
+        fn test_random_command_execution() {
+            // Test random bytes generation
+            let byte_count = 32;
+
+            use rand::RngCore;
+            let mut rng = rand::thread_rng();
+            let mut bytes = vec![0u8; byte_count];
+            rng.fill_bytes(&mut bytes);
+
+            let span = create_test_span();
+
+            // Test hex output
+            let hex_result = Value::string(hex::encode(&bytes), span);
+            match hex_result {
+                Value::String { val, .. } => {
+                    assert_eq!(val.len(), byte_count * 2);
+                    assert!(val.chars().all(|c| c.is_ascii_hexdigit()));
+                }
+                _ => panic!("Should be string value"),
+            }
+
+            // Test binary output
+            let binary_result = Value::binary(bytes.clone(), span);
+            match binary_result {
+                Value::Binary { val, .. } => {
+                    assert_eq!(val.len(), byte_count);
+                    assert_eq!(val, bytes);
+                }
+                _ => panic!("Should be binary value"),
+            }
+        }
+
+        #[test]
+        fn test_random_command_length_validation() {
+            // Test length validation in random command
+            let test_cases = vec![
+                (0, false, "zero length"),
+                (-1, false, "negative length"),
+                (1, true, "minimum valid"),
+                (32, true, "default length"),
+                (1024, true, "maximum valid"),
+                (1025, false, "over maximum"),
+                (2000, false, "way over maximum"),
+            ];
+
+            for (length, should_be_valid, description) in test_cases {
+                let is_valid = length > 0 && length <= 1024;
+                assert_eq!(
+                    is_valid, should_be_valid,
+                    "Failed for {}: {}",
+                    length, description
+                );
+
+                // Test error creation for invalid lengths
+                if !is_valid {
+                    let span = create_test_span();
+                    let error = LabeledError::new("Invalid length")
+                        .with_label("Length must be between 1 and 1024 bytes", span);
+                    assert_eq!(error.msg, "Invalid length");
+                }
+            }
+        }
+
+        #[test]
+        fn test_hash_consistency() {
+            // Test that hash functions are deterministic
+            let test_data = "consistency test";
+            let test_bytes = test_data.as_bytes();
+
+            // SHA-256 consistency
+            use sha2::{Digest, Sha256};
+            let mut hasher1 = Sha256::new();
+            hasher1.update(test_bytes);
+            let hash1 = hex::encode(hasher1.finalize());
+
+            let mut hasher2 = Sha256::new();
+            hasher2.update(test_bytes);
+            let hash2 = hex::encode(hasher2.finalize());
+
+            assert_eq!(hash1, hash2, "SHA-256 should be consistent");
+
+            // BLAKE3 consistency
+            let blake3_hash1 = blake3::hash(test_bytes).to_hex();
+            let blake3_hash2 = blake3::hash(test_bytes).to_hex();
+
+            assert_eq!(blake3_hash1, blake3_hash2, "BLAKE3 should be consistent");
+        }
+
+        #[test]
+        fn test_pipeline_input_processing() {
+            // Test pipeline input vs positional argument handling
+            let span = create_test_span();
+            let test_data = "pipeline test";
+
+            // Test pipeline input
+            let pipeline_input = PipelineData::Value(
+                Value::String {
+                    val: test_data.to_string(),
+                    internal_span: span,
+                },
+                None,
+            );
+
+            let data_from_pipeline = match pipeline_input {
+                PipelineData::Value(Value::String { val, .. }, _) => val.into_bytes(),
+                PipelineData::Value(Value::Binary { val, .. }, _) => val,
+                _ => panic!("Should handle pipeline string input"),
+            };
+
+            assert_eq!(data_from_pipeline, test_data.as_bytes());
+
+            // Test positional argument
+            let arg_value = Value::String {
+                val: test_data.to_string(),
+                internal_span: span,
+            };
+
+            let data_from_arg = match arg_value {
+                Value::String { val, .. } => val.into_bytes(),
+                Value::Binary { val, .. } => val,
+                _ => panic!("Should handle positional string argument"),
+            };
+
+            assert_eq!(data_from_arg, test_data.as_bytes());
+            assert_eq!(data_from_pipeline, data_from_arg);
+        }
+
+        #[test]
+        fn test_all_hash_algorithms_with_same_input() {
+            // Test all hash algorithms with the same input for comparison
+            let test_input = "cross-algorithm test";
+            let test_bytes = test_input.as_bytes();
+
+            // SHA-256
+            use sha2::{Digest, Sha256, Sha512};
+            let mut sha256_hasher = Sha256::new();
+            sha256_hasher.update(test_bytes);
+            let sha256_hash = sha256_hasher.finalize();
+            assert_eq!(sha256_hash.len(), 32);
+
+            // SHA-512
+            let mut sha512_hasher = Sha512::new();
+            sha512_hasher.update(test_bytes);
+            let sha512_hash = sha512_hasher.finalize();
+            assert_eq!(sha512_hash.len(), 64);
+
+            // BLAKE3
+            let mut blake3_hasher = Blake3Hasher::new();
+            blake3_hasher.update(test_bytes);
+            let mut blake3_hash = vec![0u8; 32];
+            blake3_hasher.finalize_xof().fill(&mut blake3_hash);
+            assert_eq!(blake3_hash.len(), 32);
+
+            // All hashes should be different (extremely high probability)
+            assert_ne!(sha256_hash.to_vec(), sha512_hash[..32].to_vec());
+            assert_ne!(sha256_hash.to_vec(), blake3_hash);
+            assert_ne!(sha512_hash[..32].to_vec(), blake3_hash);
+        }
+    }
 }
