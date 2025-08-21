@@ -67,35 +67,45 @@ Tests cover:
 - Error message formatting
 - Error conversion chains
 
-### 4. Command Modules (Unit Tests) - MISSING ❌
+### 4. Command Modules (Unit Tests) - PARTIALLY COMPLETE ✅
 
-#### 4.1 ULID Commands (`src/commands/ulid.rs`)
+#### 4.1 ULID Commands (`src/commands/ulid.rs`) - COMPLETED ✅
 **Lines of Code**: 702 (largest command file)
 **Commands**: 4 commands (Generate, Validate, Parse, SecurityAdvice)
+**Tests Implemented**: 30 unit tests
 
-**Unit Tests Needed**:
+**Unit Tests Completed**:
 - ✅ Command signature validation
 - ✅ Input parameter parsing
 - ✅ Format string validation  
 - ✅ Security context detection
 - ✅ Error condition handling
 - ✅ Output format generation
+- ✅ Count validation logic
+- ✅ Timestamp parameter validation
+- ✅ ULID string pattern validation
+- ✅ Parsing logic integration testing
 
 **Approach**: Test command logic without Nushell runtime
-**Priority**: HIGH (most complex commands)
+**Priority**: HIGH (most complex commands) - DONE ✅
 
-#### 4.2 Hash Commands (`src/commands/hash.rs`)
+#### 4.2 Hash Commands (`src/commands/hash.rs`) - COMPLETED ✅
 **Lines of Code**: 365
 **Commands**: 4 commands (SHA256, SHA512, Blake3, Random)
+**Tests Implemented**: 24 unit tests
 
-**Unit Tests Needed**:
-- Hash algorithm selection
-- Input validation (length limits)
-- Binary vs string output
-- Random byte generation
-- Error conditions
+**Unit Tests Completed**:
+- ✅ Hash algorithm selection and command signatures
+- ✅ Input validation (length limits)
+- ✅ Binary vs string output flags
+- ✅ Random byte generation and validation
+- ✅ Error conditions and boundary testing
+- ✅ Known test vector validation (SHA-256, BLAKE3)
+- ✅ Deterministic hash computation testing
+- ✅ Hex encoding correctness
+- ✅ Cryptographic algorithm correctness
 
-**Priority**: HIGH (crypto operations)
+**Priority**: HIGH (crypto operations) - DONE ✅
 
 #### 4.3 Time Commands (`src/commands/time.rs`) 
 **Lines of Code**: 321
@@ -170,9 +180,9 @@ ulid generate --count -1
 ## Implementation Priority
 
 ### Phase 1: Critical Command Unit Tests
-1. **ULID Commands** (`src/commands/ulid.rs`) - Core functionality
-2. **Hash Commands** (`src/commands/hash.rs`) - Security-critical
-3. **Time Commands** (`src/commands/time.rs`) - Core functionality
+1. ✅ **ULID Commands** (`src/commands/ulid.rs`) - Core functionality - DONE (30 tests)
+2. ✅ **Hash Commands** (`src/commands/hash.rs`) - Security-critical - DONE (24 tests)
+3. **Time Commands** (`src/commands/time.rs`) - Core functionality - IN PROGRESS
 
 ### Phase 2: Supporting Command Unit Tests  
 4. **Encoding Commands** (`src/commands/encode.rs`)
@@ -192,11 +202,11 @@ ulid generate --count -1
 
 ## Coverage Goals
 
-### Current Estimated Coverage: ~40%
+### Current Estimated Coverage: ~65%
 - Core engine: ~95% ✅
-- Security: ~70% ✅  
-- Error handling: ~60% ✅
-- Commands: ~0% ❌
+- Security: ~80% ✅ (improved with context detection tests)
+- Error handling: ~70% ✅ (improved with command error tests) 
+- Commands: ~35% ✅ (54 tests added for ULID + Hash commands)
 - Integration: ~20% ❌
 
 ### Target Coverage: ~85%
@@ -301,6 +311,34 @@ fn test_ulid_generate_command() {
 2. **Help Text Generation** - Command documentation
 3. **Simple Utility Functions** - String manipulation
 
+## Progress Summary
+
+### ✅ COMPLETED (Phase 1 - Critical Commands)
+- **ULID Commands**: 30 unit tests covering all 4 commands (Generate, Validate, Parse, SecurityAdvice)
+- **Hash Commands**: 24 unit tests covering all 4 commands (SHA256, SHA512, Blake3, Random)
+- **Total Tests Added**: 54 new unit tests
+- **Coverage Improvement**: ~40% → ~65% (estimated 25% improvement)
+
+### 🚧 IN PROGRESS  
+- **Time Commands**: Next priority (3 commands)
+
+### ⏳ REMAINING WORK
+- **Encoding Commands**: 4 commands (Base32/Hex encode/decode)
+- **UUID Commands**: 3 commands  
+- **Sort Commands**: 2 commands
+- **Stream Commands**: 2 commands
+- **Info Commands**: 1 command
+- **Integration Tests**: Command workflow testing
+
+### 🎯 Impact
+The critical Phase 1 implementation has:
+1. **Eliminated the biggest coverage gap** - Command modules went from 0% to ~35% coverage
+2. **Added comprehensive testing** for the most complex user-facing functionality
+3. **Improved overall project coverage** by an estimated 25 percentage points
+4. **Established testing patterns** for remaining command modules
+
 ## Conclusion
 
 This comprehensive test plan will improve the project's test coverage from ~40% to ~85%, focusing first on the most critical and untested components (command modules), then expanding to full integration testing. The phased approach ensures immediate improvement in the most important areas while building toward comprehensive coverage.
+
+**Phase 1 is now 67% complete** with the two highest-priority command modules fully tested.
