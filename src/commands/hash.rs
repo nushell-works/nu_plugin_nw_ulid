@@ -574,7 +574,7 @@ mod tests {
         fn test_random_bytes_generation() {
             // Test that random bytes are actually generated
             use rand::RngCore;
-            let mut rng = rand::thread_rng();
+            let mut rng = rand::rng();
             let mut bytes1 = vec![0u8; 32];
             let mut bytes2 = vec![0u8; 32];
 
@@ -902,7 +902,7 @@ mod tests {
             let byte_count = 32;
 
             use rand::RngCore;
-            let mut rng = rand::thread_rng();
+            let mut rng = rand::rng();
             let mut bytes = vec![0u8; byte_count];
             rng.fill_bytes(&mut bytes);
 
