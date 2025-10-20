@@ -70,7 +70,7 @@ uuid = { version = "1.18.0", features = ["v4"] }
 base64 = "0.22.1"
 
 [dev-dependencies]
-nu-test-support = "0.106.1"
+nu-test-support = "0.108.0"
 criterion = { version = "0.7", features = ["html_reports"] }
 
 [profile.release]
