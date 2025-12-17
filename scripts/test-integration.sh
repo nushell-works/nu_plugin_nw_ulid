@@ -15,8 +15,8 @@ NC='\033[0m' # No Color
 
 # Check if Nushell is installed
 if ! command -v nu &> /dev/null; then
-    echo -e "${RED}❌ Nushell not found. Please install Nushell 0.106.1+${NC}"
-    echo "Install with: cargo install nu --version 0.106.1"
+    echo -e "${RED}❌ Nushell not found. Please install Nushell 0.109.1+${NC}"
+    echo "Install with: cargo install nu --version 0.109.1"
     exit 1
 fi
 

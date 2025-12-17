@@ -53,20 +53,15 @@ impl SecurityWarnings {
         // Header
         main_record.push(
             "title",
-            Value::String {
-                val: "🚨 ULID Security Considerations".to_string(),
-                internal_span: span,
-            },
+            Value::string("🚨 ULID Security Considerations", span),
         );
 
         main_record.push(
             "warning",
-            Value::String {
-                val:
-                    "ULIDs have important security limitations due to monotonic generation patterns"
-                        .to_string(),
-                internal_span: span,
-            },
+            Value::string(
+                "ULIDs have important security limitations due to monotonic generation patterns",
+                span,
+            ),
         );
 
         // Safe use cases
@@ -82,19 +77,10 @@ impl SecurityWarnings {
 
         let safe_values: Vec<Value> = safe_cases
             .into_iter()
-            .map(|case| Value::String {
-                val: case.to_string(),
-                internal_span: span,
-            })
+            .map(|case| Value::string(case, span))
             .collect();
 
-        main_record.push(
-            "safe_use_cases",
-            Value::List {
-                vals: safe_values,
-                internal_span: span,
-            },
-        );
+        main_record.push("safe_use_cases", Value::list(safe_values, span));
 
         // Unsafe use cases
         let unsafe_cases = vec![
@@ -110,64 +96,37 @@ impl SecurityWarnings {
 
         let unsafe_values: Vec<Value> = unsafe_cases
             .into_iter()
-            .map(|case| Value::String {
-                val: case.to_string(),
-                internal_span: span,
-            })
+            .map(|case| Value::string(case, span))
             .collect();
 
-        main_record.push(
-            "unsafe_use_cases",
-            Value::List {
-                vals: unsafe_values,
-                internal_span: span,
-            },
-        );
+        main_record.push("unsafe_use_cases", Value::list(unsafe_values, span));
 
         // Vulnerability explanation
-        main_record.push("vulnerability", Value::String {
-            val: "When multiple ULIDs are generated within the same millisecond, the randomness component becomes a counter (incremented by 1). This creates predictable sequences that enable timing-based attacks.".to_string(),
-            internal_span: span,
-        });
+        main_record.push("vulnerability", Value::string(
+            "When multiple ULIDs are generated within the same millisecond, the randomness component becomes a counter (incremented by 1). This creates predictable sequences that enable timing-based attacks.",
+            span,
+        ));
 
         // Attack example
         let mut attack_record = Record::new();
         attack_record.push(
             "scenario",
-            Value::String {
-                val: "Generate two objects simultaneously".to_string(),
-                internal_span: span,
-            },
+            Value::string("Generate two objects simultaneously", span),
         );
         attack_record.push(
             "time_t",
-            Value::String {
-                val: "01AN4Z07BY + 79KA1307SR9X4MV3".to_string(),
-                internal_span: span,
-            },
+            Value::string("01AN4Z07BY + 79KA1307SR9X4MV3", span),
         );
         attack_record.push(
             "time_t_plus_1",
-            Value::String {
-                val: "01AN4Z07BY + 79KA1307SR9X4MV4  (just incremented!)".to_string(),
-                internal_span: span,
-            },
+            Value::string("01AN4Z07BY + 79KA1307SR9X4MV4  (just incremented!)", span),
         );
         attack_record.push(
             "impact",
-            Value::String {
-                val: "Second ULID = First ULID + 1 (predictable)".to_string(),
-                internal_span: span,
-            },
+            Value::string("Second ULID = First ULID + 1 (predictable)", span),
         );
 
-        main_record.push(
-            "attack_example",
-            Value::Record {
-                val: attack_record.into(),
-                internal_span: span,
-            },
-        );
+        main_record.push("attack_example", Value::record(attack_record, span));
 
         // Secure alternatives
         let alternatives = vec![
@@ -197,34 +156,13 @@ impl SecurityWarnings {
             .into_iter()
             .map(|(use_case, alternative)| {
                 let mut alt_record = Record::new();
-                alt_record.push(
-                    "use_case",
-                    Value::String {
-                        val: use_case.to_string(),
-                        internal_span: span,
-                    },
-                );
-                alt_record.push(
-                    "recommended",
-                    Value::String {
-                        val: alternative.to_string(),
-                        internal_span: span,
-                    },
-                );
-                Value::Record {
-                    val: alt_record.into(),
-                    internal_span: span,
-                }
+                alt_record.push("use_case", Value::string(use_case, span));
+                alt_record.push("recommended", Value::string(alternative, span));
+                Value::record(alt_record, span)
             })
             .collect();
 
-        main_record.push(
-            "secure_alternatives",
-            Value::List {
-                vals: alt_values,
-                internal_span: span,
-            },
-        );
+        main_record.push("secure_alternatives", Value::list(alt_values, span));
 
         // Best practices
         let best_practices = vec![
@@ -238,33 +176,18 @@ impl SecurityWarnings {
 
         let practice_values: Vec<Value> = best_practices
             .into_iter()
-            .map(|practice| Value::String {
-                val: practice.to_string(),
-                internal_span: span,
-            })
+            .map(|practice| Value::string(practice, span))
             .collect();
 
-        main_record.push(
-            "best_practices",
-            Value::List {
-                vals: practice_values,
-                internal_span: span,
-            },
-        );
+        main_record.push("best_practices", Value::list(practice_values, span));
 
         // Additional resources
         main_record.push(
             "learn_more",
-            Value::String {
-                val: "See ULID specification: https://github.com/ulid/spec".to_string(),
-                internal_span: span,
-            },
+            Value::string("See ULID specification: https://github.com/ulid/spec", span),
         );
 
-        Value::Record {
-            val: main_record.into(),
-            internal_span: span,
-        }
+        Value::record(main_record, span)
     }
 
     /// Create a warning message for specific context
@@ -273,37 +196,31 @@ impl SecurityWarnings {
 
         record.push(
             "warning",
-            Value::String {
-                val: "⚠️  Potential security concern detected".to_string(),
-                internal_span: span,
-            },
+            Value::string("⚠️  Potential security concern detected", span),
+        );
+
+        record.push("context", Value::string(context, span));
+
+        record.push(
+            "message",
+            Value::string(
+                format!(
+                    "The context '{}' suggests security-sensitive usage. ULIDs may not be appropriate for authentication, session management, or cryptographic purposes.",
+                    context
+                ),
+                span,
+            ),
         );
 
         record.push(
-            "context",
-            Value::String {
-                val: context.to_string(),
-                internal_span: span,
-            },
+            "recommendation",
+            Value::string(
+                "Consider using cryptographically secure random tokens instead. Run 'ulid security-advice' for detailed guidance.",
+                span,
+            ),
         );
 
-        record.push("message", Value::String {
-            val: format!(
-                "The context '{}' suggests security-sensitive usage. ULIDs may not be appropriate for authentication, session management, or cryptographic purposes.",
-                context
-            ),
-            internal_span: span,
-        });
-
-        record.push("recommendation", Value::String {
-            val: "Consider using cryptographically secure random tokens instead. Run 'ulid security-advice' for detailed guidance.".to_string(),
-            internal_span: span,
-        });
-
-        Value::Record {
-            val: record.into(),
-            internal_span: span,
-        }
+        Value::record(record, span)
     }
 
     /// Get security rating for a usage context
