@@ -49,7 +49,7 @@ This is the initial production release with:
 - ✅ Complete ULID functionality (23 commands)
 - ✅ Enterprise-grade security and performance
 - ✅ Comprehensive testing and documentation
-- ✅ Nushell 0.106.1+ compatibility
+- ✅ Nushell 0.109.1+ compatibility
 - ✅ Rust edition 2024 support
 
 ### Future Versions
@@ -58,8 +58,8 @@ This is the initial production release with:
 ```
 Feature                  | v0.1.x              | v0.2.x (Planned)
 -------------------------|---------------------|-------------------
-Minimum Rust Version    | 1.85.0 (edition24) | 1.90.0+
-Minimum Nushell Version | 0.106.1             | 0.110.0+
+Minimum Rust Version    | 1.89.0 (edition24) | 1.90.0+
+Minimum Nushell Version | 0.109.1             | 0.110.0+
 Command Interface        | Stable              | Enhanced subcommands
 Error Types              | Basic               | Detailed error context
 Async Support            | No                  | Yes
@@ -276,7 +276,7 @@ def migrate_mongodb_collection [collection: string] {
 ```
 nu_plugin_nw_ulid | Nushell Version | Rust Requirement | Status
 ------------------|-----------------|-------------------|--------
-0.1.0             | 0.106.1+        | 1.85.0+          | ✅ Current
+0.1.0             | 0.109.1+        | 1.89.0+          | ✅ Current
 Future 0.2.x      | 0.110.0+        | 1.90.0+          | 🔄 Planned
 ```
 
@@ -372,12 +372,12 @@ def check_migration_readiness [] {
     let checks = [
         {
             name: "Nushell Version",
-            check: { (version | get version) >= "0.106.1" },
-            fix: "Update Nushell: cargo install nu --version 0.106.1"
+            check: { (version | get version) >= "0.109.1" },
+            fix: "Update Nushell: cargo install nu --version 0.109.1"
         },
         {
             name: "Rust Version",
-            check: { (rustc --version | parse "rustc {version}" | get version.0) >= "1.85.0" },
+            check: { (rustc --version | parse "rustc {version}" | get version.0) >= "1.89.0" },
             fix: "Update Rust: rustup update"
         },
         {
@@ -564,8 +564,8 @@ def migration_checklist [] {
     let items = [
         "✅ Backup of original data created",
         "✅ Old plugin uninstalled (if applicable)",
-        "✅ Nushell version 0.106.1+ verified",
-        "✅ Rust version 1.85.0+ verified",
+        "✅ Nushell version 0.109.1+ verified",
+        "✅ Rust version 1.89.0+ verified",
         "✅ nu_plugin_nw_ulid installed from crates.io",
         "✅ Plugin registered with correct binary name",
         "✅ Basic functionality verified",

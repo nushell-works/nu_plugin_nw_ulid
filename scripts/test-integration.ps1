@@ -15,8 +15,8 @@ try {
     $nuVersion = & nu --version 2>$null | Select-Object -First 1
     Write-Host "📋 Found: $nuVersion" -ForegroundColor Yellow
 } catch {
-    Write-Host "❌ Nushell not found. Please install Nushell 0.106.1+" -ForegroundColor Red
-    Write-Host "Install with: cargo install nu --version 0.106.1" -ForegroundColor Yellow
+    Write-Host "❌ Nushell not found. Please install Nushell 0.109.1+" -ForegroundColor Red
+    Write-Host "Install with: cargo install nu --version 0.109.1" -ForegroundColor Yellow
     exit 1
 }
 

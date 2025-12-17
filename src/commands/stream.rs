@@ -106,6 +106,7 @@ impl PluginCommand for UlidStreamCommand {
                 Value::List {
                     vals,
                     internal_span,
+                    ..
                 },
                 _,
             ) => {
@@ -121,10 +122,7 @@ impl PluginCommand for UlidStreamCommand {
                 .map_err(|e| *e)?;
 
                 Ok(PipelineData::Value(
-                    Value::List {
-                        vals: result,
-                        internal_span,
-                    },
+                    Value::list(result, internal_span),
                     None,
                 ))
             }
@@ -207,10 +205,7 @@ fn process_batch_sequential(
                     let mut error_record = nu_protocol::Record::new();
                     error_record.push("error", Value::string(e.msg, call_head));
                     error_record.push("input", value.clone());
-                    results.push(Value::Record {
-                        val: error_record.into(),
-                        internal_span: call_head,
-                    });
+                    results.push(Value::record(error_record, call_head));
                 } else {
                     return Err(e);
                 }
@@ -263,10 +258,7 @@ fn process_single_item(
                     record.push("ulid", Value::string(&components.ulid, call_head));
                     record.push("timestamp_ms", Value::int(components.timestamp_ms as i64, call_head));
                     record.push("randomness", Value::string(&components.randomness_hex, call_head));
-                    Ok(Value::Record {
-                        val: record.into(),
-                        internal_span: call_head,
-                    })
+                    Ok(Value::record(record, call_head))
                 }
                 "timestamp-only" => Ok(Value::int(components.timestamp_ms as i64, call_head)),
                 _ => Ok(UlidEngine::components_to_value(&components, call_head)),
@@ -289,10 +281,7 @@ fn process_single_item(
                 "compact" => {
                     let mut record = nu_protocol::Record::new();
                     record.push("ulid", Value::string(&ulid_str, call_head));
-                    Ok(Value::Record {
-                        val: record.into(),
-                        internal_span: call_head,
-                    })
+                    Ok(Value::record(record, call_head))
                 }
                 _ => Ok(Value::string(&ulid_str, call_head)),
             }
@@ -455,13 +444,7 @@ impl PluginCommand for UlidGenerateStreamCommand {
             results.extend(batch_results);
         }
 
-        Ok(PipelineData::Value(
-            Value::List {
-                vals: results,
-                internal_span: call.head,
-            },
-            None,
-        ))
+        Ok(PipelineData::Value(Value::list(results, call.head), None))
     }
 }
 

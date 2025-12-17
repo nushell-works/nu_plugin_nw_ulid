@@ -38,8 +38,8 @@ Examples of behavior that contributes to creating a positive environment include
 
 Ensure you have the required tools installed:
 
-- **Rust 1.85.0+**: [Install Rust](https://rustup.rs/) (required for Rust edition 2024)
-- **Nushell 0.106.1+**: [Install Nushell](https://nushell.sh/book/installation.html)
+- **Rust 1.89.0+**: [Install Rust](https://rustup.rs/) (required for Nushell 0.109.1)
+- **Nushell 0.109.1+**: [Install Nushell](https://nushell.sh/book/installation.html)
 - **Git**: [Install Git](https://git-scm.com/downloads)
 
 ### Fork and Clone

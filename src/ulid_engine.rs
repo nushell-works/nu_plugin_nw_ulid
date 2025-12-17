@@ -172,44 +172,20 @@ impl UlidEngine {
     /// Convert ULID to Nushell Value based on format
     pub fn to_value(ulid: &Ulid, format: &UlidOutputFormat, span: Span) -> Value {
         match format {
-            UlidOutputFormat::String => Value::String {
-                val: ulid.to_string(),
-                internal_span: span,
-            },
+            UlidOutputFormat::String => Value::string(ulid.to_string(), span),
             UlidOutputFormat::Json => {
                 let mut record = Record::new();
-                record.push(
-                    "ulid",
-                    Value::String {
-                        val: ulid.to_string(),
-                        internal_span: span,
-                    },
-                );
-                record.push(
-                    "timestamp_ms",
-                    Value::Int {
-                        val: ulid.timestamp_ms() as i64,
-                        internal_span: span,
-                    },
-                );
+                record.push("ulid", Value::string(ulid.to_string(), span));
+                record.push("timestamp_ms", Value::int(ulid.timestamp_ms() as i64, span));
                 record.push(
                     "randomness",
-                    Value::String {
-                        val: format!("{:x}", ulid.random()),
-                        internal_span: span,
-                    },
+                    Value::string(format!("{:x}", ulid.random()), span),
                 );
-                Value::Record {
-                    val: record.into(),
-                    internal_span: span,
-                }
+                Value::record(record, span)
             }
             UlidOutputFormat::Binary => {
                 let bytes = ulid.to_bytes();
-                Value::Binary {
-                    val: bytes.to_vec(),
-                    internal_span: span,
-                }
+                Value::binary(bytes.to_vec(), span)
             }
         }
     }
@@ -218,22 +194,10 @@ impl UlidEngine {
     pub fn components_to_value(components: &UlidComponents, span: Span) -> Value {
         let mut record = Record::new();
 
-        record.push(
-            "ulid",
-            Value::String {
-                val: components.ulid.clone(),
-                internal_span: span,
-            },
-        );
+        record.push("ulid", Value::string(components.ulid.clone(), span));
 
         let mut timestamp_record = Record::new();
-        timestamp_record.push(
-            "ms",
-            Value::Int {
-                val: components.timestamp_ms as i64,
-                internal_span: span,
-            },
-        );
+        timestamp_record.push("ms", Value::int(components.timestamp_ms as i64, span));
 
         // Convert timestamp to ISO8601 format
         let timestamp_secs = components.timestamp_ms / 1000;
@@ -244,57 +208,24 @@ impl UlidEngine {
         {
             timestamp_record.push(
                 "iso8601",
-                Value::String {
-                    val: datetime.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string(),
-                    internal_span: span,
-                },
+                Value::string(datetime.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string(), span),
             );
-            timestamp_record.push(
-                "unix",
-                Value::Int {
-                    val: timestamp_secs as i64,
-                    internal_span: span,
-                },
-            );
+            timestamp_record.push("unix", Value::int(timestamp_secs as i64, span));
         }
 
-        record.push(
-            "timestamp",
-            Value::Record {
-                val: timestamp_record.into(),
-                internal_span: span,
-            },
-        );
+        record.push("timestamp", Value::record(timestamp_record, span));
 
         let mut randomness_record = Record::new();
         randomness_record.push(
             "hex",
-            Value::String {
-                val: components.randomness_hex.clone(),
-                internal_span: span,
-            },
+            Value::string(components.randomness_hex.clone(), span),
         );
 
-        record.push(
-            "randomness",
-            Value::Record {
-                val: randomness_record.into(),
-                internal_span: span,
-            },
-        );
+        record.push("randomness", Value::record(randomness_record, span));
 
-        record.push(
-            "valid",
-            Value::Bool {
-                val: components.valid,
-                internal_span: span,
-            },
-        );
+        record.push("valid", Value::bool(components.valid, span));
 
-        Value::Record {
-            val: record.into(),
-            internal_span: span,
-        }
+        Value::record(record, span)
     }
 
     /// Check if a ULID has security warnings

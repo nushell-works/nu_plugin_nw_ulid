@@ -706,10 +706,7 @@ mod tests {
             // Test SHA-256 with string input
             let span = create_test_span();
             let test_string = "hello world";
-            let input_value = Value::String {
-                val: test_string.to_string(),
-                internal_span: span,
-            };
+            let input_value = Value::string(test_string.to_string(), span);
 
             // Test the input processing logic from the run method
             let data = match input_value {
@@ -740,10 +737,7 @@ mod tests {
             // Test SHA-256 with binary input
             let span = create_test_span();
             let test_bytes = vec![0x48, 0x65, 0x6c, 0x6c, 0x6f]; // "Hello"
-            let input_value = Value::Binary {
-                val: test_bytes.clone(),
-                internal_span: span,
-            };
+            let input_value = Value::binary(test_bytes.clone(), span);
 
             // Test binary input processing
             let data = match input_value {
@@ -767,10 +761,7 @@ mod tests {
         fn test_sha256_invalid_input_type() {
             // Test error handling for invalid input types
             let span = create_test_span();
-            let invalid_input = Value::Int {
-                val: 42,
-                internal_span: span,
-            };
+            let invalid_input = Value::int(42, span);
 
             // Test the error path from run method
             let result = match invalid_input {
@@ -992,13 +983,8 @@ mod tests {
             let test_data = "pipeline test";
 
             // Test pipeline input
-            let pipeline_input = PipelineData::Value(
-                Value::String {
-                    val: test_data.to_string(),
-                    internal_span: span,
-                },
-                None,
-            );
+            let pipeline_input =
+                PipelineData::Value(Value::string(test_data.to_string(), span), None);
 
             let data_from_pipeline = match pipeline_input {
                 PipelineData::Value(Value::String { val, .. }, _) => val.into_bytes(),
@@ -1009,10 +995,7 @@ mod tests {
             assert_eq!(data_from_pipeline, test_data.as_bytes());
 
             // Test positional argument
-            let arg_value = Value::String {
-                val: test_data.to_string(),
-                internal_span: span,
-            };
+            let arg_value = Value::string(test_data.to_string(), span);
 
             let data_from_arg = match arg_value {
                 Value::String { val, .. } => val.into_bytes(),

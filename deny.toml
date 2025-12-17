@@ -22,7 +22,7 @@ ignore = [
     # This is a transitive dependency we can't easily control
     "RUSTSEC-2024-0436",  # paste crate no longer maintained
     
-    # Note: proc-macro-error advisory removed as it's no longer present in Nushell 0.106.1
+    # Note: proc-macro-error advisory removed as it's no longer present in Nushell 0.109.1
 ]
 
 [licenses]

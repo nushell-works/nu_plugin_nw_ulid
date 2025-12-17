@@ -211,8 +211,8 @@ Based on benchmarking against reference implementations:
 
 ### Prerequisites
 
-- Rust 1.85.0 or later (required for Rust edition 2024)
-- Nushell 0.106.1 or later
+- Rust 1.89.0 or later (required for Nushell 0.109.1)
+- Nushell 0.109.1 or later
 
 ### Building
 

@@ -91,6 +91,7 @@ impl PluginCommand for UlidSortCommand {
                 Value::List {
                     vals,
                     internal_span,
+                    ..
                 },
                 _,
             ) => {
@@ -108,10 +109,7 @@ impl PluginCommand for UlidSortCommand {
                 }
 
                 Ok(PipelineData::Value(
-                    Value::List {
-                        vals: sorted_vals,
-                        internal_span,
-                    },
+                    Value::list(sorted_vals, internal_span),
                     None,
                 ))
             }
@@ -351,13 +349,7 @@ impl PluginCommand for UlidInspectCommand {
                     ts_record.push("age", Value::string("in the future".to_string(), call.head));
                 }
 
-                record.push(
-                    "timestamp",
-                    Value::Record {
-                        val: ts_record.into(),
-                        internal_span: call.head,
-                    },
-                );
+                record.push("timestamp", Value::record(ts_record, call.head));
             }
         }
 
@@ -387,13 +379,7 @@ impl PluginCommand for UlidInspectCommand {
                     );
                 }
 
-                record.push(
-                    "randomness",
-                    Value::Record {
-                        val: rand_record.into(),
-                        internal_span: call.head,
-                    },
-                );
+                record.push("randomness", Value::record(rand_record, call.head));
             }
         }
 
@@ -419,22 +405,10 @@ impl PluginCommand for UlidInspectCommand {
                 Value::string("~1 in 1.2 × 10^24".to_string(), call.head),
             );
 
-            record.push(
-                "statistics",
-                Value::Record {
-                    val: stats_record.into(),
-                    internal_span: call.head,
-                },
-            );
+            record.push("statistics", Value::record(stats_record, call.head));
         }
 
-        Ok(PipelineData::Value(
-            Value::Record {
-                val: record.into(),
-                internal_span: call.head,
-            },
-            None,
-        ))
+        Ok(PipelineData::Value(Value::record(record, call.head), None))
     }
 }
 

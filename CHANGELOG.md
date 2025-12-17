@@ -77,8 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Technical Implementation
 - Built with Rust 2024 edition for latest language features
-- Minimum supported Rust version: 1.85.0
-- Compatible with Nushell 0.106.1 and later
+- Minimum supported Rust version: 1.89.0
+- Compatible with Nushell 0.109.1 and later
 - Zero clippy warnings with production-quality code standards
 - Memory-safe implementation with extensive error handling
 - Async-ready architecture for future scalability

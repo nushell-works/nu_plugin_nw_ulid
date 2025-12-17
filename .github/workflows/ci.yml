@@ -25,7 +25,7 @@ jobs:
         rust: [stable, beta]
         include:
           - os: ubuntu-latest
-            rust: 1.85.0  # MSRV for Rust edition 2024 support
+            rust: 1.89.0  # MSRV required by Nushell 0.109.1
         exclude:
           - os: macos-latest
             rust: beta
@@ -136,7 +136,7 @@ jobs:
       uses: actions/checkout@v6
 
     - name: Install MSRV Rust toolchain
-      uses: dtolnay/rust-toolchain@1.85.0
+      uses: dtolnay/rust-toolchain@1.89.0
 
     - name: Cache Cargo registry
       uses: actions/cache@v5
@@ -178,7 +178,7 @@ jobs:
         key: ${{ runner.os }}-cargo-integration-${{ hashFiles('**/Cargo.lock') }}
 
     - name: Install Nushell
-      run: cargo install nu --version 0.106.1 --locked
+      run: cargo install nu --version 0.109.1 --locked
 
     - name: Run integration tests (Unix)
       if: runner.os != 'Windows'

@@ -90,11 +90,11 @@ impl PluginCommand for UlidGenerateCommand {
         let context: Option<String> = call.get_flag("context")?;
 
         // Security check for context
-        if let Some(ref ctx) = context {
-            if SecurityWarnings::is_security_sensitive_context(ctx) {
-                let warning = SecurityWarnings::create_context_warning(ctx, call.head);
-                return Ok(PipelineData::Value(warning, None));
-            }
+        if let Some(ref ctx) = context
+            && SecurityWarnings::is_security_sensitive_context(ctx)
+        {
+            let warning = SecurityWarnings::create_context_warning(ctx, call.head);
+            return Ok(PipelineData::Value(warning, None));
         }
 
         // Parse format
@@ -151,13 +151,7 @@ impl PluginCommand for UlidGenerateCommand {
                     .map(|ulid| UlidEngine::to_value(ulid, &format, call.head))
                     .collect();
 
-                Ok(PipelineData::Value(
-                    Value::List {
-                        vals: values,
-                        internal_span: call.head,
-                    },
-                    None,
-                ))
+                Ok(PipelineData::Value(Value::list(values, call.head), None))
             }
             None => {
                 // Generate single ULID
@@ -258,21 +252,9 @@ impl PluginCommand for UlidValidateCommand {
                 .map(|err| Value::string(err, call.head))
                 .collect();
 
-            record.push(
-                "errors",
-                Value::List {
-                    vals: errors,
-                    internal_span: call.head,
-                },
-            );
+            record.push("errors", Value::list(errors, call.head));
 
-            Ok(PipelineData::Value(
-                Value::Record {
-                    val: record.into(),
-                    internal_span: call.head,
-                },
-                None,
-            ))
+            Ok(PipelineData::Value(Value::record(record, call.head), None))
         } else {
             let is_valid = UlidEngine::validate(&ulid_str);
             Ok(PipelineData::Value(Value::bool(is_valid, call.head), None))
@@ -1326,13 +1308,7 @@ mod tests {
             }
 
             // Test PipelineData creation
-            let pipeline_data = PipelineData::Value(
-                Value::List {
-                    vals: list_values,
-                    internal_span: span,
-                },
-                None,
-            );
+            let pipeline_data = PipelineData::Value(Value::list(list_values, span), None);
 
             match pipeline_data {
                 PipelineData::Value(Value::List { vals, .. }, None) => {
