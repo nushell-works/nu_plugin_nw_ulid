@@ -149,25 +149,10 @@ pub fn create_info_value(title: &str, message: &str, span: Span) -> Value {
     use nu_protocol::Record;
 
     let mut record = Record::new();
-    record.push(
-        "info",
-        Value::String {
-            val: title.to_string(),
-            internal_span: span,
-        },
-    );
-    record.push(
-        "message",
-        Value::String {
-            val: message.to_string(),
-            internal_span: span,
-        },
-    );
+    record.push("info", Value::string(title, span));
+    record.push("message", Value::string(message, span));
 
-    Value::Record {
-        val: record.into(),
-        internal_span: span,
-    }
+    Value::record(record, span)
 }
 
 /// Create success message with data
@@ -178,26 +163,11 @@ where
     use nu_protocol::Record;
 
     let mut record = Record::new();
-    record.push(
-        "success",
-        Value::Bool {
-            val: true,
-            internal_span: span,
-        },
-    );
-    record.push(
-        "message",
-        Value::String {
-            val: message.to_string(),
-            internal_span: span,
-        },
-    );
+    record.push("success", Value::bool(true, span));
+    record.push("message", Value::string(message, span));
     record.push("data", data.into());
 
-    Value::Record {
-        val: record.into(),
-        internal_span: span,
-    }
+    Value::record(record, span)
 }
 
 #[cfg(test)]

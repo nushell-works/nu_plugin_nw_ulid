@@ -15,7 +15,7 @@ This document describes the development environment setup and requirements for t
 |------|---------|---------|
 | **Rust** | 1.89.0 | Core language and toolchain |
 | **Cargo** | 1.89.0 | Package manager and build tool |
-| **Nushell** | 0.106.1 | Target shell environment |
+| **Nushell** | 0.109.1 | Target shell environment |
 | **Git** | 2.39.5+ | Version control |
 
 ### Development Quality Tools
@@ -45,7 +45,7 @@ cargo install nu
 ```bash
 rustc --version    # Should show: rustc 1.89.0+
 cargo --version    # Should show: cargo 1.89.0+
-nu --version       # Should show: 0.106.1+
+nu --version       # Should show: 0.109.1+
 clippy --version   # Should show: clippy 0.1.89+
 rustfmt --version  # Should show: rustfmt 1.8.0+
 ```

@@ -11,7 +11,7 @@ documentation = "https://docs.rs/nu_plugin_nw_ulid"
 keywords = ["nushell", "ulid", "uuid", "identifier", "plugin"]
 categories = ["command-line-utilities", "development-tools", "cryptography", "data-structures"]
 readme = "README.md"
-rust-version = "1.85.0"
+rust-version = "1.89.0"
 include = [
     "src/**/*",
     "docs/**/*",
@@ -54,8 +54,8 @@ name = "nu_plugin_nw_ulid"
 path = "src/lib.rs"
 
 [dependencies]
-nu-plugin = "0.106.1"
-nu-protocol = "0.106.1"
+nu-plugin = "0.109.1"
+nu-protocol = "0.109.1"
 
 # Production dependencies for Phase 3+
 ulid = { version = "1.1", features = ["serde"] }
@@ -70,7 +70,7 @@ uuid = { version = "1.19.0", features = ["v4"] }
 base64 = "0.22.1"
 
 [dev-dependencies]
-nu-test-support = "0.106.1"
+nu-test-support = "0.109.1"
 criterion = { version = "0.7", features = ["html_reports"] }
 
 [profile.release]

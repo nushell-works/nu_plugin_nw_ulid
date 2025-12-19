@@ -2,7 +2,7 @@
 
 **Version**: 0.1.0  
 **Last Updated**: August 17, 2025  
-**Compatibility**: Nushell 0.106.1+
+**Compatibility**: Nushell 0.109.1+
 
 Complete reference for all ULID plugin commands and their programmatic usage. This document provides detailed API specifications, parameter descriptions, return types, and advanced usage patterns for developers and script authors.
 

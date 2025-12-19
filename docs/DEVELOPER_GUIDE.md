@@ -133,8 +133,8 @@ impl UlidError {
 
 ### Prerequisites
 
-- **Rust 1.85.0+** (required for Rust edition 2024)
-- **Nushell 0.106.1+**
+- **Rust 1.89.0+** (required for Nushell 0.109.1)
+- **Nushell 0.109.1+**
 - **Git** for version control
 - **cargo-audit** for security scanning
 - **cargo-deny** for dependency management

@@ -53,7 +53,7 @@ test-integration: ## Run integration tests with Nushell
 		./scripts/test-integration.sh; \
 	else \
 		echo "❌ Nushell not found. Please install Nushell first."; \
-		echo "Install with: cargo install nu --version 0.106.1"; \
+		echo "Install with: cargo install nu --version 0.109.1"; \
 		exit 1; \
 	fi
 
