@@ -112,4 +112,6 @@ jobs:
       uses: actions/dependency-review-action@v4
       with:
         fail-on-severity: moderate
-        allow-licenses: BSD-3-Clause, MIT, Apache-2.0, ISC, Unicode-DFS-2016
+        allow-licenses: BSD-3-Clause, MIT, Apache-2.0, ISC, Unicode-DFS-2016, MIT/Apache-2.0
+        # Note: MIT/Apache-2.0 is non-standard SPDX format used by nu-glob@0.109.1
+        # Standard format should be "MIT OR Apache-2.0" but we allow this for compatibility

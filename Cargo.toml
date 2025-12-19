@@ -54,7 +54,7 @@ name = "nu_plugin_nw_ulid"
 path = "src/lib.rs"
 
 [dependencies]
-nu-plugin = "0.106.1"
+nu-plugin = "0.109.1"
 nu-protocol = "0.106.1"
 
 # Production dependencies for Phase 3+
