@@ -112,5 +112,7 @@ jobs:
       uses: actions/dependency-review-action@v4
       with:
         fail-on-severity: moderate
-        allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, 0BSD, ISC, MPL-2.0, Unicode-3.0, Unicode-DFS-2016, Zlib, CC-PDDC
+        allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, 0BSD, ISC, MPL-2.0, Unicode-3.0, Unicode-DFS-2016, Zlib, CC-PDDC, MIT/Apache-2.0
         # Note: Apache-2.0 WITH LLVM-exception is handled as Apache-2.0 by the action
+        # Note: MIT/Apache-2.0 is non-standard SPDX format used by nu-glob@0.109.1
+        # Standard format should be "MIT OR Apache-2.0" but we allow this for compatibility
