@@ -1,6 +1,6 @@
 [package]
 name = "nu_plugin_nw_ulid"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 authors = ["John Ky <newhoggy@gmail.com>"]
 description = "Production-grade ULID (Universally Unique Lexicographically Sortable Identifier) utilities plugin for Nushell with cryptographically secure operations, enterprise-grade security, and streaming support"

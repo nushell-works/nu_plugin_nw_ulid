@@ -1212,7 +1212,7 @@ dependencies = [
 
 [[package]]
 name = "nu_plugin_nw_ulid"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "base32",
  "base64",

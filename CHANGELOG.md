@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2025-12-20
+
+### Changed
+- Updated Nushell dependencies from 0.106.1 to 0.109.1 for compatibility with latest Nushell releases
+- Updated `uuid` dependency from 1.18.0 to 1.19.0
+- Modernized code with Rust 2024 edition features (let-chains)
+- Refactored Value construction to use Nushell 0.109.1 helper methods (`Value::list()`, `Value::record()`)
+- Updated minimum supported Rust version (MSRV) to 1.89.0 (required by Nushell 0.109.1)
+
+### Fixed
+- Updated CI/CD workflows to handle non-SPDX license format in nu-glob dependency
+- Updated GitHub Actions to latest major versions (checkout@v6, download-artifact@v7)
+
+### Platform Support
+- ⚠️ **Temporary Windows Limitation**: Windows builds temporarily disabled due to upstream Nushell 0.109.1 dependency conflict
+  - Issue: `windows-sys` version mismatch (0.60.2 vs 0.61.2) in nu-protocol dependencies
+  - Affects: Windows compilation only (runtime not affected if built with older version)
+  - Linux and macOS: Fully supported
+  - Windows support will be restored in a future release when Nushell 0.109.2+ resolves the dependency conflict
+
+### Notes
+- This is a maintenance release focused on dependency updates
+- No functional changes to plugin commands or API
+- Users on Nushell 0.109.x should upgrade to this version for compatibility
+- All existing plugin commands work identically to 0.1.1
+
 ## [0.1.1] - 2025-08-21
 
 ### Changed
