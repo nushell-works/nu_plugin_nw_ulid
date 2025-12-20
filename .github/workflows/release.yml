@@ -101,6 +101,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        # NOTE: Keep this OS matrix in sync with .github/workflows/ci.yml build-release job
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
