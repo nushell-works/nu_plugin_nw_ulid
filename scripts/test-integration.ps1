@@ -15,14 +15,14 @@ try {
     $nuVersion = & nu --version 2>$null | Select-Object -First 1
     Write-Host "📋 Found: $nuVersion" -ForegroundColor Yellow
 } catch {
-    Write-Host "❌ Nushell not found. Please install Nushell 0.109.1+" -ForegroundColor Red
-    Write-Host "Install with: cargo install nu --version 0.109.1" -ForegroundColor Yellow
+    Write-Host "❌ Nushell not found. Please install Nushell 0.110.0+" -ForegroundColor Red
+    Write-Host "Install with: cargo install nu --version 0.110.0" -ForegroundColor Yellow
     exit 1
 }
 
 # Build the plugin
 Write-Host "🔨 Building plugin..." -ForegroundColor Yellow
-& cargo build --release
+& cargo build --release --locked
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Plugin build failed" -ForegroundColor Red
     exit 1
@@ -30,7 +30,7 @@ if ($LASTEXITCODE -ne 0) {
 
 # Install the plugin
 Write-Host "📦 Installing plugin..." -ForegroundColor Yellow
-& cargo install --path .
+& cargo install --path . --locked
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Plugin installation failed" -ForegroundColor Red
     exit 1

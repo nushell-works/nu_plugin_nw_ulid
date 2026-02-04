@@ -15,8 +15,8 @@ NC='\033[0m' # No Color
 
 # Check if Nushell is installed
 if ! command -v nu &> /dev/null; then
-    echo -e "${RED}❌ Nushell not found. Please install Nushell 0.109.1+${NC}"
-    echo "Install with: cargo install nu --version 0.109.1"
+    echo -e "${RED}❌ Nushell not found. Please install Nushell 0.110.0+${NC}"
+    echo "Install with: cargo install nu --version 0.110.0"
     exit 1
 fi
 
@@ -26,11 +26,11 @@ echo -e "${YELLOW}📋 Found: $NU_VERSION${NC}"
 
 # Build the plugin
 echo -e "${YELLOW}🔨 Building plugin...${NC}"
-cargo build --release
+cargo build --release --locked
 
 # Install the plugin
 echo -e "${YELLOW}📦 Installing plugin...${NC}"
-cargo install --path .
+cargo install --path . --locked
 
 # Get the plugin path
 PLUGIN_PATH="$HOME/.cargo/bin/nu_plugin_nw_ulid"
