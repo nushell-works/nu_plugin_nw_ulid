@@ -111,13 +111,10 @@ jobs:
             target: aarch64-unknown-linux-gnu
             artifact_name: nu_plugin_nw_ulid
             asset_name: nu_plugin_nw_ulid-v${{ needs.create-release.outputs.version }}-linux-aarch64.tar.gz
-          # TEMPORARY: Windows build disabled due to windows-sys dependency conflict in Nushell 0.109.1
-          # Issue: nu-protocol has incompatible windows-sys versions (0.60.2 vs 0.61.2)
-          # TODO: Re-enable Windows when Nushell 0.109.2+ is released with the fix
-          # - os: windows-latest
-          #   target: x86_64-pc-windows-msvc
-          #   artifact_name: nu_plugin_nw_ulid.exe
-          #   asset_name: nu_plugin_nw_ulid-v${{ needs.create-release.outputs.version }}-windows-x86_64.zip
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: nu_plugin_nw_ulid.exe
+            asset_name: nu_plugin_nw_ulid-v${{ needs.create-release.outputs.version }}-windows-x86_64.zip
           - os: macos-latest
             target: x86_64-apple-darwin
             artifact_name: nu_plugin_nw_ulid

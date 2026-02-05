@@ -17,15 +17,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # TEMPORARY: Windows excluded due to windows-sys dependency conflict in Nushell 0.109.1
-        # Issue: nu-protocol has incompatible windows-sys versions (0.60.2 vs 0.61.2)
-        # via miette->terminal_size and dirs-sys dependencies causing GUID type mismatch
-        # TODO: Re-enable Windows when Nushell 0.109.2+ is released with the fix
-        os: [ubuntu-latest, macos-latest]  # windows-latest temporarily removed
+        os: [ubuntu-latest, macos-latest, windows-latest]
         rust: [stable, beta]
         include:
           - os: ubuntu-latest
-            rust: 1.89.0  # MSRV required by Nushell 0.109.1
+            rust: 1.89.0  # MSRV required by Nushell 0.110.0
         exclude:
           - os: macos-latest
             rust: beta
@@ -158,8 +154,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # TEMPORARY: Windows excluded (see note in test job above)
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         
     steps:
     - name: Checkout code
@@ -178,7 +173,7 @@ jobs:
         key: ${{ runner.os }}-cargo-integration-${{ hashFiles('**/Cargo.lock') }}
 
     - name: Install Nushell
-      run: cargo install nu --version 0.109.1 --locked
+      run: cargo install nu --version 0.110.0 --locked
 
     - name: Run integration tests (Unix)
       if: runner.os != 'Windows'
@@ -205,11 +200,10 @@ jobs:
             target: aarch64-unknown-linux-gnu
             artifact_name: nu_plugin_nw_ulid
             asset_name: nu_plugin_nw_ulid-linux-aarch64
-          # TEMPORARY: Windows build disabled (see note in test job above)
-          # - os: windows-latest
-          #   target: x86_64-pc-windows-msvc
-          #   artifact_name: nu_plugin_nw_ulid.exe
-          #   asset_name: nu_plugin_nw_ulid-windows-x86_64.exe
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: nu_plugin_nw_ulid.exe
+            asset_name: nu_plugin_nw_ulid-windows-x86_64.exe
           - os: macos-latest
             target: x86_64-apple-darwin
             artifact_name: nu_plugin_nw_ulid
