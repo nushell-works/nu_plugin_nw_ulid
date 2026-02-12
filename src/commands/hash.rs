@@ -28,7 +28,7 @@ impl PluginCommand for UlidHashSha256Command {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .required("data", SyntaxShape::Any, "Data to hash (string or binary)")
+            .optional("data", SyntaxShape::Any, "Data to hash (string or binary)")
             .switch("binary", "Output as binary instead of hex", Some('b'))
             .input_output_types(vec![
                 (Type::String, Type::String),
@@ -63,7 +63,7 @@ impl PluginCommand for UlidHashSha256Command {
     ) -> Result<PipelineData, LabeledError> {
         let binary_output = call.has_flag("binary")?;
 
-        let data = if let Ok(arg) = call.req::<Value>(0) {
+        let data = if let Some(arg) = call.opt::<Value>(0)? {
             // Using positional argument
             match arg {
                 Value::String { val, .. } => val.into_bytes(),
@@ -115,7 +115,7 @@ impl PluginCommand for UlidHashSha512Command {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .required("data", SyntaxShape::Any, "Data to hash (string or binary)")
+            .optional("data", SyntaxShape::Any, "Data to hash (string or binary)")
             .switch("binary", "Output as binary instead of hex", Some('b'))
             .input_output_types(vec![
                 (Type::String, Type::String),
@@ -150,7 +150,7 @@ impl PluginCommand for UlidHashSha512Command {
     ) -> Result<PipelineData, LabeledError> {
         let binary_output = call.has_flag("binary")?;
 
-        let data = if let Ok(arg) = call.req::<Value>(0) {
+        let data = if let Some(arg) = call.opt::<Value>(0)? {
             // Using positional argument
             match arg {
                 Value::String { val, .. } => val.into_bytes(),
@@ -202,7 +202,7 @@ impl PluginCommand for UlidHashBlake3Command {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .required("data", SyntaxShape::Any, "Data to hash (string or binary)")
+            .optional("data", SyntaxShape::Any, "Data to hash (string or binary)")
             .switch("binary", "Output as binary instead of hex", Some('b'))
             .named(
                 "length",
@@ -255,7 +255,7 @@ impl PluginCommand for UlidHashBlake3Command {
                 .with_label("Output length must be between 1 and 1024 bytes", call.head));
         }
 
-        let data = if let Ok(arg) = call.req::<Value>(0) {
+        let data = if let Some(arg) = call.opt::<Value>(0)? {
             // Using positional argument
             match arg {
                 Value::String { val, .. } => val.into_bytes(),
@@ -391,8 +391,8 @@ mod tests {
             let signature = cmd.signature();
 
             assert_eq!(signature.name, "ulid hash sha256");
-            assert_eq!(signature.required_positional.len(), 1);
-            assert_eq!(signature.required_positional[0].name, "data");
+            assert_eq!(signature.optional_positional.len(), 1);
+            assert_eq!(signature.optional_positional[0].name, "data");
             assert!(signature.named.iter().any(|flag| flag.long == "binary"));
         }
 
@@ -447,8 +447,8 @@ mod tests {
             let signature = cmd.signature();
 
             assert_eq!(signature.name, "ulid hash sha512");
-            assert_eq!(signature.required_positional.len(), 1);
-            assert_eq!(signature.required_positional[0].name, "data");
+            assert_eq!(signature.optional_positional.len(), 1);
+            assert_eq!(signature.optional_positional[0].name, "data");
             assert!(signature.named.iter().any(|flag| flag.long == "binary"));
         }
 
@@ -488,8 +488,8 @@ mod tests {
             let signature = cmd.signature();
 
             assert_eq!(signature.name, "ulid hash blake3");
-            assert_eq!(signature.required_positional.len(), 1);
-            assert_eq!(signature.required_positional[0].name, "data");
+            assert_eq!(signature.optional_positional.len(), 1);
+            assert_eq!(signature.optional_positional[0].name, "data");
             assert!(signature.named.iter().any(|flag| flag.long == "binary"));
         }
 

@@ -23,7 +23,7 @@ impl PluginCommand for UlidEncodeBase32Command {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .required(
+            .optional(
                 "data",
                 SyntaxShape::Any,
                 "Data to encode (string or binary)",
@@ -57,7 +57,7 @@ impl PluginCommand for UlidEncodeBase32Command {
         call: &EvaluatedCall,
         input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
-        let data = if let Ok(arg) = call.req::<Value>(0) {
+        let data = if let Some(arg) = call.opt::<Value>(0)? {
             // Using positional argument
             match arg {
                 Value::String { val, .. } => val.into_bytes(),
@@ -172,7 +172,7 @@ impl PluginCommand for UlidEncodeHexCommand {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .required(
+            .optional(
                 "data",
                 SyntaxShape::Any,
                 "Data to encode (string or binary)",
@@ -209,7 +209,7 @@ impl PluginCommand for UlidEncodeHexCommand {
     ) -> Result<PipelineData, LabeledError> {
         let uppercase = call.has_flag("uppercase")?;
 
-        let data = if let Ok(arg) = call.req::<Value>(0) {
+        let data = if let Some(arg) = call.opt::<Value>(0)? {
             // Using positional argument
             match arg {
                 Value::String { val, .. } => val.into_bytes(),

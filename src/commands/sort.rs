@@ -207,8 +207,20 @@ fn compare_ulid_strings(a: &str, b: &str, natural: bool) -> Ordering {
         a.cmp(b)
     } else {
         // Compare by extracted timestamps
-        let a_timestamp = UlidEngine::extract_timestamp(a).unwrap_or(0);
-        let b_timestamp = UlidEngine::extract_timestamp(b).unwrap_or(0);
+        let a_timestamp = match UlidEngine::extract_timestamp(a) {
+            Ok(ts) => ts,
+            Err(e) => {
+                eprintln!("Failed to extract timestamp from '{}': {}", a, e);
+                0
+            }
+        };
+        let b_timestamp = match UlidEngine::extract_timestamp(b) {
+            Ok(ts) => ts,
+            Err(e) => {
+                eprintln!("Failed to extract timestamp from '{}': {}", b, e);
+                0
+            }
+        };
 
         match a_timestamp.cmp(&b_timestamp) {
             Ordering::Equal => {
@@ -377,18 +389,26 @@ impl PluginCommand for UlidInspectCommand {
                 rand_record.push("hex", Value::string(&components.randomness_hex, call.head));
 
                 // Convert to different formats
-                if let Ok(rand_bytes) = hex::decode(&components.randomness_hex) {
-                    rand_record.push("bytes", Value::binary(rand_bytes.clone(), call.head));
-                    rand_record.push(
-                        "base64",
-                        Value::string(
-                            base64::Engine::encode(
-                                &base64::engine::general_purpose::STANDARD,
-                                &rand_bytes,
+                match hex::decode(&components.randomness_hex) {
+                    Ok(rand_bytes) => {
+                        rand_record.push("bytes", Value::binary(rand_bytes.clone(), call.head));
+                        rand_record.push(
+                            "base64",
+                            Value::string(
+                                base64::Engine::encode(
+                                    &base64::engine::general_purpose::STANDARD,
+                                    &rand_bytes,
+                                ),
+                                call.head,
                             ),
-                            call.head,
-                        ),
-                    );
+                        );
+                    }
+                    Err(e) => {
+                        eprintln!(
+                            "Failed to decode randomness hex '{}': {}",
+                            components.randomness_hex, e
+                        );
+                    }
                 }
 
                 record.push("randomness", Value::record(rand_record, call.head));
