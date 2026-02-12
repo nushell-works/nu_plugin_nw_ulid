@@ -109,6 +109,7 @@ impl UlidEngine {
     }
 
     /// Validate a ULID string format
+    #[must_use]
     pub fn validate(ulid_str: &str) -> bool {
         Ulid::from_str(ulid_str).is_ok()
     }
@@ -242,6 +243,7 @@ impl UlidEngine {
     }
 
     /// Check if a ULID has security warnings
+    #[must_use]
     pub fn has_security_concerns(usage_context: &str) -> bool {
         let unsafe_contexts = [
             "auth",

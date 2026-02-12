@@ -5,6 +5,7 @@ pub struct SecurityWarnings;
 
 impl SecurityWarnings {
     /// Check if a context or usage description suggests security-sensitive use
+    #[must_use]
     pub fn is_security_sensitive_context(context: &str) -> bool {
         let sensitive_keywords = [
             "auth",
@@ -224,6 +225,7 @@ impl SecurityWarnings {
     }
 
     /// Get security rating for a usage context
+    #[must_use]
     pub fn get_security_rating(context: &str) -> SecurityRating {
         let context_lower = context.to_lowercase();
 
@@ -283,6 +285,7 @@ impl SecurityWarnings {
     }
 
     /// Check if we should show warnings for this operation
+    #[must_use]
     pub fn should_warn_for_operation(operation: &str, context: Option<&str>) -> bool {
         match context {
             Some(ctx) => Self::is_security_sensitive_context(ctx),
@@ -306,6 +309,7 @@ pub enum SecurityRating {
 }
 
 impl SecurityRating {
+    #[must_use]
     pub fn as_str(&self) -> &'static str {
         match self {
             SecurityRating::Low => "Low",
@@ -315,6 +319,7 @@ impl SecurityRating {
         }
     }
 
+    #[must_use]
     pub fn get_advice(&self) -> &'static str {
         match self {
             SecurityRating::Low => "ULIDs are appropriate for this use case",
