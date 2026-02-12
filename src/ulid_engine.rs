@@ -1,6 +1,7 @@
+use std::str::FromStr;
+
 use nu_protocol::{Record, Span, Value};
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 use ulid::Ulid;
 
 /// Core ULID engine providing all ULID operations for the plugin

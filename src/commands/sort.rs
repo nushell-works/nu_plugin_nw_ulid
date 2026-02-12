@@ -1,8 +1,9 @@
+use std::cmp::Ordering;
+
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
 use nu_protocol::{
     Category, Example, LabeledError, PipelineData, Signature, SyntaxShape, Type, Value,
 };
-use std::cmp::Ordering;
 
 use crate::{UlidEngine, UlidPlugin};
 
