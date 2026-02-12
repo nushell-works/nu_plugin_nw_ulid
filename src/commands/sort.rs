@@ -7,6 +7,13 @@ use nu_protocol::{
 
 use crate::{UlidEngine, UlidPlugin};
 
+const ULID_TIMESTAMP_BITS: i64 = 48;
+const ULID_RANDOMNESS_BITS: i64 = 80;
+const ULID_TOTAL_BITS: i64 = 128;
+const SECONDS_PER_MINUTE: i64 = 60;
+const SECONDS_PER_HOUR: i64 = 3600;
+const SECONDS_PER_DAY: i64 = 86400;
+
 pub struct UlidSortCommand;
 
 impl PluginCommand for UlidSortCommand {
@@ -308,7 +315,7 @@ impl PluginCommand for UlidInspectCommand {
         // Timestamp information
         let timestamp_ms = components.timestamp_ms;
         let timestamp_secs = timestamp_ms / 1000;
-        let timestamp_nanos = (timestamp_ms % 1000) * 1_000_000;
+        let timestamp_nanos = (timestamp_ms % 1000) * crate::NANOS_PER_MILLI;
 
         if let Some(datetime) =
             chrono::DateTime::from_timestamp(timestamp_secs as i64, timestamp_nanos as u32)
@@ -389,9 +396,12 @@ impl PluginCommand for UlidInspectCommand {
             let mut stats_record = nu_protocol::Record::new();
 
             // ULID component analysis
-            stats_record.push("timestamp_bits", Value::int(48, call.head));
-            stats_record.push("randomness_bits", Value::int(80, call.head));
-            stats_record.push("total_bits", Value::int(128, call.head));
+            stats_record.push("timestamp_bits", Value::int(ULID_TIMESTAMP_BITS, call.head));
+            stats_record.push(
+                "randomness_bits",
+                Value::int(ULID_RANDOMNESS_BITS, call.head),
+            );
+            stats_record.push("total_bits", Value::int(ULID_TOTAL_BITS, call.head));
 
             // Entropy analysis (simplified)
             let randomness_entropy = analyze_entropy(&components.randomness_hex);
@@ -416,16 +426,16 @@ impl PluginCommand for UlidInspectCommand {
 fn format_duration(duration: chrono::Duration) -> String {
     let total_seconds = duration.num_seconds();
 
-    if total_seconds < 60 {
+    if total_seconds < SECONDS_PER_MINUTE {
         format!("{} seconds ago", total_seconds)
-    } else if total_seconds < 3600 {
-        let minutes = total_seconds / 60;
+    } else if total_seconds < SECONDS_PER_HOUR {
+        let minutes = total_seconds / SECONDS_PER_MINUTE;
         format!("{} minutes ago", minutes)
-    } else if total_seconds < 86400 {
-        let hours = total_seconds / 3600;
+    } else if total_seconds < SECONDS_PER_DAY {
+        let hours = total_seconds / SECONDS_PER_HOUR;
         format!("{} hours ago", hours)
     } else {
-        let days = total_seconds / 86400;
+        let days = total_seconds / SECONDS_PER_DAY;
         format!("{} days ago", days)
     }
 }

@@ -116,7 +116,7 @@ impl PluginCommand for UlidGenerateCommand {
                 let count_usize = if c < 0 {
                     return Err(LabeledError::new("Invalid count")
                         .with_label("Count must be positive", call.head));
-                } else if c > 10_000 {
+                } else if c > crate::MAX_BULK_GENERATION as i64 {
                     return Err(LabeledError::new("Count too large")
                         .with_label("Maximum count is 10,000", call.head));
                 } else {

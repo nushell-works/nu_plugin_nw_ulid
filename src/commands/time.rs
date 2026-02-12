@@ -6,6 +6,8 @@ use nu_protocol::{
 
 use crate::UlidPlugin;
 
+const TIMESTAMP_MILLIS_THRESHOLD: i64 = 1_000_000_000_000;
+
 pub struct UlidTimeNowCommand;
 
 impl PluginCommand for UlidTimeNowCommand {
@@ -149,7 +151,7 @@ impl PluginCommand for UlidTimeParseCommand {
             }
             Value::Int { val, .. } => {
                 // Determine if it's seconds or milliseconds based on magnitude
-                if val > 1_000_000_000_000i64 {
+                if val > TIMESTAMP_MILLIS_THRESHOLD {
                     // Looks like milliseconds
                     Utc.timestamp_millis_opt(val).single().ok_or_else(|| {
                         LabeledError::new("Invalid timestamp")
@@ -293,7 +295,7 @@ impl PluginCommand for UlidTimeMillisCommand {
                 datetime.timestamp_millis()
             }
             Some(Value::Int { val, .. }) => {
-                if val > 1_000_000_000_000i64 {
+                if val > TIMESTAMP_MILLIS_THRESHOLD {
                     // Already milliseconds
                     val
                 } else {
@@ -302,7 +304,7 @@ impl PluginCommand for UlidTimeMillisCommand {
                 }
             }
             Some(Value::Float { val, .. }) => {
-                if val > 1_000_000_000_000.0 {
+                if val > TIMESTAMP_MILLIS_THRESHOLD as f64 {
                     // Already milliseconds
                     val as i64
                 } else {

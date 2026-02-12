@@ -78,7 +78,7 @@ pub fn validate_positive_integer(
         }));
     }
 
-    if value > 10_000 {
+    if value > crate::MAX_BULK_GENERATION as i64 {
         return Err(Box::new(ShellError::GenericError {
             error: "Parameter too large".to_string(),
             msg: format!("Parameter '{}' exceeds maximum allowed value", param_name),
@@ -103,7 +103,7 @@ pub fn validate_ulid_string(ulid_str: &str, span: Span) -> Result<(), Box<ShellE
         }));
     }
 
-    if ulid_str.len() != 26 {
+    if ulid_str.len() != crate::ULID_STRING_LENGTH {
         return Err(Box::new(ShellError::GenericError {
             error: "Invalid ULID length".to_string(),
             msg: format!("ULID must be exactly 26 characters, got {}", ulid_str.len()),
@@ -114,14 +114,16 @@ pub fn validate_ulid_string(ulid_str: &str, span: Span) -> Result<(), Box<ShellE
     }
 
     // Check character set
-    let valid_chars = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
     for (i, c) in ulid_str.chars().enumerate() {
-        if !valid_chars.contains(c) {
+        if !crate::CROCKFORD_BASE32_CHARSET.contains(c) {
             return Err(Box::new(ShellError::GenericError {
                 error: "Invalid ULID character".to_string(),
                 msg: format!("Invalid character '{}' at position {}", c, i),
                 span: Some(span),
-                help: Some(format!("Valid characters: {}", valid_chars)),
+                help: Some(format!(
+                    "Valid characters: {}",
+                    crate::CROCKFORD_BASE32_CHARSET
+                )),
                 inner: Vec::new(),
             }));
         }

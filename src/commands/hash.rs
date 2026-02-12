@@ -7,6 +7,9 @@ use sha2::{Digest, Sha256, Sha512};
 
 use crate::UlidPlugin;
 
+const DEFAULT_HASH_OUTPUT_BYTES: usize = 32;
+const MAX_HASH_OUTPUT_BYTES: usize = 1024;
+
 pub struct UlidHashSha256Command;
 
 impl PluginCommand for UlidHashSha256Command {
@@ -240,9 +243,9 @@ impl PluginCommand for UlidHashBlake3Command {
     ) -> Result<PipelineData, LabeledError> {
         let binary_output = call.has_flag("binary")?;
         let length: Option<i64> = call.get_flag("length")?;
-        let output_length = length.unwrap_or(32) as usize;
+        let output_length = length.unwrap_or(DEFAULT_HASH_OUTPUT_BYTES as i64) as usize;
 
-        if output_length == 0 || output_length > 1024 {
+        if output_length == 0 || output_length > MAX_HASH_OUTPUT_BYTES {
             return Err(LabeledError::new("Invalid output length")
                 .with_label("Output length must be between 1 and 1024 bytes", call.head));
         }
@@ -342,9 +345,9 @@ impl PluginCommand for UlidHashRandomCommand {
     ) -> Result<PipelineData, LabeledError> {
         let length: Option<i64> = call.get_flag("length")?;
         let binary_output = call.has_flag("binary")?;
-        let byte_count = length.unwrap_or(32) as usize;
+        let byte_count = length.unwrap_or(DEFAULT_HASH_OUTPUT_BYTES as i64) as usize;
 
-        if byte_count == 0 || byte_count > 1024 {
+        if byte_count == 0 || byte_count > MAX_HASH_OUTPUT_BYTES {
             return Err(LabeledError::new("Invalid length")
                 .with_label("Length must be between 1 and 1024 bytes", call.head));
         }
