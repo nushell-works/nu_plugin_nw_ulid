@@ -361,7 +361,6 @@ pub fn is_security_sensitive_context(description: &str) -> bool { ... }
 **Do not apply** `#[must_use]` to:
 
 - Functions that return `Result` — the `#[must_use]` on `Result` itself already covers this.
-- Builder methods that return `&mut Self` — the builder pattern implies chaining.
 - Functions with meaningful side effects (I/O, mutation) where the return value is
   supplementary.
 
@@ -386,30 +385,22 @@ Deciding whether a function parameter should be `&str`, `String`, or generic.
 
 Use the cheapest type that satisfies the function's needs:
 
-| The function…                          | Accept              | Example                                     |
-|----------------------------------------|---------------------|---------------------------------------------|
-| Only reads the string                  | `&str`              | `fn validate(input: &str) -> bool`          |
-| Stores the string in a struct/`Vec`    | `String`            | `fn set_title(&mut self, title: String)`    |
-| Needs flexibility (public API surface) | `impl Into<String>` | `fn new(name: impl Into<String>) -> Self`   |
+| The function…                       | Accept   | Example                                  |
+|-------------------------------------|----------|------------------------------------------|
+| Only reads the string               | `&str`   | `fn validate(input: &str) -> bool`       |
+| Stores the string in a struct/`Vec` | `String` | `fn set_title(&mut self, title: String)` |
 
-Prefer `&str` for internal helpers and `impl Into<String>` sparingly — only at public API
-boundaries where caller ergonomics justify the generic. Avoid `impl AsRef<str>` unless you
-genuinely need to accept both `String` and `&str` without conversion.
+Prefer `&str` for engine methods and internal helpers. Since this project's public interface
+is the Nushell plugin command layer (where `nu-protocol` types dictate parameter shapes), the
+`&str` vs `String` decision applies primarily to internal function signatures.
 
 For return types, prefer `&str` when returning a reference to owned data, and `String` when
-returning a newly constructed value. Avoid `Cow<'_, str>` unless profiling shows the
-borrow-or-own flexibility is needed.
+returning a newly constructed value.
 
 ```rust
 // Good — borrows for read-only access
 pub fn timestamp(&self) -> &str {
     &self.timestamp
-}
-
-// Good — takes ownership because it stores the value
-pub fn with_title(mut self, title: String) -> Self {
-    self.title = title;
-    self
 }
 
 // Good — constructs a new string
@@ -422,8 +413,7 @@ pub fn format_summary(&self) -> String {
 
 Accepting `&str` avoids unnecessary allocations on the caller side. Taking `String` when
 ownership is needed makes the transfer explicit and avoids hidden `.to_string()` calls
-inside the function. The `impl Into<String>` pattern is convenient for public APIs but adds
-monomorphisation cost, so it should be used judiciously.
+inside the function.
 
 ---
 
@@ -499,7 +489,7 @@ Common extraction targets:
 - **Setup / teardown** — opening resources, building configuration structs.
 - **Distinct phases** — validation, transformation, output formatting.
 - **Repeated patterns** — similar blocks that differ only in parameters.
-- **Nested closures or callbacks** — especially credential handlers, diff callbacks.
+- **Nested closures** — iterator chains with complex transformation logic.
 
 ```rust
 // Before — 120-line run() mixing validation, parsing, formatting, and output
@@ -542,18 +532,21 @@ Handling a `Result` or `Option` where the error/`None` case is intentionally ign
 **Never silently discard an error that could indicate a real problem.** Three patterns to watch
 for:
 
-1. **`let _ = fallible_call();`** — If the operation can meaningfully fail, at least log the
-   error at `debug!` or `warn!` level. If the failure is truly inconsequential (best-effort
-   cleanup), add a comment explaining why:
+1. **`let _ = fallible_call();`** — If the operation can meaningfully fail, propagate with `?`
+   or report via `eprintln!`. If the failure is truly inconsequential, add a comment
+   explaining why:
 
    ```rust
-   // Bad — caller has no idea the operation failed
-   let _ = fs::remove_file(&temp_path);
+   // Bad — error is silently swallowed
+   let _ = call.get_flag::<String>("format");
 
-   // Good — intent is documented, failure is logged
-   // Best-effort cleanup; the file may already have been removed.
-   if let Err(e) = fs::remove_file(&temp_path) {
-       eprintln!("Cleanup failed: {e}");
+   // Good — propagate to the Nushell runtime
+   let format = call.get_flag::<String>("format")?;
+
+   // Good — best-effort in a streaming context, documented
+   // Item-level failure should not abort the entire stream.
+   if let Err(e) = UlidEngine::parse(&input) {
+       eprintln!("Skipping invalid ULID: {e}");
    }
    ```
 
@@ -579,14 +572,15 @@ for:
 
 **Acceptable silent discards:**
 
-- Closing a file or flushing a logger during shutdown.
-- Sending on a channel where the receiver may have been dropped.
-- Test cleanup in `Drop` implementations.
+- Best-effort error reporting in streaming mode, where the stream should continue processing
+  remaining items (see `stream.rs` for the existing pattern).
+- Optional metadata that may be absent and has a sensible default (e.g., timezone info from
+  a parsed timestamp).
 
 ### Motivation
 
 Silent error suppression is one of the hardest bugs to diagnose because nothing visibly fails —
-the program simply produces wrong results or missing data. Logging at `debug!` or `warn!` level
+the program simply produces wrong results or missing data. Reporting errors via `eprintln!`
 costs nothing on the success path and provides a trail when something goes wrong. The explicit
 comment requirement for `let _ =` forces the author to justify the suppression at write time,
 which often reveals that the error should not be ignored after all.
