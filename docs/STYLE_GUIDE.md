@@ -61,39 +61,44 @@ Considering `unwrap()`, `expect()`, or other panicking calls.
 
 ### Guidance
 
-**`unwrap()` is acceptable** in these cases only:
-
-- **Static regex** — use `std::sync::LazyLock` so the pattern is compiled once and the
-  `unwrap()` is confined to the initialiser. Clippy's `invalid_regex` lint (deny by default)
-  validates the literal at compile time, so the `unwrap()` is provably safe.
-
-  ```rust
-  use std::sync::LazyLock;
-  use regex::Regex;
-
-  static SCOPE_RE: LazyLock<Regex> =
-      LazyLock::new(|| Regex::new(r"^[a-z][a-z0-9-]*$").unwrap());
-  ```
-
-- **Known-safe constructors** — `FixedOffset::east_opt(0).unwrap()` where the argument is
-  a constant that cannot fail.
-- **Test code** — tests may use `unwrap()` freely.
-
-**`expect()` is acceptable** for truly catastrophic I/O that should terminate the process:
+**`unwrap()` and `expect()` are acceptable** in **test code only**:
 
 ```rust
-io::stdout().flush().expect("Failed to flush stdout");
+#[test]
+fn test_generate_ulid() {
+    let ulid = UlidEngine::generate().expect("Should generate ULID");
+    assert!(UlidEngine::validate(&ulid.to_string()));
+}
+```
+
+**In production code, use `?` with appropriate error conversion** for Nushell call methods
+and engine operations:
+
+```rust
+// Good — propagates errors to the Nushell runtime
+let count: Option<i64> = call.get_flag("count")?;
+let ulid_str: String = call.req(0)?;
+let components = UlidEngine::parse(&ulid_str)?;
+```
+
+**Use `if let` or `match` for fallible conversions** that return `Option`:
+
+```rust
+// Good — handles the None case gracefully
+if let Some(datetime) =
+    chrono::DateTime::from_timestamp(timestamp_secs as i64, timestamp_nanos as u32)
+{
+    record.push("iso8601", Value::string(datetime.format("...").to_string(), span));
+}
 ```
 
 **Never** use `unwrap()` or `expect()` on user-supplied or runtime data in library code.
-Use `?` with appropriate error conversion instead.
 
 ### Motivation
 
-Panics in library code produce poor diagnostics and cannot be handled by callers. Limiting
-panics to provably-safe or catastrophic cases keeps the error surface predictable.
-A lazy static avoids recompiling the regex on every call and makes the safety argument
-obvious at the declaration site.
+Panics in plugin code crash the Nushell plugin host and produce poor diagnostics.
+The `?` operator propagates errors as `LabeledError` values that Nushell can display
+with span information, giving users actionable feedback instead of a panic backtrace.
 
 ---
 
