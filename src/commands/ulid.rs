@@ -1,3 +1,5 @@
+//! Core ULID commands for generation, validation, parsing, and security advice.
+
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
 use nu_protocol::{
     Category, Example, LabeledError, PipelineData, Signature, Span, SyntaxShape, Type, Value,
@@ -5,6 +7,7 @@ use nu_protocol::{
 
 use crate::{SecurityWarnings, UlidEngine, UlidPlugin};
 
+/// Generates new ULIDs with optional count, timestamp, format, and security context.
 pub struct UlidGenerateCommand;
 
 impl PluginCommand for UlidGenerateCommand {
@@ -170,6 +173,7 @@ impl PluginCommand for UlidGenerateCommand {
     }
 }
 
+/// Validates whether a string is a valid ULID, with optional detailed output.
 pub struct UlidValidateCommand;
 
 impl PluginCommand for UlidValidateCommand {
@@ -262,6 +266,7 @@ impl PluginCommand for UlidValidateCommand {
     }
 }
 
+/// Parses a ULID string and extracts its timestamp and randomness components.
 pub struct UlidParseCommand;
 
 impl PluginCommand for UlidParseCommand {
@@ -309,6 +314,7 @@ impl PluginCommand for UlidParseCommand {
     }
 }
 
+/// Displays comprehensive security guidance for ULID usage contexts.
 pub struct UlidSecurityAdviceCommand;
 
 impl PluginCommand for UlidSecurityAdviceCommand {

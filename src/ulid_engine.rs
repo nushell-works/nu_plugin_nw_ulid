@@ -1,3 +1,5 @@
+//! Core ULID engine providing all ULID operations for the plugin.
+
 use std::str::FromStr;
 
 use nu_protocol::{Record, Span, Value};
@@ -19,31 +21,41 @@ pub const NANOS_PER_MILLI: u64 = 1_000_000;
 /// Bitmask for the 80-bit randomness component of a ULID.
 const ULID_RANDOMNESS_MASK: u128 = 0xFFFF_FFFF_FFFF_FFFF_FFFF;
 
-/// Core ULID engine providing all ULID operations for the plugin
+/// Core ULID engine providing all ULID operations for the plugin.
 pub struct UlidEngine;
 
-/// ULID parsing result containing structured components
+/// Parsed components of a ULID.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UlidComponents {
+    /// The original ULID string.
     pub ulid: String,
+    /// Millisecond timestamp extracted from the ULID.
     pub timestamp_ms: u64,
+    /// Hexadecimal representation of the randomness component.
     pub randomness_hex: String,
+    /// Whether the ULID passed validation.
     pub valid: bool,
 }
 
-/// ULID generation options
+/// Options for ULID generation operations.
 #[derive(Debug, Clone)]
 pub struct UlidGenerationOptions {
+    /// Number of ULIDs to generate.
     pub count: Option<usize>,
+    /// Custom timestamp in milliseconds.
     pub timestamp_ms: Option<u64>,
+    /// Desired output format.
     pub format: UlidOutputFormat,
 }
 
-/// Output format options for ULID operations
+/// Output format options for ULID operations.
 #[derive(Debug, Clone)]
 pub enum UlidOutputFormat {
+    /// Plain string representation.
     String,
+    /// JSON record with structured fields.
     Json,
+    /// Raw 16-byte binary representation.
     Binary,
 }
 
@@ -58,18 +70,18 @@ impl Default for UlidGenerationOptions {
 }
 
 impl UlidEngine {
-    /// Generate a single ULID
+    /// Generates a single ULID.
     pub fn generate() -> Result<Ulid, UlidError> {
         Ok(Ulid::new())
     }
 
-    /// Generate a ULID with specific timestamp
+    /// Generates a ULID with a specific timestamp.
     pub fn generate_with_timestamp(timestamp_ms: u64) -> Result<Ulid, UlidError> {
         let ulid = Ulid::from_parts(timestamp_ms, rand::random::<u128>() & ULID_RANDOMNESS_MASK);
         Ok(ulid)
     }
 
-    /// Generate multiple ULIDs efficiently
+    /// Generates multiple ULIDs efficiently.
     pub fn generate_bulk(count: usize) -> Result<Vec<Ulid>, UlidError> {
         if count == 0 {
             return Ok(Vec::new());
@@ -89,7 +101,7 @@ impl UlidEngine {
         Ok(result)
     }
 
-    /// Parse a ULID string into components
+    /// Parses a ULID string into components.
     pub fn parse(ulid_str: &str) -> Result<UlidComponents, UlidError> {
         match Ulid::from_str(ulid_str) {
             Ok(ulid) => {
@@ -108,13 +120,13 @@ impl UlidEngine {
         }
     }
 
-    /// Validate a ULID string format
+    /// Returns `true` if the string is a valid ULID.
     #[must_use]
     pub fn validate(ulid_str: &str) -> bool {
         Ulid::from_str(ulid_str).is_ok()
     }
 
-    /// Validate a ULID with detailed error information
+    /// Validates a ULID with detailed error information.
     pub fn validate_detailed(ulid_str: &str) -> UlidValidationResult {
         let mut result = UlidValidationResult {
             valid: true,
@@ -161,7 +173,7 @@ impl UlidEngine {
         result
     }
 
-    /// Extract timestamp from ULID
+    /// Extracts the timestamp from a ULID.
     pub fn extract_timestamp(ulid_str: &str) -> Result<u64, UlidError> {
         match Ulid::from_str(ulid_str) {
             Ok(ulid) => Ok(ulid.timestamp_ms()),
@@ -172,7 +184,7 @@ impl UlidEngine {
         }
     }
 
-    /// Extract randomness component from ULID
+    /// Extracts the randomness component from a ULID.
     pub fn extract_randomness(ulid_str: &str) -> Result<u128, UlidError> {
         match Ulid::from_str(ulid_str) {
             Ok(ulid) => Ok(ulid.random()),
@@ -183,7 +195,7 @@ impl UlidEngine {
         }
     }
 
-    /// Convert ULID to Nushell Value based on format
+    /// Converts a ULID to a Nushell `Value` based on the output format.
     pub fn to_value(ulid: &Ulid, format: &UlidOutputFormat, span: Span) -> Value {
         match format {
             UlidOutputFormat::String => Value::string(ulid.to_string(), span),
@@ -204,7 +216,7 @@ impl UlidEngine {
         }
     }
 
-    /// Convert UlidComponents to Nushell Value
+    /// Converts `UlidComponents` to a Nushell `Value`.
     pub fn components_to_value(components: &UlidComponents, span: Span) -> Value {
         let mut record = Record::new();
 
@@ -242,7 +254,7 @@ impl UlidEngine {
         Value::record(record, span)
     }
 
-    /// Check if a ULID has security warnings
+    /// Returns `true` if the usage context has security concerns.
     #[must_use]
     pub fn has_security_concerns(usage_context: &str) -> bool {
         let unsafe_contexts = [
@@ -264,7 +276,7 @@ impl UlidEngine {
             .any(|&unsafe_ctx| context_lower.contains(unsafe_ctx))
     }
 
-    /// Get security advice for ULID usage
+    /// Gets security advice for ULID usage.
     pub fn get_security_advice() -> SecurityAdvice {
         SecurityAdvice {
             safe_use_cases: vec![
@@ -292,32 +304,61 @@ impl UlidEngine {
     }
 }
 
-/// ULID validation result with detailed information
+/// ULID validation result with detailed error information.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UlidValidationResult {
+    /// Whether the ULID is valid.
     pub valid: bool,
+    /// Length of the input string.
     pub length: usize,
+    /// Whether all characters are valid Crockford Base32.
     pub charset_valid: bool,
+    /// Whether the timestamp component is valid.
     pub timestamp_valid: bool,
+    /// Descriptions of any validation errors found.
     pub errors: Vec<String>,
 }
 
-/// Security advice structure
+/// Security advice for ULID usage.
 #[derive(Debug, Clone)]
 pub struct SecurityAdvice {
+    /// Scenarios where ULIDs are safe to use.
     pub safe_use_cases: Vec<String>,
+    /// Scenarios where ULIDs should not be used.
     pub unsafe_use_cases: Vec<String>,
+    /// Recommended alternatives for security-sensitive contexts.
     pub alternatives: Vec<String>,
+    /// Explanation of the underlying vulnerability.
     pub vulnerability_explanation: String,
 }
 
-/// ULID operation errors
+/// Errors produced by ULID operations.
 #[derive(Debug, Clone)]
 pub enum UlidError {
-    InvalidFormat { input: String, reason: String },
-    InvalidInput { message: String },
-    TimestampOutOfRange { timestamp: u64, max_timestamp: u64 },
-    GenerationError { reason: String },
+    /// The input string is not a valid ULID.
+    InvalidFormat {
+        /// The input that failed validation.
+        input: String,
+        /// Human-readable reason for the failure.
+        reason: String,
+    },
+    /// A general input validation error.
+    InvalidInput {
+        /// Description of the problem.
+        message: String,
+    },
+    /// The timestamp exceeds the maximum representable value.
+    TimestampOutOfRange {
+        /// The provided timestamp.
+        timestamp: u64,
+        /// The maximum allowed timestamp.
+        max_timestamp: u64,
+    },
+    /// ULID generation failed.
+    GenerationError {
+        /// Human-readable reason for the failure.
+        reason: String,
+    },
 }
 
 impl std::fmt::Display for UlidError {

@@ -1,3 +1,5 @@
+//! Hashing commands (SHA-256, SHA-512, BLAKE3) and secure random generation.
+
 use blake3::Hasher as Blake3Hasher;
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
 use nu_protocol::{
@@ -10,6 +12,7 @@ use crate::UlidPlugin;
 const DEFAULT_HASH_OUTPUT_BYTES: usize = 32;
 const MAX_HASH_OUTPUT_BYTES: usize = 1024;
 
+/// Computes the SHA-256 hash of data.
 pub struct UlidHashSha256Command;
 
 impl PluginCommand for UlidHashSha256Command {
@@ -96,6 +99,7 @@ impl PluginCommand for UlidHashSha256Command {
     }
 }
 
+/// Computes the SHA-512 hash of data.
 pub struct UlidHashSha512Command;
 
 impl PluginCommand for UlidHashSha512Command {
@@ -182,6 +186,7 @@ impl PluginCommand for UlidHashSha512Command {
     }
 }
 
+/// Computes the BLAKE3 hash of data with configurable output length.
 pub struct UlidHashBlake3Command;
 
 impl PluginCommand for UlidHashBlake3Command {
@@ -287,6 +292,7 @@ impl PluginCommand for UlidHashBlake3Command {
     }
 }
 
+/// Generates cryptographically secure random bytes.
 pub struct UlidHashRandomCommand;
 
 impl PluginCommand for UlidHashRandomCommand {

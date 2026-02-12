@@ -1,3 +1,5 @@
+//! Time utility commands for timestamp parsing and conversion.
+
 use chrono::{DateTime, Datelike, TimeZone, Timelike, Utc};
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
 use nu_protocol::{
@@ -8,6 +10,7 @@ use crate::UlidPlugin;
 
 const TIMESTAMP_MILLIS_THRESHOLD: i64 = 1_000_000_000_000;
 
+/// Gets the current timestamp in various formats.
 pub struct UlidTimeNowCommand;
 
 impl PluginCommand for UlidTimeNowCommand {
@@ -85,6 +88,7 @@ impl PluginCommand for UlidTimeNowCommand {
     }
 }
 
+/// Parses a timestamp string or number into multiple date-time formats.
 pub struct UlidTimeParseCommand;
 
 impl PluginCommand for UlidTimeParseCommand {
@@ -229,6 +233,7 @@ impl PluginCommand for UlidTimeParseCommand {
     }
 }
 
+/// Converts various timestamp formats to milliseconds for ULID timestamp use.
 pub struct UlidTimeMillisCommand;
 
 impl PluginCommand for UlidTimeMillisCommand {

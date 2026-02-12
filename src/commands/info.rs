@@ -1,8 +1,11 @@
+//! Plugin information command.
+
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
 use nu_protocol::{Example, LabeledError, PipelineData, Signature, Value};
 
 use crate::UlidPlugin;
 
+/// Displays plugin version and capability information.
 pub struct UlidInfoCommand;
 
 impl PluginCommand for UlidInfoCommand {

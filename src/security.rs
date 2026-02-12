@@ -1,10 +1,12 @@
+//! Security warning and rating system for ULID usage contexts.
+
 use nu_protocol::{Record, Span, Value};
 
-/// Security warning system for ULID usage
+/// Security warning system for ULID usage.
 pub struct SecurityWarnings;
 
 impl SecurityWarnings {
-    /// Check if a context or usage description suggests security-sensitive use
+    /// Checks if a context or usage description suggests security-sensitive use.
     #[must_use]
     pub fn is_security_sensitive_context(context: &str) -> bool {
         let sensitive_keywords = [
@@ -47,7 +49,7 @@ impl SecurityWarnings {
             .any(|&keyword| context_lower.contains(keyword))
     }
 
-    /// Get comprehensive security advice
+    /// Gets comprehensive security advice as a Nushell record value.
     pub fn get_security_advice(span: Span) -> Value {
         let mut main_record = Record::new();
 
@@ -191,7 +193,7 @@ impl SecurityWarnings {
         Value::record(main_record, span)
     }
 
-    /// Create a warning message for specific context
+    /// Creates a warning message for a specific context.
     pub fn create_context_warning(context: &str, span: Span) -> Value {
         let mut record = Record::new();
 
@@ -224,7 +226,7 @@ impl SecurityWarnings {
         Value::record(record, span)
     }
 
-    /// Get security rating for a usage context
+    /// Gets the security rating for a usage context.
     #[must_use]
     pub fn get_security_rating(context: &str) -> SecurityRating {
         let context_lower = context.to_lowercase();
@@ -275,7 +277,7 @@ impl SecurityWarnings {
         }
     }
 
-    /// Format security warning for command help text
+    /// Formats the security warning for command help text.
     pub fn format_command_warning() -> String {
         "⚠️  WARNING: ULIDs are not suitable for security-sensitive contexts.\n\
          ✅  Safe: Database IDs, log correlation, file naming\n\
@@ -284,7 +286,7 @@ impl SecurityWarnings {
             .to_string()
     }
 
-    /// Check if we should show warnings for this operation
+    /// Checks whether warnings should be shown for this operation.
     #[must_use]
     pub fn should_warn_for_operation(operation: &str, context: Option<&str>) -> bool {
         match context {
@@ -299,16 +301,21 @@ impl SecurityWarnings {
     }
 }
 
-/// Security risk rating for ULID usage contexts
+/// Security risk rating for ULID usage contexts.
 #[derive(Debug, Clone, PartialEq)]
 pub enum SecurityRating {
-    Low,     // Safe for ULIDs
-    Medium,  // Caution advised
-    High,    // Not recommended for ULIDs
-    Unknown, // Context unclear
+    /// Safe for ULIDs.
+    Low,
+    /// Caution advised.
+    Medium,
+    /// Not recommended for ULIDs.
+    High,
+    /// Context unclear.
+    Unknown,
 }
 
 impl SecurityRating {
+    /// Returns the rating as a human-readable string.
     #[must_use]
     pub fn as_str(&self) -> &'static str {
         match self {
@@ -319,6 +326,7 @@ impl SecurityRating {
         }
     }
 
+    /// Returns actionable advice for the given rating level.
     #[must_use]
     pub fn get_advice(&self) -> &'static str {
         match self {

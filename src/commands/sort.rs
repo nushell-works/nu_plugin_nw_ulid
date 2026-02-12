@@ -1,3 +1,5 @@
+//! ULID sorting and inspection commands.
+
 use std::cmp::Ordering;
 
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
@@ -14,6 +16,7 @@ const SECONDS_PER_MINUTE: i64 = 60;
 const SECONDS_PER_HOUR: i64 = 3600;
 const SECONDS_PER_DAY: i64 = 86400;
 
+/// Sorts data by ULID timestamp order.
 pub struct UlidSortCommand;
 
 impl PluginCommand for UlidSortCommand {
@@ -231,6 +234,7 @@ fn extract_string_value(value: &Value) -> Option<String> {
     }
 }
 
+/// Extracts detailed information and metadata from ULIDs.
 pub struct UlidInspectCommand;
 
 impl PluginCommand for UlidInspectCommand {

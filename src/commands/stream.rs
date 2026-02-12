@@ -1,3 +1,5 @@
+//! Streaming operations for memory-efficient processing of large ULID datasets.
+
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
 use nu_protocol::{
     Category, Example, LabeledError, PipelineData, Signature, SyntaxShape, Type, Value,
@@ -8,6 +10,7 @@ use crate::{UlidEngine, UlidPlugin};
 const DEFAULT_BATCH_SIZE: usize = 1000;
 const MAX_STREAM_COUNT: usize = 100_000;
 
+/// Stream-processes large datasets of ULIDs with memory-efficient batching.
 pub struct UlidStreamCommand;
 
 impl PluginCommand for UlidStreamCommand {
@@ -325,6 +328,7 @@ fn extract_ulid_string(value: &Value) -> Result<String, Box<LabeledError>> {
     }
 }
 
+/// Generates a continuous stream of ULIDs with memory-efficient batch processing.
 pub struct UlidGenerateStreamCommand;
 
 impl PluginCommand for UlidGenerateStreamCommand {

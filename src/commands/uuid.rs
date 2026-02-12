@@ -1,3 +1,5 @@
+//! UUID generation, validation, and parsing commands.
+
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
 use nu_protocol::{
     Category, Example, LabeledError, PipelineData, Signature, Span, SyntaxShape, Type, Value,
@@ -6,6 +8,7 @@ use uuid::Uuid;
 
 use crate::UlidPlugin;
 
+/// Generates a random UUID v4.
 pub struct UlidUuidGenerateCommand;
 
 impl PluginCommand for UlidUuidGenerateCommand {
@@ -48,6 +51,7 @@ impl PluginCommand for UlidUuidGenerateCommand {
     }
 }
 
+/// Validates whether a string is a valid UUID.
 pub struct UlidUuidValidateCommand;
 
 impl PluginCommand for UlidUuidValidateCommand {
@@ -97,6 +101,7 @@ impl PluginCommand for UlidUuidValidateCommand {
     }
 }
 
+/// Parses a UUID string and extracts its version, variant, and formatted representations.
 pub struct UlidUuidParseCommand;
 
 impl PluginCommand for UlidUuidParseCommand {
