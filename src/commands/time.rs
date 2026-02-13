@@ -141,94 +141,8 @@ impl PluginCommand for UlidTimeParseCommand {
         _input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
         let timestamp: Value = call.req(0)?;
-
-        let datetime = match timestamp {
-            Value::String { val, .. } => {
-                // Try parsing as ISO8601/RFC3339
-                DateTime::parse_from_rfc3339(&val)
-                    .or_else(|_| DateTime::parse_from_str(&val, "%Y-%m-%dT%H:%M:%S%.3fZ"))
-                    .map(|dt| dt.with_timezone(&Utc))
-                    .map_err(|e| {
-                        LabeledError::new("Failed to parse timestamp")
-                            .with_label(format!("Invalid timestamp format: {}", e), call.head)
-                    })?
-            }
-            Value::Int { val, .. } => {
-                // Determine if it's seconds or milliseconds based on magnitude
-                if val > TIMESTAMP_MILLIS_THRESHOLD {
-                    // Looks like milliseconds
-                    Utc.timestamp_millis_opt(val).single().ok_or_else(|| {
-                        LabeledError::new("Invalid timestamp")
-                            .with_label("Timestamp is out of range", call.head)
-                    })?
-                } else {
-                    // Looks like seconds
-                    Utc.timestamp_opt(val, 0).single().ok_or_else(|| {
-                        LabeledError::new("Invalid timestamp")
-                            .with_label("Timestamp is out of range", call.head)
-                    })?
-                }
-            }
-            Value::Float { val, .. } => {
-                let seconds = val.trunc() as i64;
-                let nanos = ((val.fract() * 1_000_000_000.0) as u32).min(999_999_999);
-                Utc.timestamp_opt(seconds, nanos).single().ok_or_else(|| {
-                    LabeledError::new("Invalid timestamp")
-                        .with_label("Timestamp is out of range", call.head)
-                })?
-            }
-            _ => {
-                return Err(LabeledError::new("Invalid input type")
-                    .with_label("Expected string, int, or float", call.head));
-            }
-        };
-
-        let record = Value::record(
-            [
-                (
-                    "iso8601".into(),
-                    Value::string(
-                        datetime.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string(),
-                        call.head,
-                    ),
-                ),
-                (
-                    "rfc3339".into(),
-                    Value::string(datetime.to_rfc3339(), call.head),
-                ),
-                (
-                    "unix_seconds".into(),
-                    Value::int(datetime.timestamp(), call.head),
-                ),
-                (
-                    "unix_millis".into(),
-                    Value::int(datetime.timestamp_millis(), call.head),
-                ),
-                ("year".into(), Value::int(datetime.year() as i64, call.head)),
-                (
-                    "month".into(),
-                    Value::int(datetime.month() as i64, call.head),
-                ),
-                ("day".into(), Value::int(datetime.day() as i64, call.head)),
-                ("hour".into(), Value::int(datetime.hour() as i64, call.head)),
-                (
-                    "minute".into(),
-                    Value::int(datetime.minute() as i64, call.head),
-                ),
-                (
-                    "second".into(),
-                    Value::int(datetime.second() as i64, call.head),
-                ),
-                (
-                    "nanosecond".into(),
-                    Value::int(datetime.nanosecond() as i64, call.head),
-                ),
-            ]
-            .into_iter()
-            .collect(),
-            call.head,
-        );
-
+        let datetime = parse_timestamp_to_datetime(timestamp, call.head)?;
+        let record = build_datetime_record(datetime, call.head);
         Ok(PipelineData::Value(record, None))
     }
 }
@@ -325,6 +239,71 @@ impl PluginCommand for UlidTimeMillisCommand {
 
         Ok(PipelineData::Value(Value::int(millis, call.head), None))
     }
+}
+
+fn parse_timestamp_to_datetime(
+    timestamp: Value,
+    span: nu_protocol::Span,
+) -> Result<DateTime<Utc>, LabeledError> {
+    match timestamp {
+        Value::String { val, .. } => DateTime::parse_from_rfc3339(&val)
+            .or_else(|_| DateTime::parse_from_str(&val, "%Y-%m-%dT%H:%M:%S%.3fZ"))
+            .map(|dt| dt.with_timezone(&Utc))
+            .map_err(|e| {
+                LabeledError::new("Failed to parse timestamp")
+                    .with_label(format!("Invalid timestamp format: {}", e), span)
+            }),
+        Value::Int { val, .. } => if val > TIMESTAMP_MILLIS_THRESHOLD {
+            Utc.timestamp_millis_opt(val).single()
+        } else {
+            Utc.timestamp_opt(val, 0).single()
+        }
+        .ok_or_else(|| {
+            LabeledError::new("Invalid timestamp").with_label("Timestamp is out of range", span)
+        }),
+        Value::Float { val, .. } => {
+            let seconds = val.trunc() as i64;
+            let nanos = ((val.fract() * 1_000_000_000.0) as u32).min(999_999_999);
+            Utc.timestamp_opt(seconds, nanos).single().ok_or_else(|| {
+                LabeledError::new("Invalid timestamp").with_label("Timestamp is out of range", span)
+            })
+        }
+        _ => Err(LabeledError::new("Invalid input type")
+            .with_label("Expected string, int, or float", span)),
+    }
+}
+
+fn build_datetime_record(datetime: DateTime<Utc>, span: nu_protocol::Span) -> Value {
+    Value::record(
+        [
+            (
+                "iso8601".into(),
+                Value::string(datetime.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string(), span),
+            ),
+            ("rfc3339".into(), Value::string(datetime.to_rfc3339(), span)),
+            (
+                "unix_seconds".into(),
+                Value::int(datetime.timestamp(), span),
+            ),
+            (
+                "unix_millis".into(),
+                Value::int(datetime.timestamp_millis(), span),
+            ),
+            ("year".into(), Value::int(datetime.year() as i64, span)),
+            ("month".into(), Value::int(datetime.month() as i64, span)),
+            ("day".into(), Value::int(datetime.day() as i64, span)),
+            ("hour".into(), Value::int(datetime.hour() as i64, span)),
+            ("minute".into(), Value::int(datetime.minute() as i64, span)),
+            ("second".into(), Value::int(datetime.second() as i64, span)),
+            (
+                "nanosecond".into(),
+                Value::int(datetime.nanosecond() as i64, span),
+            ),
+        ]
+        .into_iter()
+        .collect(),
+        span,
+    )
 }
 
 #[cfg(test)]

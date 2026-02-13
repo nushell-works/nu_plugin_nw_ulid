@@ -53,12 +53,10 @@ impl SecurityWarnings {
     pub fn get_security_advice(span: Span) -> Value {
         let mut main_record = Record::new();
 
-        // Header
         main_record.push(
             "title",
             Value::string("🚨 ULID Security Considerations", span),
         );
-
         main_record.push(
             "warning",
             Value::string(
@@ -66,125 +64,18 @@ impl SecurityWarnings {
                 span,
             ),
         );
-
-        // Safe use cases
-        let safe_cases = vec![
-            "Database primary keys",
-            "Log correlation IDs",
-            "File and object naming",
-            "Sortable identifiers for analytics",
-            "General-purpose unique identifiers",
-            "Event tracking and tracing",
-            "Data pipeline identifiers",
-        ];
-
-        let safe_values: Vec<Value> = safe_cases
-            .into_iter()
-            .map(|case| Value::string(case, span))
-            .collect();
-
-        main_record.push("safe_use_cases", Value::list(safe_values, span));
-
-        // Unsafe use cases
-        let unsafe_cases = vec![
-            "Authentication tokens",
-            "Session identifiers",
-            "Password reset tokens",
-            "API keys or secrets",
-            "Security-critical random values",
-            "Cryptographic nonces",
-            "CSRF tokens",
-            "OAuth state parameters",
-        ];
-
-        let unsafe_values: Vec<Value> = unsafe_cases
-            .into_iter()
-            .map(|case| Value::string(case, span))
-            .collect();
-
-        main_record.push("unsafe_use_cases", Value::list(unsafe_values, span));
-
-        // Vulnerability explanation
+        main_record.push("safe_use_cases", build_use_case_list(SAFE_USE_CASES, span));
+        main_record.push(
+            "unsafe_use_cases",
+            build_use_case_list(UNSAFE_USE_CASES, span),
+        );
         main_record.push("vulnerability", Value::string(
             "When multiple ULIDs are generated within the same millisecond, the randomness component becomes a counter (incremented by 1). This creates predictable sequences that enable timing-based attacks.",
             span,
         ));
-
-        // Attack example
-        let mut attack_record = Record::new();
-        attack_record.push(
-            "scenario",
-            Value::string("Generate two objects simultaneously", span),
-        );
-        attack_record.push(
-            "time_t",
-            Value::string("01AN4Z07BY + 79KA1307SR9X4MV3", span),
-        );
-        attack_record.push(
-            "time_t_plus_1",
-            Value::string("01AN4Z07BY + 79KA1307SR9X4MV4  (just incremented!)", span),
-        );
-        attack_record.push(
-            "impact",
-            Value::string("Second ULID = First ULID + 1 (predictable)", span),
-        );
-
-        main_record.push("attack_example", Value::record(attack_record, span));
-
-        // Secure alternatives
-        let alternatives = vec![
-            (
-                "Authentication tokens",
-                "256-bit cryptographically random strings",
-            ),
-            (
-                "Session IDs",
-                "UUID v4 or dedicated session token generators",
-            ),
-            (
-                "API keys",
-                "Proper key derivation functions (PBKDF2, scrypt, Argon2)",
-            ),
-            (
-                "CSRF tokens",
-                "Cryptographically secure random byte generators",
-            ),
-            (
-                "Password reset tokens",
-                "Secure random generators with expiration",
-            ),
-        ];
-
-        let alt_values: Vec<Value> = alternatives
-            .into_iter()
-            .map(|(use_case, alternative)| {
-                let mut alt_record = Record::new();
-                alt_record.push("use_case", Value::string(use_case, span));
-                alt_record.push("recommended", Value::string(alternative, span));
-                Value::record(alt_record, span)
-            })
-            .collect();
-
-        main_record.push("secure_alternatives", Value::list(alt_values, span));
-
-        // Best practices
-        let best_practices = vec![
-            "Always assess whether your use case requires cryptographic security",
-            "Document ULID usage context in your code and architecture",
-            "Use ULIDs for identification, not authentication or authorization",
-            "Prefer UUIDs or secure random generators for security-sensitive contexts",
-            "Consider the trade-offs: sortability vs. cryptographic security",
-            "Implement proper security reviews for identifier usage",
-        ];
-
-        let practice_values: Vec<Value> = best_practices
-            .into_iter()
-            .map(|practice| Value::string(practice, span))
-            .collect();
-
-        main_record.push("best_practices", Value::list(practice_values, span));
-
-        // Additional resources
+        main_record.push("attack_example", build_attack_example(span));
+        main_record.push("secure_alternatives", build_secure_alternatives(span));
+        main_record.push("best_practices", build_use_case_list(BEST_PRACTICES, span));
         main_record.push(
             "learn_more",
             Value::string("See ULID specification: https://github.com/ulid/spec", span),
@@ -299,6 +190,102 @@ impl SecurityWarnings {
             }
         }
     }
+}
+
+const SAFE_USE_CASES: &[&str] = &[
+    "Database primary keys",
+    "Log correlation IDs",
+    "File and object naming",
+    "Sortable identifiers for analytics",
+    "General-purpose unique identifiers",
+    "Event tracking and tracing",
+    "Data pipeline identifiers",
+];
+
+const UNSAFE_USE_CASES: &[&str] = &[
+    "Authentication tokens",
+    "Session identifiers",
+    "Password reset tokens",
+    "API keys or secrets",
+    "Security-critical random values",
+    "Cryptographic nonces",
+    "CSRF tokens",
+    "OAuth state parameters",
+];
+
+const BEST_PRACTICES: &[&str] = &[
+    "Always assess whether your use case requires cryptographic security",
+    "Document ULID usage context in your code and architecture",
+    "Use ULIDs for identification, not authentication or authorization",
+    "Prefer UUIDs or secure random generators for security-sensitive contexts",
+    "Consider the trade-offs: sortability vs. cryptographic security",
+    "Implement proper security reviews for identifier usage",
+];
+
+fn build_use_case_list(items: &[&str], span: Span) -> Value {
+    let values: Vec<Value> = items
+        .iter()
+        .map(|item| Value::string(*item, span))
+        .collect();
+    Value::list(values, span)
+}
+
+fn build_attack_example(span: Span) -> Value {
+    let mut record = Record::new();
+    record.push(
+        "scenario",
+        Value::string("Generate two objects simultaneously", span),
+    );
+    record.push(
+        "time_t",
+        Value::string("01AN4Z07BY + 79KA1307SR9X4MV3", span),
+    );
+    record.push(
+        "time_t_plus_1",
+        Value::string("01AN4Z07BY + 79KA1307SR9X4MV4  (just incremented!)", span),
+    );
+    record.push(
+        "impact",
+        Value::string("Second ULID = First ULID + 1 (predictable)", span),
+    );
+    Value::record(record, span)
+}
+
+fn build_secure_alternatives(span: Span) -> Value {
+    let alternatives = [
+        (
+            "Authentication tokens",
+            "256-bit cryptographically random strings",
+        ),
+        (
+            "Session IDs",
+            "UUID v4 or dedicated session token generators",
+        ),
+        (
+            "API keys",
+            "Proper key derivation functions (PBKDF2, scrypt, Argon2)",
+        ),
+        (
+            "CSRF tokens",
+            "Cryptographically secure random byte generators",
+        ),
+        (
+            "Password reset tokens",
+            "Secure random generators with expiration",
+        ),
+    ];
+
+    let values: Vec<Value> = alternatives
+        .iter()
+        .map(|(use_case, alternative)| {
+            let mut alt_record = Record::new();
+            alt_record.push("use_case", Value::string(*use_case, span));
+            alt_record.push("recommended", Value::string(*alternative, span));
+            Value::record(alt_record, span)
+        })
+        .collect();
+
+    Value::list(values, span)
 }
 
 /// Security risk rating for ULID usage contexts.
