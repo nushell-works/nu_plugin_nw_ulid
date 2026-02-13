@@ -1,3 +1,5 @@
+//! Nushell plugin providing ULID generation, validation, and analysis utilities.
+
 use nu_plugin::{Plugin, PluginCommand};
 
 mod commands;
@@ -10,6 +12,7 @@ pub use error::*;
 pub use security::*;
 pub use ulid_engine::*;
 
+/// Top-level plugin type registered with the Nushell plugin host.
 pub struct UlidPlugin;
 
 impl Plugin for UlidPlugin {

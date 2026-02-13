@@ -1,3 +1,5 @@
+//! Hashing commands (SHA-256, SHA-512, BLAKE3) and secure random generation.
+
 use blake3::Hasher as Blake3Hasher;
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
 use nu_protocol::{
@@ -7,6 +9,10 @@ use sha2::{Digest, Sha256, Sha512};
 
 use crate::UlidPlugin;
 
+const DEFAULT_HASH_OUTPUT_BYTES: usize = 32;
+const MAX_HASH_OUTPUT_BYTES: usize = 1024;
+
+/// Computes the SHA-256 hash of data.
 pub struct UlidHashSha256Command;
 
 impl PluginCommand for UlidHashSha256Command {
@@ -22,7 +28,7 @@ impl PluginCommand for UlidHashSha256Command {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .required("data", SyntaxShape::Any, "Data to hash (string or binary)")
+            .optional("data", SyntaxShape::Any, "Data to hash (string or binary)")
             .switch("binary", "Output as binary instead of hex", Some('b'))
             .input_output_types(vec![
                 (Type::String, Type::String),
@@ -57,7 +63,7 @@ impl PluginCommand for UlidHashSha256Command {
     ) -> Result<PipelineData, LabeledError> {
         let binary_output = call.has_flag("binary")?;
 
-        let data = if let Ok(arg) = call.req::<Value>(0) {
+        let data = if let Some(arg) = call.opt::<Value>(0)? {
             // Using positional argument
             match arg {
                 Value::String { val, .. } => val.into_bytes(),
@@ -93,6 +99,7 @@ impl PluginCommand for UlidHashSha256Command {
     }
 }
 
+/// Computes the SHA-512 hash of data.
 pub struct UlidHashSha512Command;
 
 impl PluginCommand for UlidHashSha512Command {
@@ -108,7 +115,7 @@ impl PluginCommand for UlidHashSha512Command {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .required("data", SyntaxShape::Any, "Data to hash (string or binary)")
+            .optional("data", SyntaxShape::Any, "Data to hash (string or binary)")
             .switch("binary", "Output as binary instead of hex", Some('b'))
             .input_output_types(vec![
                 (Type::String, Type::String),
@@ -143,7 +150,7 @@ impl PluginCommand for UlidHashSha512Command {
     ) -> Result<PipelineData, LabeledError> {
         let binary_output = call.has_flag("binary")?;
 
-        let data = if let Ok(arg) = call.req::<Value>(0) {
+        let data = if let Some(arg) = call.opt::<Value>(0)? {
             // Using positional argument
             match arg {
                 Value::String { val, .. } => val.into_bytes(),
@@ -179,6 +186,7 @@ impl PluginCommand for UlidHashSha512Command {
     }
 }
 
+/// Computes the BLAKE3 hash of data with configurable output length.
 pub struct UlidHashBlake3Command;
 
 impl PluginCommand for UlidHashBlake3Command {
@@ -194,7 +202,7 @@ impl PluginCommand for UlidHashBlake3Command {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .required("data", SyntaxShape::Any, "Data to hash (string or binary)")
+            .optional("data", SyntaxShape::Any, "Data to hash (string or binary)")
             .switch("binary", "Output as binary instead of hex", Some('b'))
             .named(
                 "length",
@@ -240,14 +248,14 @@ impl PluginCommand for UlidHashBlake3Command {
     ) -> Result<PipelineData, LabeledError> {
         let binary_output = call.has_flag("binary")?;
         let length: Option<i64> = call.get_flag("length")?;
-        let output_length = length.unwrap_or(32) as usize;
+        let output_length = length.unwrap_or(DEFAULT_HASH_OUTPUT_BYTES as i64) as usize;
 
-        if output_length == 0 || output_length > 1024 {
+        if output_length == 0 || output_length > MAX_HASH_OUTPUT_BYTES {
             return Err(LabeledError::new("Invalid output length")
                 .with_label("Output length must be between 1 and 1024 bytes", call.head));
         }
 
-        let data = if let Ok(arg) = call.req::<Value>(0) {
+        let data = if let Some(arg) = call.opt::<Value>(0)? {
             // Using positional argument
             match arg {
                 Value::String { val, .. } => val.into_bytes(),
@@ -284,6 +292,7 @@ impl PluginCommand for UlidHashBlake3Command {
     }
 }
 
+/// Generates cryptographically secure random bytes.
 pub struct UlidHashRandomCommand;
 
 impl PluginCommand for UlidHashRandomCommand {
@@ -342,9 +351,9 @@ impl PluginCommand for UlidHashRandomCommand {
     ) -> Result<PipelineData, LabeledError> {
         let length: Option<i64> = call.get_flag("length")?;
         let binary_output = call.has_flag("binary")?;
-        let byte_count = length.unwrap_or(32) as usize;
+        let byte_count = length.unwrap_or(DEFAULT_HASH_OUTPUT_BYTES as i64) as usize;
 
-        if byte_count == 0 || byte_count > 1024 {
+        if byte_count == 0 || byte_count > MAX_HASH_OUTPUT_BYTES {
             return Err(LabeledError::new("Invalid length")
                 .with_label("Length must be between 1 and 1024 bytes", call.head));
         }
@@ -382,8 +391,8 @@ mod tests {
             let signature = cmd.signature();
 
             assert_eq!(signature.name, "ulid hash sha256");
-            assert_eq!(signature.required_positional.len(), 1);
-            assert_eq!(signature.required_positional[0].name, "data");
+            assert_eq!(signature.optional_positional.len(), 1);
+            assert_eq!(signature.optional_positional[0].name, "data");
             assert!(signature.named.iter().any(|flag| flag.long == "binary"));
         }
 
@@ -438,8 +447,8 @@ mod tests {
             let signature = cmd.signature();
 
             assert_eq!(signature.name, "ulid hash sha512");
-            assert_eq!(signature.required_positional.len(), 1);
-            assert_eq!(signature.required_positional[0].name, "data");
+            assert_eq!(signature.optional_positional.len(), 1);
+            assert_eq!(signature.optional_positional[0].name, "data");
             assert!(signature.named.iter().any(|flag| flag.long == "binary"));
         }
 
@@ -479,8 +488,8 @@ mod tests {
             let signature = cmd.signature();
 
             assert_eq!(signature.name, "ulid hash blake3");
-            assert_eq!(signature.required_positional.len(), 1);
-            assert_eq!(signature.required_positional[0].name, "data");
+            assert_eq!(signature.optional_positional.len(), 1);
+            assert_eq!(signature.optional_positional[0].name, "data");
             assert!(signature.named.iter().any(|flag| flag.long == "binary"));
         }
 

@@ -1,3 +1,5 @@
+//! Core ULID commands for generation, validation, parsing, and security advice.
+
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
 use nu_protocol::{
     Category, Example, LabeledError, PipelineData, Signature, Span, SyntaxShape, Type, Value,
@@ -5,6 +7,7 @@ use nu_protocol::{
 
 use crate::{SecurityWarnings, UlidEngine, UlidPlugin};
 
+/// Generates new ULIDs with optional count, timestamp, format, and security context.
 pub struct UlidGenerateCommand;
 
 impl PluginCommand for UlidGenerateCommand {
@@ -89,7 +92,6 @@ impl PluginCommand for UlidGenerateCommand {
         let format_str: Option<String> = call.get_flag("format")?;
         let context: Option<String> = call.get_flag("context")?;
 
-        // Security check for context
         if let Some(ref ctx) = context
             && SecurityWarnings::is_security_sensitive_context(ctx)
         {
@@ -97,79 +99,16 @@ impl PluginCommand for UlidGenerateCommand {
             return Ok(PipelineData::Value(warning, None));
         }
 
-        // Parse format
-        let format = match format_str.as_deref() {
-            Some("json") => crate::UlidOutputFormat::Json,
-            Some("binary") => crate::UlidOutputFormat::Binary,
-            Some("string") | None => crate::UlidOutputFormat::String,
-            Some(f) => {
-                return Err(LabeledError::new("Invalid format").with_label(
-                    format!("Unknown format '{}'. Use 'string', 'json', or 'binary'", f),
-                    call.head,
-                ));
-            }
-        };
+        let format = parse_output_format(format_str.as_deref(), call.head)?;
 
         match count {
-            Some(c) => {
-                // Generate multiple ULIDs
-                let count_usize = if c < 0 {
-                    return Err(LabeledError::new("Invalid count")
-                        .with_label("Count must be positive", call.head));
-                } else if c > 10_000 {
-                    return Err(LabeledError::new("Count too large")
-                        .with_label("Maximum count is 10,000", call.head));
-                } else {
-                    c as usize
-                };
-
-                let ulids = match timestamp {
-                    Some(ts) => {
-                        let mut result = Vec::new();
-                        for _ in 0..count_usize {
-                            match UlidEngine::generate_with_timestamp(ts as u64) {
-                                Ok(ulid) => result.push(ulid),
-                                Err(e) => {
-                                    return Err(LabeledError::new("Generation failed")
-                                        .with_label(e.to_string(), call.head));
-                                }
-                            }
-                        }
-                        result
-                    }
-                    None => match UlidEngine::generate_bulk(count_usize) {
-                        Ok(ulids) => ulids,
-                        Err(e) => {
-                            return Err(LabeledError::new("Bulk generation failed")
-                                .with_label(e.to_string(), call.head));
-                        }
-                    },
-                };
-
-                let values: Vec<Value> = ulids
-                    .iter()
-                    .map(|ulid| UlidEngine::to_value(ulid, &format, call.head))
-                    .collect();
-
-                Ok(PipelineData::Value(Value::list(values, call.head), None))
-            }
-            None => {
-                // Generate single ULID
-                let ulid = match timestamp {
-                    Some(ts) => UlidEngine::generate_with_timestamp(ts as u64),
-                    None => UlidEngine::generate(),
-                }
-                .map_err(|e| {
-                    LabeledError::new("Generation failed").with_label(e.to_string(), call.head)
-                })?;
-
-                let value = UlidEngine::to_value(&ulid, &format, call.head);
-                Ok(PipelineData::Value(value, None))
-            }
+            Some(c) => generate_bulk_ulids(c, timestamp, &format, call.head),
+            None => generate_single_ulid(timestamp, &format, call.head),
         }
     }
 }
 
+/// Validates whether a string is a valid ULID, with optional detailed output.
 pub struct UlidValidateCommand;
 
 impl PluginCommand for UlidValidateCommand {
@@ -262,6 +201,7 @@ impl PluginCommand for UlidValidateCommand {
     }
 }
 
+/// Parses a ULID string and extracts its timestamp and randomness components.
 pub struct UlidParseCommand;
 
 impl PluginCommand for UlidParseCommand {
@@ -309,6 +249,7 @@ impl PluginCommand for UlidParseCommand {
     }
 }
 
+/// Displays comprehensive security guidance for ULID usage contexts.
 pub struct UlidSecurityAdviceCommand;
 
 impl PluginCommand for UlidSecurityAdviceCommand {
@@ -346,6 +287,76 @@ impl PluginCommand for UlidSecurityAdviceCommand {
         let advice = SecurityWarnings::get_security_advice(call.head);
         Ok(PipelineData::Value(advice, None))
     }
+}
+
+fn parse_output_format(
+    format_str: Option<&str>,
+    span: nu_protocol::Span,
+) -> Result<crate::UlidOutputFormat, LabeledError> {
+    match format_str {
+        Some("json") => Ok(crate::UlidOutputFormat::Json),
+        Some("binary") => Ok(crate::UlidOutputFormat::Binary),
+        Some("string") | None => Ok(crate::UlidOutputFormat::String),
+        Some(f) => Err(LabeledError::new("Invalid format").with_label(
+            format!("Unknown format '{}'. Use 'string', 'json', or 'binary'", f),
+            span,
+        )),
+    }
+}
+
+fn generate_single_ulid(
+    timestamp: Option<i64>,
+    format: &crate::UlidOutputFormat,
+    span: nu_protocol::Span,
+) -> Result<PipelineData, LabeledError> {
+    let ulid = match timestamp {
+        Some(ts) => UlidEngine::generate_with_timestamp(ts as u64),
+        None => UlidEngine::generate(),
+    }
+    .map_err(|e| LabeledError::new("Generation failed").with_label(e.to_string(), span))?;
+
+    let value = UlidEngine::to_value(&ulid, format, span);
+    Ok(PipelineData::Value(value, None))
+}
+
+fn generate_bulk_ulids(
+    count: i64,
+    timestamp: Option<i64>,
+    format: &crate::UlidOutputFormat,
+    span: nu_protocol::Span,
+) -> Result<PipelineData, LabeledError> {
+    let count_usize = if count < 0 {
+        return Err(LabeledError::new("Invalid count").with_label("Count must be positive", span));
+    } else if count > crate::MAX_BULK_GENERATION as i64 {
+        return Err(
+            LabeledError::new("Count too large").with_label("Maximum count is 10,000", span)
+        );
+    } else {
+        count as usize
+    };
+
+    let ulids = match timestamp {
+        Some(ts) => {
+            let mut result = Vec::new();
+            for _ in 0..count_usize {
+                let ulid = UlidEngine::generate_with_timestamp(ts as u64).map_err(|e| {
+                    LabeledError::new("Generation failed").with_label(e.to_string(), span)
+                })?;
+                result.push(ulid);
+            }
+            result
+        }
+        None => UlidEngine::generate_bulk(count_usize).map_err(|e| {
+            LabeledError::new("Bulk generation failed").with_label(e.to_string(), span)
+        })?,
+    };
+
+    let values: Vec<Value> = ulids
+        .iter()
+        .map(|ulid| UlidEngine::to_value(ulid, format, span))
+        .collect();
+
+    Ok(PipelineData::Value(Value::list(values, span), None))
 }
 
 #[cfg(test)]

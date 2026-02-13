@@ -1,3 +1,5 @@
+//! Command implementations for the ULID plugin.
+
 pub mod encode;
 pub mod hash;
 pub mod info;

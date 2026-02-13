@@ -1,3 +1,5 @@
+//! Streaming operations for memory-efficient processing of large ULID datasets.
+
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
 use nu_protocol::{
     Category, Example, LabeledError, PipelineData, Signature, SyntaxShape, Type, Value,
@@ -5,6 +7,10 @@ use nu_protocol::{
 
 use crate::{UlidEngine, UlidPlugin};
 
+const DEFAULT_BATCH_SIZE: usize = 1000;
+const MAX_STREAM_COUNT: usize = 100_000;
+
+/// Stream-processes large datasets of ULIDs with memory-efficient batching.
 pub struct UlidStreamCommand;
 
 impl PluginCommand for UlidStreamCommand {
@@ -98,7 +104,7 @@ impl PluginCommand for UlidStreamCommand {
         let parallel: bool = call.has_flag("parallel")?;
         let continue_on_error: bool = call.has_flag("continue-on-error")?;
 
-        let batch_size = batch_size.unwrap_or(1000) as usize;
+        let batch_size = batch_size.unwrap_or(DEFAULT_BATCH_SIZE as i64) as usize;
         let format = output_format.unwrap_or_else(|| "full".to_string());
 
         match input {
@@ -322,6 +328,7 @@ fn extract_ulid_string(value: &Value) -> Result<String, Box<LabeledError>> {
     }
 }
 
+/// Generates a continuous stream of ULIDs with memory-efficient batch processing.
 pub struct UlidGenerateStreamCommand;
 
 impl PluginCommand for UlidGenerateStreamCommand {
@@ -401,7 +408,7 @@ impl PluginCommand for UlidGenerateStreamCommand {
             );
         }
 
-        if count > 100_000 {
+        if count > MAX_STREAM_COUNT as i64 {
             return Err(LabeledError::new("Count too large").with_label(
                 "Maximum count is 100,000 for streaming generation",
                 call.head,
@@ -409,7 +416,7 @@ impl PluginCommand for UlidGenerateStreamCommand {
         }
 
         let count = count as usize;
-        let batch_size = batch_size.unwrap_or(1000).max(1) as usize;
+        let batch_size = batch_size.unwrap_or(DEFAULT_BATCH_SIZE as i64).max(1) as usize;
 
         let mut results = Vec::new();
         let total_batches = count.div_ceil(batch_size);

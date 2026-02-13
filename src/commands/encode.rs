@@ -1,3 +1,5 @@
+//! Base32 and hex encoding/decoding commands for ULIDs.
+
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
 use nu_protocol::{
     Category, Example, LabeledError, PipelineData, Signature, Span, SyntaxShape, Type, Value,
@@ -5,6 +7,7 @@ use nu_protocol::{
 
 use crate::UlidPlugin;
 
+/// Encodes data using Crockford Base32.
 pub struct UlidEncodeBase32Command;
 
 impl PluginCommand for UlidEncodeBase32Command {
@@ -20,7 +23,7 @@ impl PluginCommand for UlidEncodeBase32Command {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .required(
+            .optional(
                 "data",
                 SyntaxShape::Any,
                 "Data to encode (string or binary)",
@@ -54,7 +57,7 @@ impl PluginCommand for UlidEncodeBase32Command {
         call: &EvaluatedCall,
         input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
-        let data = if let Ok(arg) = call.req::<Value>(0) {
+        let data = if let Some(arg) = call.opt::<Value>(0)? {
             // Using positional argument
             match arg {
                 Value::String { val, .. } => val.into_bytes(),
@@ -81,6 +84,7 @@ impl PluginCommand for UlidEncodeBase32Command {
     }
 }
 
+/// Decodes Crockford Base32 data.
 pub struct UlidDecodeBase32Command;
 
 impl PluginCommand for UlidDecodeBase32Command {
@@ -152,6 +156,7 @@ impl PluginCommand for UlidDecodeBase32Command {
     }
 }
 
+/// Encodes data as hexadecimal.
 pub struct UlidEncodeHexCommand;
 
 impl PluginCommand for UlidEncodeHexCommand {
@@ -167,7 +172,7 @@ impl PluginCommand for UlidEncodeHexCommand {
 
     fn signature(&self) -> Signature {
         Signature::build(self.name())
-            .required(
+            .optional(
                 "data",
                 SyntaxShape::Any,
                 "Data to encode (string or binary)",
@@ -204,7 +209,7 @@ impl PluginCommand for UlidEncodeHexCommand {
     ) -> Result<PipelineData, LabeledError> {
         let uppercase = call.has_flag("uppercase")?;
 
-        let data = if let Ok(arg) = call.req::<Value>(0) {
+        let data = if let Some(arg) = call.opt::<Value>(0)? {
             // Using positional argument
             match arg {
                 Value::String { val, .. } => val.into_bytes(),
@@ -236,6 +241,7 @@ impl PluginCommand for UlidEncodeHexCommand {
     }
 }
 
+/// Decodes hexadecimal data.
 pub struct UlidDecodeHexCommand;
 
 impl PluginCommand for UlidDecodeHexCommand {

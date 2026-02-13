@@ -176,19 +176,19 @@ mod security_tests {
         // This is a basic test - in production, more sophisticated timing analysis needed
         let start = std::time::Instant::now();
         for _ in 0..1000 {
-            UlidEngine::validate(valid_ulid);
+            let _ = UlidEngine::validate(valid_ulid);
         }
         let valid_time = start.elapsed();
 
         let start = std::time::Instant::now();
         for _ in 0..1000 {
-            UlidEngine::validate(invalid_prefix);
+            let _ = UlidEngine::validate(invalid_prefix);
         }
         let invalid_prefix_time = start.elapsed();
 
         let start = std::time::Instant::now();
         for _ in 0..1000 {
-            UlidEngine::validate(invalid_start);
+            let _ = UlidEngine::validate(invalid_start);
         }
         let invalid_start_time = start.elapsed();
 

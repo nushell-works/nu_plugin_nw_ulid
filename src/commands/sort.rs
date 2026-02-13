@@ -1,11 +1,22 @@
+//! ULID sorting and inspection commands.
+
+use std::cmp::Ordering;
+
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
 use nu_protocol::{
     Category, Example, LabeledError, PipelineData, Signature, SyntaxShape, Type, Value,
 };
-use std::cmp::Ordering;
 
 use crate::{UlidEngine, UlidPlugin};
 
+const ULID_TIMESTAMP_BITS: i64 = 48;
+const ULID_RANDOMNESS_BITS: i64 = 80;
+const ULID_TOTAL_BITS: i64 = 128;
+const SECONDS_PER_MINUTE: i64 = 60;
+const SECONDS_PER_HOUR: i64 = 3600;
+const SECONDS_PER_DAY: i64 = 86400;
+
+/// Sorts data by ULID timestamp order.
 pub struct UlidSortCommand;
 
 impl PluginCommand for UlidSortCommand {
@@ -196,8 +207,20 @@ fn compare_ulid_strings(a: &str, b: &str, natural: bool) -> Ordering {
         a.cmp(b)
     } else {
         // Compare by extracted timestamps
-        let a_timestamp = UlidEngine::extract_timestamp(a).unwrap_or(0);
-        let b_timestamp = UlidEngine::extract_timestamp(b).unwrap_or(0);
+        let a_timestamp = match UlidEngine::extract_timestamp(a) {
+            Ok(ts) => ts,
+            Err(e) => {
+                eprintln!("Failed to extract timestamp from '{}': {}", a, e);
+                0
+            }
+        };
+        let b_timestamp = match UlidEngine::extract_timestamp(b) {
+            Ok(ts) => ts,
+            Err(e) => {
+                eprintln!("Failed to extract timestamp from '{}': {}", b, e);
+                0
+            }
+        };
 
         match a_timestamp.cmp(&b_timestamp) {
             Ordering::Equal => {
@@ -223,6 +246,7 @@ fn extract_string_value(value: &Value) -> Option<String> {
     }
 }
 
+/// Extracts detailed information and metadata from ULIDs.
 pub struct UlidInspectCommand;
 
 impl PluginCommand for UlidInspectCommand {
@@ -287,7 +311,6 @@ impl PluginCommand for UlidInspectCommand {
         let timestamp_only: bool = call.has_flag("timestamp-only")?;
         let stats: bool = call.has_flag("stats")?;
 
-        // Validate ULID first
         if !UlidEngine::validate(&ulid_str) {
             return Err(LabeledError::new("Invalid ULID")
                 .with_label(format!("'{}' is not a valid ULID", ulid_str), call.head));
@@ -298,133 +321,137 @@ impl PluginCommand for UlidInspectCommand {
 
         let mut record = nu_protocol::Record::new();
 
-        // Basic ULID information
         if !timestamp_only {
             record.push("ulid", Value::string(&components.ulid, call.head));
             record.push("valid", Value::bool(components.valid, call.head));
         }
 
-        // Timestamp information
-        let timestamp_ms = components.timestamp_ms;
-        let timestamp_secs = timestamp_ms / 1000;
-        let timestamp_nanos = (timestamp_ms % 1000) * 1_000_000;
-
-        if let Some(datetime) =
-            chrono::DateTime::from_timestamp(timestamp_secs as i64, timestamp_nanos as u32)
-        {
-            if compact {
-                record.push(
-                    "timestamp",
-                    Value::string(
-                        datetime.format("%Y-%m-%d %H:%M:%S%.3f UTC").to_string(),
-                        call.head,
-                    ),
-                );
-            } else {
-                let mut ts_record = nu_protocol::Record::new();
-                ts_record.push("milliseconds", Value::int(timestamp_ms as i64, call.head));
-                ts_record.push("seconds", Value::int(timestamp_secs as i64, call.head));
-                ts_record.push(
-                    "iso8601",
-                    Value::string(
-                        datetime.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string(),
-                        call.head,
-                    ),
-                );
-                ts_record.push("rfc3339", Value::string(datetime.to_rfc3339(), call.head));
-                ts_record.push(
-                    "human",
-                    Value::string(
-                        datetime.format("%Y-%m-%d %H:%M:%S UTC").to_string(),
-                        call.head,
-                    ),
-                );
-
-                // Add relative time information
-                let now = chrono::Utc::now();
-                let duration = now.signed_duration_since(datetime);
-                if duration.num_seconds() > 0 {
-                    ts_record.push("age", Value::string(format_duration(duration), call.head));
-                } else {
-                    ts_record.push("age", Value::string("in the future".to_string(), call.head));
-                }
-
-                record.push("timestamp", Value::record(ts_record, call.head));
-            }
+        if let Some(ts_value) = build_timestamp_value(&components, compact, call.head) {
+            record.push("timestamp", ts_value);
         }
 
-        // Randomness information (skip if timestamp-only)
         if !timestamp_only {
-            if compact {
-                record.push(
-                    "randomness",
-                    Value::string(&components.randomness_hex, call.head),
-                );
-            } else {
-                let mut rand_record = nu_protocol::Record::new();
-                rand_record.push("hex", Value::string(&components.randomness_hex, call.head));
-
-                // Convert to different formats
-                if let Ok(rand_bytes) = hex::decode(&components.randomness_hex) {
-                    rand_record.push("bytes", Value::binary(rand_bytes.clone(), call.head));
-                    rand_record.push(
-                        "base64",
-                        Value::string(
-                            base64::Engine::encode(
-                                &base64::engine::general_purpose::STANDARD,
-                                &rand_bytes,
-                            ),
-                            call.head,
-                        ),
-                    );
-                }
-
-                record.push("randomness", Value::record(rand_record, call.head));
-            }
+            record.push(
+                "randomness",
+                build_randomness_value(&components, compact, call.head),
+            );
         }
 
-        // Statistical information (if requested)
         if stats && !timestamp_only {
-            let mut stats_record = nu_protocol::Record::new();
-
-            // ULID component analysis
-            stats_record.push("timestamp_bits", Value::int(48, call.head));
-            stats_record.push("randomness_bits", Value::int(80, call.head));
-            stats_record.push("total_bits", Value::int(128, call.head));
-
-            // Entropy analysis (simplified)
-            let randomness_entropy = analyze_entropy(&components.randomness_hex);
-            stats_record.push(
-                "randomness_entropy",
-                Value::float(randomness_entropy, call.head),
-            );
-
-            // Collision probability (theoretical)
-            stats_record.push(
-                "collision_probability_per_ms",
-                Value::string("~1 in 1.2 × 10^24".to_string(), call.head),
-            );
-
-            record.push("statistics", Value::record(stats_record, call.head));
+            record.push("statistics", build_stats_record(&components, call.head));
         }
 
         Ok(PipelineData::Value(Value::record(record, call.head), None))
     }
 }
 
+fn build_timestamp_value(
+    components: &crate::UlidComponents,
+    compact: bool,
+    span: nu_protocol::Span,
+) -> Option<Value> {
+    let timestamp_ms = components.timestamp_ms;
+    let timestamp_secs = timestamp_ms / 1000;
+    let timestamp_nanos = (timestamp_ms % 1000) * crate::NANOS_PER_MILLI;
+
+    let datetime = chrono::DateTime::from_timestamp(timestamp_secs as i64, timestamp_nanos as u32)?;
+
+    if compact {
+        Some(Value::string(
+            datetime.format("%Y-%m-%d %H:%M:%S%.3f UTC").to_string(),
+            span,
+        ))
+    } else {
+        let mut ts_record = nu_protocol::Record::new();
+        ts_record.push("milliseconds", Value::int(timestamp_ms as i64, span));
+        ts_record.push("seconds", Value::int(timestamp_secs as i64, span));
+        ts_record.push(
+            "iso8601",
+            Value::string(datetime.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string(), span),
+        );
+        ts_record.push("rfc3339", Value::string(datetime.to_rfc3339(), span));
+        ts_record.push(
+            "human",
+            Value::string(datetime.format("%Y-%m-%d %H:%M:%S UTC").to_string(), span),
+        );
+
+        let now = chrono::Utc::now();
+        let duration = now.signed_duration_since(datetime);
+        if duration.num_seconds() > 0 {
+            ts_record.push("age", Value::string(format_duration(duration), span));
+        } else {
+            ts_record.push("age", Value::string("in the future".to_string(), span));
+        }
+
+        Some(Value::record(ts_record, span))
+    }
+}
+
+fn build_randomness_value(
+    components: &crate::UlidComponents,
+    compact: bool,
+    span: nu_protocol::Span,
+) -> Value {
+    if compact {
+        return Value::string(&components.randomness_hex, span);
+    }
+
+    let mut rand_record = nu_protocol::Record::new();
+    rand_record.push("hex", Value::string(&components.randomness_hex, span));
+
+    match hex::decode(&components.randomness_hex) {
+        Ok(rand_bytes) => {
+            rand_record.push("bytes", Value::binary(rand_bytes.clone(), span));
+            rand_record.push(
+                "base64",
+                Value::string(
+                    base64::Engine::encode(&base64::engine::general_purpose::STANDARD, &rand_bytes),
+                    span,
+                ),
+            );
+        }
+        Err(e) => {
+            eprintln!(
+                "Failed to decode randomness hex '{}': {}",
+                components.randomness_hex, e
+            );
+        }
+    }
+
+    Value::record(rand_record, span)
+}
+
+fn build_stats_record(components: &crate::UlidComponents, span: nu_protocol::Span) -> Value {
+    let mut stats_record = nu_protocol::Record::new();
+
+    stats_record.push("timestamp_bits", Value::int(ULID_TIMESTAMP_BITS, span));
+    stats_record.push("randomness_bits", Value::int(ULID_RANDOMNESS_BITS, span));
+    stats_record.push("total_bits", Value::int(ULID_TOTAL_BITS, span));
+
+    let randomness_entropy = analyze_entropy(&components.randomness_hex);
+    stats_record.push("randomness_entropy", Value::float(randomness_entropy, span));
+
+    stats_record.push(
+        "collision_probability_per_ms",
+        Value::string("~1 in 1.2 × 10^24".to_string(), span),
+    );
+
+    Value::record(stats_record, span)
+}
+
 fn format_duration(duration: chrono::Duration) -> String {
     let total_seconds = duration.num_seconds();
 
-    if total_seconds < 60 {
+    if total_seconds < SECONDS_PER_MINUTE {
         format!("{} seconds ago", total_seconds)
-    } else if total_seconds < 3600 {
-        let minutes = total_seconds / 60;
+    } else if total_seconds < SECONDS_PER_HOUR {
+        let minutes = total_seconds / SECONDS_PER_MINUTE;
         format!("{} minutes ago", minutes)
-    } else if total_seconds < 86400 {
-        let hours = total_seconds / 3600;
+    } else if total_seconds < SECONDS_PER_DAY {
+        let hours = total_seconds / SECONDS_PER_HOUR;
         format!("{} hours ago", hours)
     } else {
-        let days = total_seconds / 86400;
+        let days = total_seconds / SECONDS_PER_DAY;
         format!("{} days ago", days)
     }
 }

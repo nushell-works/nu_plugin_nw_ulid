@@ -1,6 +1,8 @@
+//! Error conversion and validation helpers for the ULID plugin.
+
 use nu_protocol::{ShellError, Span, Value};
 
-/// Convert UlidError to Nushell ShellError with user-friendly messages
+/// Converts a [`UlidError`](crate::UlidError) to a Nushell `ShellError` with user-friendly messages.
 pub fn ulid_error_to_shell_error(error: crate::UlidError, span: Span) -> ShellError {
     match error {
         crate::UlidError::InvalidFormat { input, reason } => ShellError::GenericError {
@@ -45,7 +47,7 @@ pub fn ulid_error_to_shell_error(error: crate::UlidError, span: Span) -> ShellEr
     }
 }
 
-/// Create a security warning for inappropriate ULID usage
+/// Creates a security warning for inappropriate ULID usage.
 pub fn create_security_warning(context: &str, span: Span) -> ShellError {
     ShellError::GenericError {
         error: "⚠️  ULID Security Warning".to_string(),
@@ -62,7 +64,7 @@ pub fn create_security_warning(context: &str, span: Span) -> ShellError {
     }
 }
 
-/// Validate command parameters with helpful error messages
+/// Validates command parameters with helpful error messages.
 pub fn validate_positive_integer(
     value: i64,
     param_name: &str,
@@ -78,7 +80,7 @@ pub fn validate_positive_integer(
         }));
     }
 
-    if value > 10_000 {
+    if value > crate::MAX_BULK_GENERATION as i64 {
         return Err(Box::new(ShellError::GenericError {
             error: "Parameter too large".to_string(),
             msg: format!("Parameter '{}' exceeds maximum allowed value", param_name),
@@ -91,7 +93,7 @@ pub fn validate_positive_integer(
     Ok(value as usize)
 }
 
-/// Validate ULID string with helpful error messages
+/// Validates a ULID string with helpful error messages.
 pub fn validate_ulid_string(ulid_str: &str, span: Span) -> Result<(), Box<ShellError>> {
     if ulid_str.is_empty() {
         return Err(Box::new(ShellError::GenericError {
@@ -103,7 +105,7 @@ pub fn validate_ulid_string(ulid_str: &str, span: Span) -> Result<(), Box<ShellE
         }));
     }
 
-    if ulid_str.len() != 26 {
+    if ulid_str.len() != crate::ULID_STRING_LENGTH {
         return Err(Box::new(ShellError::GenericError {
             error: "Invalid ULID length".to_string(),
             msg: format!("ULID must be exactly 26 characters, got {}", ulid_str.len()),
@@ -114,14 +116,16 @@ pub fn validate_ulid_string(ulid_str: &str, span: Span) -> Result<(), Box<ShellE
     }
 
     // Check character set
-    let valid_chars = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
     for (i, c) in ulid_str.chars().enumerate() {
-        if !valid_chars.contains(c) {
+        if !crate::CROCKFORD_BASE32_CHARSET.contains(c) {
             return Err(Box::new(ShellError::GenericError {
                 error: "Invalid ULID character".to_string(),
                 msg: format!("Invalid character '{}' at position {}", c, i),
                 span: Some(span),
-                help: Some(format!("Valid characters: {}", valid_chars)),
+                help: Some(format!(
+                    "Valid characters: {}",
+                    crate::CROCKFORD_BASE32_CHARSET
+                )),
                 inner: Vec::new(),
             }));
         }
@@ -130,7 +134,7 @@ pub fn validate_ulid_string(ulid_str: &str, span: Span) -> Result<(), Box<ShellE
     Ok(())
 }
 
-/// Create error for unsupported operations
+/// Creates an error for unsupported operations.
 pub fn unsupported_operation_error(operation: &str, reason: &str, span: Span) -> ShellError {
     ShellError::GenericError {
         error: "Unsupported operation".to_string(),
@@ -144,7 +148,7 @@ pub fn unsupported_operation_error(operation: &str, reason: &str, span: Span) ->
     }
 }
 
-/// Create informational message value
+/// Creates an informational message value.
 pub fn create_info_value(title: &str, message: &str, span: Span) -> Value {
     use nu_protocol::Record;
 
@@ -155,7 +159,7 @@ pub fn create_info_value(title: &str, message: &str, span: Span) -> Value {
     Value::record(record, span)
 }
 
-/// Create success message with data
+/// Creates a success message with data.
 pub fn create_success_result<T>(data: T, message: &str, span: Span) -> Value
 where
     T: Into<Value>,
