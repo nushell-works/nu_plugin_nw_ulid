@@ -1329,4 +1329,130 @@ mod tests {
             }
         }
     }
+
+    mod parse_output_format_tests {
+        use super::*;
+
+        #[test]
+        fn test_valid_formats() {
+            let span = create_test_span();
+            assert!(matches!(
+                parse_output_format(Some("string"), span).unwrap(),
+                crate::UlidOutputFormat::String
+            ));
+            assert!(matches!(
+                parse_output_format(Some("json"), span).unwrap(),
+                crate::UlidOutputFormat::Json
+            ));
+            assert!(matches!(
+                parse_output_format(Some("binary"), span).unwrap(),
+                crate::UlidOutputFormat::Binary
+            ));
+        }
+
+        #[test]
+        fn test_none_defaults_to_string() {
+            let span = create_test_span();
+            assert!(matches!(
+                parse_output_format(None, span).unwrap(),
+                crate::UlidOutputFormat::String
+            ));
+        }
+
+        #[test]
+        fn test_invalid_format_returns_error() {
+            let span = create_test_span();
+            assert!(parse_output_format(Some("xml"), span).is_err());
+        }
+    }
+
+    mod generate_single_ulid_tests {
+        use super::*;
+
+        #[test]
+        fn test_generates_without_timestamp() {
+            let span = create_test_span();
+            let result =
+                generate_single_ulid(None, &crate::UlidOutputFormat::String, span).unwrap();
+            match result {
+                PipelineData::Value(Value::String { val, .. }, _) => {
+                    assert_eq!(val.len(), 26);
+                }
+                _ => panic!("Expected string pipeline value"),
+            }
+        }
+
+        #[test]
+        fn test_generates_with_timestamp() {
+            let span = create_test_span();
+            let result =
+                generate_single_ulid(Some(1704067200000), &crate::UlidOutputFormat::String, span)
+                    .unwrap();
+            match result {
+                PipelineData::Value(Value::String { val, .. }, _) => {
+                    assert_eq!(val.len(), 26);
+                }
+                _ => panic!("Expected string pipeline value"),
+            }
+        }
+
+        #[test]
+        fn test_json_format() {
+            let span = create_test_span();
+            let result = generate_single_ulid(None, &crate::UlidOutputFormat::Json, span).unwrap();
+            match result {
+                PipelineData::Value(Value::Record { .. }, _) => {}
+                _ => panic!("Expected record pipeline value for json format"),
+            }
+        }
+    }
+
+    mod generate_bulk_ulids_tests {
+        use super::*;
+
+        #[test]
+        fn test_generates_correct_count() {
+            let span = create_test_span();
+            let result =
+                generate_bulk_ulids(5, None, &crate::UlidOutputFormat::String, span).unwrap();
+            match result {
+                PipelineData::Value(Value::List { vals, .. }, _) => {
+                    assert_eq!(vals.len(), 5);
+                }
+                _ => panic!("Expected list pipeline value"),
+            }
+        }
+
+        #[test]
+        fn test_negative_count_errors() {
+            let span = create_test_span();
+            assert!(generate_bulk_ulids(-1, None, &crate::UlidOutputFormat::String, span).is_err());
+        }
+
+        #[test]
+        fn test_over_max_count_errors() {
+            let span = create_test_span();
+            assert!(
+                generate_bulk_ulids(10_001, None, &crate::UlidOutputFormat::String, span).is_err()
+            );
+        }
+
+        #[test]
+        fn test_with_timestamp() {
+            let span = create_test_span();
+            let result = generate_bulk_ulids(
+                3,
+                Some(1704067200000),
+                &crate::UlidOutputFormat::String,
+                span,
+            )
+            .unwrap();
+            match result {
+                PipelineData::Value(Value::List { vals, .. }, _) => {
+                    assert_eq!(vals.len(), 3);
+                }
+                _ => panic!("Expected list pipeline value"),
+            }
+        }
+    }
 }

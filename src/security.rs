@@ -406,4 +406,116 @@ mod tests {
         ));
         assert!(!SecurityWarnings::should_warn_for_operation("parse", None));
     }
+
+    #[test]
+    fn test_build_use_case_list() {
+        let span = Span::test_data();
+        let result = build_use_case_list(SAFE_USE_CASES, span);
+        match result {
+            Value::List { vals, .. } => {
+                assert_eq!(vals.len(), SAFE_USE_CASES.len());
+                assert_eq!(vals[0].as_str().unwrap(), "Database primary keys");
+            }
+            _ => panic!("Expected list value"),
+        }
+    }
+
+    #[test]
+    fn test_build_attack_example() {
+        let span = Span::test_data();
+        let result = build_attack_example(span);
+        match result {
+            Value::Record { val, .. } => {
+                assert!(val.get("scenario").is_some());
+                assert!(val.get("time_t").is_some());
+                assert!(val.get("time_t_plus_1").is_some());
+                assert!(val.get("impact").is_some());
+            }
+            _ => panic!("Expected record value"),
+        }
+    }
+
+    #[test]
+    fn test_build_secure_alternatives() {
+        let span = Span::test_data();
+        let result = build_secure_alternatives(span);
+        match result {
+            Value::List { vals, .. } => {
+                assert_eq!(vals.len(), 5);
+                // Each item should be a record with use_case and recommended
+                match &vals[0] {
+                    Value::Record { val, .. } => {
+                        assert!(val.get("use_case").is_some());
+                        assert!(val.get("recommended").is_some());
+                    }
+                    _ => panic!("Expected record in alternatives list"),
+                }
+            }
+            _ => panic!("Expected list value"),
+        }
+    }
+
+    #[test]
+    fn test_get_security_advice_structure() {
+        let span = Span::test_data();
+        let result = SecurityWarnings::get_security_advice(span);
+        match result {
+            Value::Record { val, .. } => {
+                assert!(val.get("title").is_some());
+                assert!(val.get("warning").is_some());
+                assert!(val.get("safe_use_cases").is_some());
+                assert!(val.get("unsafe_use_cases").is_some());
+                assert!(val.get("vulnerability").is_some());
+                assert!(val.get("attack_example").is_some());
+                assert!(val.get("secure_alternatives").is_some());
+                assert!(val.get("best_practices").is_some());
+                assert!(val.get("learn_more").is_some());
+            }
+            _ => panic!("Expected record value"),
+        }
+    }
+
+    #[test]
+    fn test_create_context_warning() {
+        let span = Span::test_data();
+        let result = SecurityWarnings::create_context_warning("auth_token", span);
+        match result {
+            Value::Record { val, .. } => {
+                assert!(val.get("warning").is_some());
+                assert!(val.get("context").is_some());
+                assert_eq!(val.get("context").unwrap().as_str().unwrap(), "auth_token");
+                assert!(val.get("message").is_some());
+                assert!(val.get("recommendation").is_some());
+            }
+            _ => panic!("Expected record value"),
+        }
+    }
+
+    #[test]
+    fn test_format_command_warning() {
+        let warning = SecurityWarnings::format_command_warning();
+        assert!(warning.contains("WARNING"));
+        assert!(warning.contains("Safe"));
+        assert!(warning.contains("Unsafe"));
+    }
+
+    #[test]
+    fn test_security_rating_as_str() {
+        assert_eq!(SecurityRating::Low.as_str(), "Low");
+        assert_eq!(SecurityRating::Medium.as_str(), "Medium");
+        assert_eq!(SecurityRating::High.as_str(), "High");
+        assert_eq!(SecurityRating::Unknown.as_str(), "Unknown");
+    }
+
+    #[test]
+    fn test_security_rating_get_advice() {
+        assert!(SecurityRating::Low.get_advice().contains("appropriate"));
+        assert!(SecurityRating::Medium.get_advice().contains("caution"));
+        assert!(
+            SecurityRating::High
+                .get_advice()
+                .contains("NOT recommended")
+        );
+        assert!(SecurityRating::Unknown.get_advice().contains("Assess"));
+    }
 }
