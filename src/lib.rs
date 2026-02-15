@@ -3,12 +3,10 @@
 use nu_plugin::{Plugin, PluginCommand};
 
 mod commands;
-mod error;
 mod security;
 mod ulid_engine;
 
 use commands::*;
-pub use error::*;
 pub use security::*;
 pub use ulid_engine::*;
 
