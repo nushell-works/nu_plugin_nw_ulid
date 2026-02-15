@@ -37,17 +37,6 @@ pub struct UlidComponents {
     pub valid: bool,
 }
 
-/// Options for ULID generation operations.
-#[derive(Debug, Clone)]
-pub struct UlidGenerationOptions {
-    /// Number of ULIDs to generate.
-    pub count: Option<usize>,
-    /// Custom timestamp in milliseconds.
-    pub timestamp_ms: Option<u64>,
-    /// Desired output format.
-    pub format: UlidOutputFormat,
-}
-
 /// Output format options for ULID operations.
 #[derive(Debug, Clone)]
 pub enum UlidOutputFormat {
@@ -57,16 +46,6 @@ pub enum UlidOutputFormat {
     Json,
     /// Raw 16-byte binary representation.
     Binary,
-}
-
-impl Default for UlidGenerationOptions {
-    fn default() -> Self {
-        Self {
-            count: None,
-            timestamp_ms: None,
-            format: UlidOutputFormat::String,
-        }
-    }
 }
 
 impl UlidEngine {
@@ -253,55 +232,6 @@ impl UlidEngine {
 
         Value::record(record, span)
     }
-
-    /// Returns `true` if the usage context has security concerns.
-    #[must_use]
-    pub fn has_security_concerns(usage_context: &str) -> bool {
-        let unsafe_contexts = [
-            "auth",
-            "authentication",
-            "token",
-            "session",
-            "password",
-            "secret",
-            "key",
-            "security",
-            "login",
-            "credential",
-        ];
-
-        let context_lower = usage_context.to_lowercase();
-        unsafe_contexts
-            .iter()
-            .any(|&unsafe_ctx| context_lower.contains(unsafe_ctx))
-    }
-
-    /// Gets security advice for ULID usage.
-    pub fn get_security_advice() -> SecurityAdvice {
-        SecurityAdvice {
-            safe_use_cases: vec![
-                "Database primary keys".to_string(),
-                "Log correlation IDs".to_string(),
-                "File/object naming".to_string(),
-                "Sortable identifiers for analytics".to_string(),
-                "General-purpose unique identifiers".to_string(),
-            ],
-            unsafe_use_cases: vec![
-                "Authentication tokens".to_string(),
-                "Session identifiers".to_string(),
-                "Password reset tokens".to_string(),
-                "API keys or secrets".to_string(),
-                "Security-critical random values".to_string(),
-            ],
-            alternatives: vec![
-                "Auth tokens: Use 256-bit cryptographically random strings".to_string(),
-                "Sessions: Use UUID v4 or dedicated session token generators".to_string(),
-                "API keys: Use proper key derivation functions".to_string(),
-                "Secrets: Use dedicated secret management systems".to_string(),
-            ],
-            vulnerability_explanation: "ULIDs use monotonic generation within the same millisecond, making subsequent IDs predictable (previous + 1). This enables timing-based attacks in security contexts.".to_string(),
-        }
-    }
 }
 
 /// ULID validation result with detailed error information.
@@ -317,19 +247,6 @@ pub struct UlidValidationResult {
     pub timestamp_valid: bool,
     /// Descriptions of any validation errors found.
     pub errors: Vec<String>,
-}
-
-/// Security advice for ULID usage.
-#[derive(Debug, Clone)]
-pub struct SecurityAdvice {
-    /// Scenarios where ULIDs are safe to use.
-    pub safe_use_cases: Vec<String>,
-    /// Scenarios where ULIDs should not be used.
-    pub unsafe_use_cases: Vec<String>,
-    /// Recommended alternatives for security-sensitive contexts.
-    pub alternatives: Vec<String>,
-    /// Explanation of the underlying vulnerability.
-    pub vulnerability_explanation: String,
 }
 
 /// Errors produced by ULID operations.
@@ -433,17 +350,6 @@ mod tests {
             .collect::<std::collections::HashSet<_>>()
             .len();
         assert_eq!(unique_count, 10);
-    }
-
-    #[test]
-    fn test_security_context_detection() {
-        assert!(UlidEngine::has_security_concerns("authentication_token"));
-        assert!(UlidEngine::has_security_concerns("session_key"));
-        assert!(UlidEngine::has_security_concerns("password_reset"));
-
-        assert!(!UlidEngine::has_security_concerns("database_id"));
-        assert!(!UlidEngine::has_security_concerns("log_correlation"));
-        assert!(!UlidEngine::has_security_concerns("file_name"));
     }
 
     #[test]
