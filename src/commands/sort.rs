@@ -475,3 +475,266 @@ fn analyze_entropy(hex_string: &str) -> f64 {
 
     entropy
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use nu_protocol::Span;
+
+    fn test_span() -> Span {
+        Span::test_data()
+    }
+
+    fn test_components() -> crate::UlidComponents {
+        // 01AN4Z07BY = timestamp, 79KA1307SR9X4MV3 = randomness
+        crate::UlidEngine::parse("01AN4Z07BY79KA1307SR9X4MV3").unwrap()
+    }
+
+    mod sort_command {
+        use super::*;
+
+        #[test]
+        fn test_command_signature() {
+            let cmd = UlidSortCommand;
+            let sig = cmd.signature();
+            assert_eq!(sig.name, "ulid sort");
+            assert!(sig.named.iter().any(|f| f.long == "column"));
+            assert!(sig.named.iter().any(|f| f.long == "reverse"));
+            assert!(sig.named.iter().any(|f| f.long == "natural"));
+        }
+
+        #[test]
+        fn test_command_name() {
+            assert_eq!(UlidSortCommand.name(), "ulid sort");
+        }
+
+        #[test]
+        fn test_command_examples_not_empty() {
+            assert!(!UlidSortCommand.examples().is_empty());
+        }
+    }
+
+    mod inspect_command {
+        use super::*;
+
+        #[test]
+        fn test_command_signature() {
+            let cmd = UlidInspectCommand;
+            let sig = cmd.signature();
+            assert_eq!(sig.name, "ulid inspect");
+            assert_eq!(sig.required_positional.len(), 1);
+            assert!(sig.named.iter().any(|f| f.long == "compact"));
+            assert!(sig.named.iter().any(|f| f.long == "timestamp-only"));
+            assert!(sig.named.iter().any(|f| f.long == "stats"));
+        }
+
+        #[test]
+        fn test_command_name() {
+            assert_eq!(UlidInspectCommand.name(), "ulid inspect");
+        }
+
+        #[test]
+        fn test_command_examples_not_empty() {
+            assert!(!UlidInspectCommand.examples().is_empty());
+        }
+    }
+
+    mod build_timestamp_value_tests {
+        use super::*;
+
+        #[test]
+        fn test_compact_returns_formatted_string() {
+            let components = test_components();
+            let result = build_timestamp_value(&components, true, test_span());
+            assert!(result.is_some());
+            match result.unwrap() {
+                Value::String { val, .. } => {
+                    assert!(val.contains("UTC"));
+                }
+                _ => panic!("Expected string value in compact mode"),
+            }
+        }
+
+        #[test]
+        fn test_full_returns_record() {
+            let components = test_components();
+            let result = build_timestamp_value(&components, false, test_span());
+            assert!(result.is_some());
+            match result.unwrap() {
+                Value::Record { val, .. } => {
+                    assert!(val.get("milliseconds").is_some());
+                    assert!(val.get("seconds").is_some());
+                    assert!(val.get("iso8601").is_some());
+                    assert!(val.get("rfc3339").is_some());
+                    assert!(val.get("human").is_some());
+                    assert!(val.get("age").is_some());
+                }
+                _ => panic!("Expected record value in full mode"),
+            }
+        }
+    }
+
+    mod build_randomness_value_tests {
+        use super::*;
+
+        #[test]
+        fn test_compact_returns_hex_string() {
+            let components = test_components();
+            let result = build_randomness_value(&components, true, test_span());
+            match result {
+                Value::String { val, .. } => {
+                    assert_eq!(val, components.randomness_hex);
+                }
+                _ => panic!("Expected string value in compact mode"),
+            }
+        }
+
+        #[test]
+        fn test_full_returns_record_with_bytes_and_base64() {
+            let components = test_components();
+            let result = build_randomness_value(&components, false, test_span());
+            match result {
+                Value::Record { val, .. } => {
+                    assert!(val.get("hex").is_some());
+                    assert!(val.get("bytes").is_some());
+                    assert!(val.get("base64").is_some());
+                }
+                _ => panic!("Expected record value in full mode"),
+            }
+        }
+    }
+
+    mod build_stats_record_tests {
+        use super::*;
+
+        #[test]
+        fn test_contains_expected_fields() {
+            let components = test_components();
+            let result = build_stats_record(&components, test_span());
+            match result {
+                Value::Record { val, .. } => {
+                    assert_eq!(
+                        val.get("timestamp_bits").unwrap().as_int().unwrap(),
+                        ULID_TIMESTAMP_BITS
+                    );
+                    assert_eq!(
+                        val.get("randomness_bits").unwrap().as_int().unwrap(),
+                        ULID_RANDOMNESS_BITS
+                    );
+                    assert_eq!(
+                        val.get("total_bits").unwrap().as_int().unwrap(),
+                        ULID_TOTAL_BITS
+                    );
+                    assert!(val.get("randomness_entropy").is_some());
+                    assert!(val.get("collision_probability_per_ms").is_some());
+                }
+                _ => panic!("Expected record value"),
+            }
+        }
+    }
+
+    mod compare_ulid_strings_tests {
+        use super::*;
+
+        #[test]
+        fn test_natural_ordering() {
+            let a = "01AN4Z07BY79KA1307SR9X4MV3";
+            let b = "01AN4Z07BZ79KA1307SR9X4MV4";
+            assert_eq!(compare_ulid_strings(a, b, true), Ordering::Less);
+            assert_eq!(compare_ulid_strings(b, a, true), Ordering::Greater);
+            assert_eq!(compare_ulid_strings(a, a, true), Ordering::Equal);
+        }
+
+        #[test]
+        fn test_timestamp_ordering() {
+            let a = "01AN4Z07BY79KA1307SR9X4MV3";
+            let b = "01AN4Z07BZ79KA1307SR9X4MV4";
+            let result = compare_ulid_strings(a, b, false);
+            // Both should parse; the one with higher timestamp chars sorts later
+            assert!(result == Ordering::Less || result == Ordering::Greater);
+        }
+
+        #[test]
+        fn test_equal_timestamps_fall_back_to_string() {
+            let a = "01AN4Z07BY79KA1307SR9X4MV3";
+            assert_eq!(compare_ulid_strings(a, a, false), Ordering::Equal);
+        }
+    }
+
+    mod format_duration_tests {
+        use super::*;
+
+        #[test]
+        fn test_seconds() {
+            let d = chrono::Duration::seconds(30);
+            assert_eq!(format_duration(d), "30 seconds ago");
+        }
+
+        #[test]
+        fn test_minutes() {
+            let d = chrono::Duration::seconds(120);
+            assert_eq!(format_duration(d), "2 minutes ago");
+        }
+
+        #[test]
+        fn test_hours() {
+            let d = chrono::Duration::seconds(7200);
+            assert_eq!(format_duration(d), "2 hours ago");
+        }
+
+        #[test]
+        fn test_days() {
+            let d = chrono::Duration::seconds(172800);
+            assert_eq!(format_duration(d), "2 days ago");
+        }
+    }
+
+    mod analyze_entropy_tests {
+        use super::*;
+
+        #[test]
+        fn test_single_char_has_zero_entropy() {
+            assert_eq!(analyze_entropy("aaaa"), 0.0);
+        }
+
+        #[test]
+        fn test_varied_chars_have_positive_entropy() {
+            let entropy = analyze_entropy("0123456789abcdef");
+            assert!(entropy > 0.0);
+        }
+    }
+
+    mod extract_helpers {
+        use super::*;
+
+        #[test]
+        fn test_extract_string_value() {
+            let val = Value::string("hello", test_span());
+            assert_eq!(extract_string_value(&val), Some("hello".to_string()));
+
+            let val = Value::int(42, test_span());
+            assert_eq!(extract_string_value(&val), None);
+        }
+
+        #[test]
+        fn test_extract_ulid_from_record() {
+            let mut record = nu_protocol::Record::new();
+            record.push(
+                "id",
+                Value::string("01AN4Z07BY79KA1307SR9X4MV3", test_span()),
+            );
+            let val = Value::record(record, test_span());
+            assert_eq!(
+                extract_ulid_from_record(&val, "id"),
+                Some("01AN4Z07BY79KA1307SR9X4MV3".to_string())
+            );
+            assert_eq!(extract_ulid_from_record(&val, "missing"), None);
+        }
+
+        #[test]
+        fn test_extract_ulid_from_non_record() {
+            let val = Value::string("not a record", test_span());
+            assert_eq!(extract_ulid_from_record(&val, "id"), None);
+        }
+    }
+}

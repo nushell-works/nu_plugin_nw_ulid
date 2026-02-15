@@ -1175,4 +1175,116 @@ mod tests {
             }
         }
     }
+
+    mod parse_timestamp_to_datetime_tests {
+        use super::*;
+
+        #[test]
+        fn test_rfc3339_string() {
+            let span = create_test_span();
+            let val = Value::string("2024-01-01T00:00:00Z", span);
+            let dt = parse_timestamp_to_datetime(val, span).unwrap();
+            assert_eq!(dt.year(), 2024);
+            assert_eq!(dt.month(), 1);
+            assert_eq!(dt.day(), 1);
+        }
+
+        #[test]
+        fn test_iso8601_millis_string() {
+            let span = create_test_span();
+            let val = Value::string("2024-06-15T12:30:45.123Z", span);
+            let dt = parse_timestamp_to_datetime(val, span).unwrap();
+            assert_eq!(dt.year(), 2024);
+            assert_eq!(dt.month(), 6);
+            assert_eq!(dt.hour(), 12);
+        }
+
+        #[test]
+        fn test_invalid_string_returns_error() {
+            let span = create_test_span();
+            let val = Value::string("not-a-timestamp", span);
+            assert!(parse_timestamp_to_datetime(val, span).is_err());
+        }
+
+        #[test]
+        fn test_int_seconds() {
+            let span = create_test_span();
+            let val = Value::int(1704067200, span);
+            let dt = parse_timestamp_to_datetime(val, span).unwrap();
+            assert_eq!(dt.year(), 2024);
+            assert_eq!(dt.month(), 1);
+            assert_eq!(dt.day(), 1);
+        }
+
+        #[test]
+        fn test_int_millis() {
+            let span = create_test_span();
+            let val = Value::int(1704067200000, span);
+            let dt = parse_timestamp_to_datetime(val, span).unwrap();
+            assert_eq!(dt.year(), 2024);
+            assert_eq!(dt.month(), 1);
+            assert_eq!(dt.day(), 1);
+        }
+
+        #[test]
+        fn test_float_timestamp() {
+            let span = create_test_span();
+            let val = Value::float(1704067200.5, span);
+            let dt = parse_timestamp_to_datetime(val, span).unwrap();
+            assert_eq!(dt.year(), 2024);
+            assert_eq!(dt.nanosecond(), 500_000_000);
+        }
+
+        #[test]
+        fn test_invalid_type_returns_error() {
+            let span = create_test_span();
+            let val = Value::bool(true, span);
+            assert!(parse_timestamp_to_datetime(val, span).is_err());
+        }
+    }
+
+    mod build_datetime_record_tests {
+        use super::*;
+
+        #[test]
+        fn test_contains_all_fields() {
+            let span = create_test_span();
+            let dt = Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap();
+            let result = build_datetime_record(dt, span);
+            match result {
+                Value::Record { val, .. } => {
+                    assert!(val.get("iso8601").is_some());
+                    assert!(val.get("rfc3339").is_some());
+                    assert!(val.get("unix_seconds").is_some());
+                    assert!(val.get("unix_millis").is_some());
+                    assert!(val.get("year").is_some());
+                    assert!(val.get("month").is_some());
+                    assert!(val.get("day").is_some());
+                    assert!(val.get("hour").is_some());
+                    assert!(val.get("minute").is_some());
+                    assert!(val.get("second").is_some());
+                    assert!(val.get("nanosecond").is_some());
+                }
+                _ => panic!("Expected record value"),
+            }
+        }
+
+        #[test]
+        fn test_field_values() {
+            let span = create_test_span();
+            let dt = Utc.with_ymd_and_hms(2024, 6, 15, 12, 30, 45).unwrap();
+            let result = build_datetime_record(dt, span);
+            match result {
+                Value::Record { val, .. } => {
+                    assert_eq!(val.get("year").unwrap().as_int().unwrap(), 2024);
+                    assert_eq!(val.get("month").unwrap().as_int().unwrap(), 6);
+                    assert_eq!(val.get("day").unwrap().as_int().unwrap(), 15);
+                    assert_eq!(val.get("hour").unwrap().as_int().unwrap(), 12);
+                    assert_eq!(val.get("minute").unwrap().as_int().unwrap(), 30);
+                    assert_eq!(val.get("second").unwrap().as_int().unwrap(), 45);
+                }
+                _ => panic!("Expected record value"),
+            }
+        }
+    }
 }
