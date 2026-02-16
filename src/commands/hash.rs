@@ -358,7 +358,7 @@ impl PluginCommand for UlidHashRandomCommand {
                 .with_label("Length must be between 1 and 1024 bytes", call.head));
         }
 
-        use rand::RngCore;
+        use rand::Rng;
         let mut rng = rand::rng();
         let mut bytes = vec![0u8; byte_count];
         rng.fill_bytes(&mut bytes);
@@ -582,7 +582,7 @@ mod tests {
         #[test]
         fn test_random_bytes_generation() {
             // Test that random bytes are actually generated
-            use rand::RngCore;
+            use rand::Rng;
             let mut rng = rand::rng();
             let mut bytes1 = vec![0u8; 32];
             let mut bytes2 = vec![0u8; 32];
@@ -901,7 +901,7 @@ mod tests {
             // Test random bytes generation
             let byte_count = 32;
 
-            use rand::RngCore;
+            use rand::Rng;
             let mut rng = rand::rng();
             let mut bytes = vec![0u8; byte_count];
             rng.fill_bytes(&mut bytes);
