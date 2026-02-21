@@ -664,6 +664,39 @@ would be clearer in separate modules.
 - Line count alone. A 400-line module with a single cohesive type and its helpers is fine.
 - A few shared utility functions that genuinely serve every type in the module.
 
+#### Command domain grouping
+
+For plugin commands specifically, group by **command domain** — the shared subcommand noun
+in the command name. Commands that share a domain noun typically share private helpers,
+constants, and error-handling logic, making them cohesive within a single file.
+
+For example, `ulid hash sha256`, `ulid hash sha512`, and `ulid hash blake3` all belong to
+the `hash` domain and live together in `hash.rs`. A single-command domain like `ulid sort`
+still gets its own file (`sort.rs`).
+
+The current domains in `src/commands/` are:
+
+| File          | Domain   | Commands                                             |
+|---------------|----------|------------------------------------------------------|
+| `ulid.rs`     | core     | generate, validate, parse, security-advice           |
+| `encode.rs`   | encode   | encode base32, decode base32, encode hex, decode hex |
+| `hash.rs`     | hash     | hash sha256, hash sha512, hash blake3, hash random   |
+| `time.rs`     | time     | time now, time parse, time millis                    |
+| `uuid.rs`     | uuid     | uuid generate, uuid validate, uuid parse             |
+| `stream.rs`   | stream   | stream, generate-stream                              |
+| `sort.rs`     | sort     | sort                                                 |
+| `inspect.rs`  | inspect  | inspect                                              |
+| `info.rs`     | info     | info                                                 |
+
+**When to create a new domain file vs. extending an existing one:**
+
+- If a new command shares the subcommand noun of an existing domain, add it to that file.
+- If a new command introduces a new noun (e.g., `ulid format …`), create a new file named
+  after the noun (`format.rs`).
+- Prefer domain-level files over one-file-per-command. A domain file with several related
+  commands and their helpers is more navigable than many thin files that scatter shared
+  context.
+
 ### Motivation
 
 A module that mixes unrelated responsibilities is hard to navigate, produces noisy diffs,
@@ -672,3 +705,7 @@ makes each file's purpose obvious from its name, keeps diffs focused on the chan
 and lets reviewers evaluate one concern at a time. The emphasis on cohesion rather than a
 rigid line limit avoids unnecessary churn on files that are large but focused, while still
 flagging files that are large *because* they mix concerns.
+
+Grouping commands by domain rather than putting all 23 commands in one file or giving each
+its own file strikes a balance: related commands share helpers and constants without
+cross-domain coupling, while the file tree remains compact enough to scan at a glance.
