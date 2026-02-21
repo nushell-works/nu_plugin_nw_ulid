@@ -251,8 +251,14 @@ impl PluginCommand for UlidHashBlake3Command {
         let output_length = length.unwrap_or(DEFAULT_HASH_OUTPUT_BYTES as i64) as usize;
 
         if output_length == 0 || output_length > MAX_HASH_OUTPUT_BYTES {
-            return Err(LabeledError::new("Invalid output length")
-                .with_label("Output length must be between 1 and 1024 bytes", call.head));
+            return Err(LabeledError::new("Invalid output length").with_label(
+                format!(
+                    "Output length must be between 1 and {} bytes",
+                    MAX_HASH_OUTPUT_BYTES
+                )
+                .as_str(),
+                call.head,
+            ));
         }
 
         let data = if let Some(arg) = call.opt::<Value>(0)? {
@@ -354,8 +360,14 @@ impl PluginCommand for UlidHashRandomCommand {
         let byte_count = length.unwrap_or(DEFAULT_HASH_OUTPUT_BYTES as i64) as usize;
 
         if byte_count == 0 || byte_count > MAX_HASH_OUTPUT_BYTES {
-            return Err(LabeledError::new("Invalid length")
-                .with_label("Length must be between 1 and 1024 bytes", call.head));
+            return Err(LabeledError::new("Invalid length").with_label(
+                format!(
+                    "Length must be between 1 and {} bytes",
+                    MAX_HASH_OUTPUT_BYTES
+                )
+                .as_str(),
+                call.head,
+            ));
         }
 
         use rand::Rng;
@@ -564,12 +576,12 @@ mod tests {
                 (1, true, "minimum length"),
                 (32, true, "default length"),
                 (512, true, "medium length"),
-                (1024, true, "maximum length"),
-                (1025, false, "over maximum length"),
+                (MAX_HASH_OUTPUT_BYTES, true, "maximum length"),
+                (MAX_HASH_OUTPUT_BYTES + 1, false, "over maximum length"),
             ];
 
             for (length, should_be_valid, description) in test_cases {
-                let is_valid = !(length == 0 || length > 1024);
+                let is_valid = !(length == 0 || length > MAX_HASH_OUTPUT_BYTES);
 
                 assert_eq!(
                     is_valid, should_be_valid,
@@ -692,12 +704,12 @@ mod tests {
             let boundary_cases = vec![
                 (0, false, "zero length"),
                 (1, true, "minimum valid"),
-                (1024, true, "maximum valid"),
-                (1025, false, "over maximum"),
+                (MAX_HASH_OUTPUT_BYTES, true, "maximum valid"),
+                (MAX_HASH_OUTPUT_BYTES + 1, false, "over maximum"),
             ];
 
             for (length, expected_valid, description) in boundary_cases {
-                let is_valid = length > 0 && length <= 1024;
+                let is_valid = length > 0 && length <= MAX_HASH_OUTPUT_BYTES;
                 assert_eq!(
                     is_valid, expected_valid,
                     "Boundary test failed for {}: {}",
@@ -863,7 +875,7 @@ mod tests {
 
             for &length in &custom_lengths {
                 // Test length validation
-                let is_valid = length > 0 && length <= 1024;
+                let is_valid = length > 0 && length <= MAX_HASH_OUTPUT_BYTES;
                 assert!(is_valid, "Length {} should be valid", length);
 
                 // Test hash generation
@@ -880,17 +892,23 @@ mod tests {
         #[test]
         fn test_blake3_invalid_length() {
             // Test BLAKE3 length validation error paths
-            let invalid_lengths = [0, 1025, 2000];
+            let invalid_lengths = [0, MAX_HASH_OUTPUT_BYTES + 1, 2000];
 
             for &length in &invalid_lengths {
-                let is_valid = length > 0 && length <= 1024;
+                let is_valid = length > 0 && length <= MAX_HASH_OUTPUT_BYTES;
                 assert!(!is_valid, "Length {} should be invalid", length);
 
                 // Test error creation
                 if !is_valid {
                     let span = create_test_span();
-                    let error = LabeledError::new("Invalid output length")
-                        .with_label("Output length must be between 1 and 1024 bytes", span);
+                    let error = LabeledError::new("Invalid output length").with_label(
+                        format!(
+                            "Output length must be between 1 and {} bytes",
+                            MAX_HASH_OUTPUT_BYTES
+                        )
+                        .as_str(),
+                        span,
+                    );
                     assert_eq!(error.msg, "Invalid output length");
                 }
             }
@@ -937,13 +955,13 @@ mod tests {
                 (-1, false, "negative length"),
                 (1, true, "minimum valid"),
                 (32, true, "default length"),
-                (1024, true, "maximum valid"),
-                (1025, false, "over maximum"),
+                (MAX_HASH_OUTPUT_BYTES as i64, true, "maximum valid"),
+                (MAX_HASH_OUTPUT_BYTES as i64 + 1, false, "over maximum"),
                 (2000, false, "way over maximum"),
             ];
 
             for (length, should_be_valid, description) in test_cases {
-                let is_valid = length > 0 && length <= 1024;
+                let is_valid = length > 0 && length <= MAX_HASH_OUTPUT_BYTES as i64;
                 assert_eq!(
                     is_valid, should_be_valid,
                     "Failed for {}: {}",
@@ -953,8 +971,14 @@ mod tests {
                 // Test error creation for invalid lengths
                 if !is_valid {
                     let span = create_test_span();
-                    let error = LabeledError::new("Invalid length")
-                        .with_label("Length must be between 1 and 1024 bytes", span);
+                    let error = LabeledError::new("Invalid length").with_label(
+                        format!(
+                            "Length must be between 1 and {} bytes",
+                            MAX_HASH_OUTPUT_BYTES
+                        )
+                        .as_str(),
+                        span,
+                    );
                     assert_eq!(error.msg, "Invalid length");
                 }
             }
