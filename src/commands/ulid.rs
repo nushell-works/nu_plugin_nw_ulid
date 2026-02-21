@@ -328,9 +328,10 @@ fn generate_bulk_ulids(
     let count_usize = if count < 0 {
         return Err(LabeledError::new("Invalid count").with_label("Count must be positive", span));
     } else if count > crate::MAX_BULK_GENERATION as i64 {
-        return Err(
-            LabeledError::new("Count too large").with_label("Maximum count is 10,000", span)
-        );
+        return Err(LabeledError::new("Count too large").with_label(
+            format!("Maximum count is {}", crate::MAX_BULK_GENERATION),
+            span,
+        ));
     } else {
         count as usize
     };
@@ -444,12 +445,16 @@ mod tests {
                 (0, true, "zero count"),
                 (1, true, "normal count"),
                 (5000, true, "medium count"),
-                (10000, true, "max count"),
-                (10001, false, "over max count"),
+                (crate::MAX_BULK_GENERATION as i64, true, "max count"),
+                (
+                    crate::MAX_BULK_GENERATION as i64 + 1,
+                    false,
+                    "over max count",
+                ),
             ];
 
             for (count, should_be_valid, description) in test_cases {
-                let is_valid = (0..=10_000).contains(&count);
+                let is_valid = (0..=crate::MAX_BULK_GENERATION as i64).contains(&count);
 
                 assert_eq!(
                     is_valid, should_be_valid,
@@ -739,7 +744,7 @@ mod tests {
                 match string_value {
                     Value::String { val, .. } => {
                         assert_eq!(val, ulid_str);
-                        assert_eq!(val.len(), 26);
+                        assert_eq!(val.len(), crate::ULID_STRING_LENGTH);
                     }
                     _ => panic!("String format should return String value"),
                 }
@@ -762,12 +767,13 @@ mod tests {
         #[test]
         fn test_count_parameter_bounds() {
             // Test count validation boundaries
-            let valid_counts = [0, 1, 10_000];
-            let invalid_counts = [10_001, -1];
+            let max = crate::MAX_BULK_GENERATION as i64;
+            let valid_counts = [0, 1, max];
+            let invalid_counts = [max + 1, -1];
 
             for count in valid_counts {
                 assert!(
-                    (0..=10_000).contains(&count),
+                    (0..=max).contains(&count),
                     "Count {} should be valid",
                     count
                 );
@@ -775,7 +781,7 @@ mod tests {
 
             for count in invalid_counts {
                 assert!(
-                    !(0..=10_000).contains(&count),
+                    !(0..=max).contains(&count),
                     "Count {} should be invalid",
                     count
                 );
@@ -808,14 +814,14 @@ mod tests {
             for (description, ulid_str) in valid_patterns {
                 assert_eq!(
                     ulid_str.len(),
-                    26,
+                    crate::ULID_STRING_LENGTH,
                     "Length check failed for {}",
                     description
                 );
                 assert!(
                     ulid_str
                         .chars()
-                        .all(|c| "0123456789ABCDEFGHJKMNPQRSTVWXYZ".contains(c)),
+                        .all(|c| crate::CROCKFORD_BASE32_CHARSET.contains(c)),
                     "Character set check failed for {}",
                     description
                 );
@@ -872,7 +878,11 @@ mod tests {
             let generated_ulid = UlidEngine::generate().expect("Should generate ULID");
             let ulid_str = generated_ulid.to_string();
 
-            assert_eq!(ulid_str.len(), 26, "ULID should be 26 characters");
+            assert_eq!(
+                ulid_str.len(),
+                crate::ULID_STRING_LENGTH,
+                "ULID should be 26 characters"
+            );
             assert!(
                 UlidEngine::validate(&ulid_str),
                 "Generated ULID should be valid"
@@ -912,8 +922,12 @@ mod tests {
                 (-1, false, "negative count"),
                 (0, true, "zero count"), // Zero is valid, returns empty vec
                 (1, true, "single count"),
-                (10_000, true, "max count"),
-                (10_001, false, "over max count"),
+                (crate::MAX_BULK_GENERATION as i64, true, "max count"),
+                (
+                    crate::MAX_BULK_GENERATION as i64 + 1,
+                    false,
+                    "over max count",
+                ),
             ];
 
             for (count, should_be_valid, description) in test_cases {
@@ -924,7 +938,7 @@ mod tests {
                         "Negative count should be invalid: {}",
                         description
                     );
-                } else if count > 10_000 {
+                } else if count > crate::MAX_BULK_GENERATION as i64 {
                     // Test the actual bulk generation limit
                     let result = UlidEngine::generate_bulk(count as usize);
                     assert!(
@@ -956,7 +970,7 @@ mod tests {
                 UlidEngine::to_value(&test_ulid, &crate::UlidOutputFormat::String, span);
             match string_value {
                 Value::String { val, .. } => {
-                    assert_eq!(val.len(), 26);
+                    assert_eq!(val.len(), crate::ULID_STRING_LENGTH);
                     assert_eq!(val, test_ulid.to_string());
                 }
                 _ => panic!("String format should return String value"),
@@ -1023,7 +1037,7 @@ mod tests {
                     "Detailed validation should pass: {}",
                     ulid_str
                 );
-                assert_eq!(result.length, 26);
+                assert_eq!(result.length, crate::ULID_STRING_LENGTH);
                 assert!(result.charset_valid);
                 assert!(result.timestamp_valid);
                 assert!(result.errors.is_empty());
@@ -1376,7 +1390,7 @@ mod tests {
                 generate_single_ulid(None, &crate::UlidOutputFormat::String, span).unwrap();
             match result {
                 PipelineData::Value(Value::String { val, .. }, _) => {
-                    assert_eq!(val.len(), 26);
+                    assert_eq!(val.len(), crate::ULID_STRING_LENGTH);
                 }
                 _ => panic!("Expected string pipeline value"),
             }
@@ -1390,7 +1404,7 @@ mod tests {
                     .unwrap();
             match result {
                 PipelineData::Value(Value::String { val, .. }, _) => {
-                    assert_eq!(val.len(), 26);
+                    assert_eq!(val.len(), crate::ULID_STRING_LENGTH);
                 }
                 _ => panic!("Expected string pipeline value"),
             }

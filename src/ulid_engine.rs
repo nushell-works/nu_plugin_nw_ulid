@@ -21,6 +21,12 @@ pub const NANOS_PER_MILLI: u64 = 1_000_000;
 /// Milliseconds per second, used for timestamp conversions.
 pub const MS_PER_SECOND: u64 = 1_000;
 
+/// Number of Crockford Base32 characters encoding the timestamp portion of a ULID.
+pub const ULID_TIMESTAMP_CHARS: usize = 10;
+
+/// Number of Crockford Base32 characters encoding the randomness portion of a ULID.
+pub const ULID_RANDOMNESS_CHARS: usize = 16;
+
 /// Bitmask for the 80-bit randomness component of a ULID.
 const ULID_RANDOMNESS_MASK: u128 = 0xFFFF_FFFF_FFFF_FFFF_FFFF;
 
@@ -316,7 +322,7 @@ mod tests {
     #[test]
     fn test_ulid_generation() {
         let ulid = UlidEngine::generate().unwrap();
-        assert_eq!(ulid.to_string().len(), 26);
+        assert_eq!(ulid.to_string().len(), ULID_STRING_LENGTH);
     }
 
     #[test]

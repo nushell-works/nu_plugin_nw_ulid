@@ -1,4 +1,4 @@
-use nu_plugin_nw_ulid::UlidEngine;
+use nu_plugin_nw_ulid::{ULID_STRING_LENGTH, UlidEngine};
 use std::time::Instant;
 
 #[cfg(test)]
@@ -169,8 +169,8 @@ mod performance_tests {
         let _generation_overhead = after_generation - initial_memory;
         let string_overhead = after_string_conversion - after_generation;
 
-        // Each ULID should use roughly 26 bytes for string representation
-        let expected_string_memory = ulid_strings.len() * 26;
+        // Each ULID should use roughly ULID_STRING_LENGTH bytes for string representation
+        let expected_string_memory = ulid_strings.len() * ULID_STRING_LENGTH;
 
         assert!(
             string_overhead < expected_string_memory * 2,

@@ -1,4 +1,6 @@
-use nu_plugin_nw_ulid::UlidEngine;
+use nu_plugin_nw_ulid::{
+    CROCKFORD_BASE32_CHARSET, ULID_RANDOMNESS_CHARS, ULID_TIMESTAMP_CHARS, UlidEngine,
+};
 use std::collections::HashMap;
 
 #[cfg(test)]
@@ -35,15 +37,15 @@ mod security_tests {
     }
 
     fn test_randomness_distribution(ulids: &[String]) {
-        // Extract randomness components (last 16 characters)
+        // Extract randomness components (last ULID_RANDOMNESS_CHARS characters)
         let randomness_parts: Vec<String> = ulids
             .iter()
-            .map(|ulid| ulid[10..].to_string()) // Skip timestamp, get randomness
+            .map(|ulid| ulid[ULID_TIMESTAMP_CHARS..].to_string()) // Skip timestamp, get randomness
             .collect();
 
         // Test character frequency distribution
         let mut char_frequency = HashMap::new();
-        let total_chars = randomness_parts.len() * 16;
+        let total_chars = randomness_parts.len() * ULID_RANDOMNESS_CHARS;
 
         for part in &randomness_parts {
             for ch in part.chars() {
@@ -51,8 +53,8 @@ mod security_tests {
             }
         }
 
-        // Each character should appear roughly 1/32 of the time (Crockford Base32)
-        let expected_frequency = total_chars as f64 / 32.0;
+        // Each character should appear roughly equally (Crockford Base32)
+        let expected_frequency = total_chars as f64 / CROCKFORD_BASE32_CHARSET.len() as f64;
         let tolerance = expected_frequency * 0.2; // 20% tolerance
 
         for (ch, count) in char_frequency {
@@ -72,8 +74,8 @@ mod security_tests {
         // Check that consecutive ULIDs don't have identical randomness parts
         for i in 1..ulids.len().min(100) {
             // Check first 100 pairs
-            let prev_randomness = &ulids[i - 1][10..];
-            let curr_randomness = &ulids[i][10..];
+            let prev_randomness = &ulids[i - 1][ULID_TIMESTAMP_CHARS..];
+            let curr_randomness = &ulids[i][ULID_TIMESTAMP_CHARS..];
 
             assert_ne!(
                 prev_randomness,

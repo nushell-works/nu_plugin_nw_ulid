@@ -3,6 +3,7 @@
 pub mod encode;
 pub mod hash;
 pub mod info;
+pub mod inspect;
 pub mod sort;
 pub mod stream;
 pub mod time;
@@ -16,7 +17,8 @@ pub use hash::{
     UlidHashBlake3Command, UlidHashRandomCommand, UlidHashSha256Command, UlidHashSha512Command,
 };
 pub use info::UlidInfoCommand;
-pub use sort::{UlidInspectCommand, UlidSortCommand};
+pub use inspect::UlidInspectCommand;
+pub use sort::UlidSortCommand;
 pub use stream::{UlidGenerateStreamCommand, UlidStreamCommand};
 pub use time::{UlidTimeMillisCommand, UlidTimeNowCommand, UlidTimeParseCommand};
 pub use ulid::{
