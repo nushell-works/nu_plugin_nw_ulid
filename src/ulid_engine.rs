@@ -38,7 +38,7 @@ pub struct UlidComponents {
 }
 
 /// Output format options for ULID operations.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum UlidOutputFormat {
     /// Plain string representation.
     String,
