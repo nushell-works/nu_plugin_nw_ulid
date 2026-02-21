@@ -44,11 +44,6 @@ impl PluginCommand for UlidStreamCommand {
                 Some('f'),
             )
             .switch(
-                "parallel",
-                "Enable parallel processing for CPU-intensive operations",
-                Some('p'),
-            )
-            .switch(
                 "continue-on-error",
                 "Continue processing despite individual item errors",
                 Some('c'),
@@ -79,11 +74,6 @@ impl PluginCommand for UlidStreamCommand {
                 result: None,
             },
             Example {
-                example: r#"$huge_dataset | ulid stream extract-timestamp --parallel"#,
-                description: "Extract timestamps with parallel processing",
-                result: None,
-            },
-            Example {
                 example: r#"$ulid_data | ulid stream transform --output-format compact --continue-on-error"#,
                 description: "Transform ULIDs to compact format, continuing on errors",
                 result: None,
@@ -101,7 +91,6 @@ impl PluginCommand for UlidStreamCommand {
         let operation: String = call.req(0)?;
         let batch_size: Option<i64> = call.get_flag("batch-size")?;
         let output_format: Option<String> = call.get_flag("output-format")?;
-        let parallel: bool = call.has_flag("parallel")?;
         let continue_on_error: bool = call.has_flag("continue-on-error")?;
 
         let batch_size = batch_size.unwrap_or(DEFAULT_BATCH_SIZE as i64) as usize;
@@ -121,7 +110,6 @@ impl PluginCommand for UlidStreamCommand {
                     &operation,
                     batch_size,
                     &format,
-                    parallel,
                     continue_on_error,
                     call.head,
                 )
@@ -146,7 +134,6 @@ fn process_stream(
     operation: &str,
     batch_size: usize,
     output_format: &str,
-    parallel: bool,
     continue_on_error: bool,
     call_head: nu_protocol::Span,
 ) -> Result<Vec<Value>, Box<LabeledError>> {
@@ -169,23 +156,13 @@ fn process_stream(
             );
         }
 
-        let batch_results = if parallel && chunk.len() > 10 {
-            process_batch_parallel(
-                chunk,
-                operation,
-                output_format,
-                continue_on_error,
-                call_head,
-            )?
-        } else {
-            process_batch_sequential(
-                chunk,
-                operation,
-                output_format,
-                continue_on_error,
-                call_head,
-            )?
-        };
+        let batch_results = process_batch_sequential(
+            chunk,
+            operation,
+            output_format,
+            continue_on_error,
+            call_head,
+        )?;
 
         results.extend(batch_results);
     }
@@ -220,24 +197,6 @@ fn process_batch_sequential(
     }
 
     Ok(results)
-}
-
-fn process_batch_parallel(
-    batch: &[Value],
-    operation: &str,
-    output_format: &str,
-    continue_on_error: bool,
-    call_head: nu_protocol::Span,
-) -> Result<Vec<Value>, Box<LabeledError>> {
-    // For parallel processing, we'd use rayon or similar
-    // For now, implement as sequential but with the structure for future parallel implementation
-    process_batch_sequential(
-        batch,
-        operation,
-        output_format,
-        continue_on_error,
-        call_head,
-    )
 }
 
 fn process_single_item(
@@ -490,4 +449,271 @@ fn generate_batch_random(
         .into_iter()
         .map(|ulid| Value::string(ulid.to_string(), call_head))
         .collect())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use nu_protocol::Span;
+
+    fn test_span() -> Span {
+        Span::test_data()
+    }
+
+    const TEST_ULID: &str = "01AN4Z07BY79KA1307SR9X4MV3";
+
+    fn make_ulid_values(ulids: &[&str]) -> Vec<Value> {
+        ulids
+            .iter()
+            .map(|s| Value::string(*s, test_span()))
+            .collect()
+    }
+
+    mod stream_command {
+        use super::*;
+
+        #[test]
+        fn test_command_name() {
+            assert_eq!(UlidStreamCommand.name(), "ulid stream");
+        }
+
+        #[test]
+        fn test_command_signature() {
+            let sig = UlidStreamCommand.signature();
+            assert_eq!(sig.name, "ulid stream");
+            assert!(sig.named.iter().any(|f| f.long == "batch-size"));
+            assert!(sig.named.iter().any(|f| f.long == "output-format"));
+            assert!(sig.named.iter().any(|f| f.long == "continue-on-error"));
+            assert!(!sig.named.iter().any(|f| f.long == "parallel"));
+        }
+
+        #[test]
+        fn test_command_examples_not_empty() {
+            assert!(!UlidStreamCommand.examples().is_empty());
+        }
+    }
+
+    mod process_stream_tests {
+        use super::*;
+
+        #[test]
+        fn test_empty_input_returns_empty() {
+            let result = process_stream(&[], "validate", 100, "full", false, test_span());
+            assert!(result.is_ok());
+            assert!(result.unwrap().is_empty());
+        }
+
+        #[test]
+        fn test_validate_operation() {
+            let vals = make_ulid_values(&[TEST_ULID]);
+            let result = process_stream(&vals, "validate", 100, "full", false, test_span());
+            let results = result.unwrap();
+            assert_eq!(results.len(), 1);
+            assert!(results[0].as_bool().unwrap());
+        }
+
+        #[test]
+        fn test_validate_invalid_ulid() {
+            let vals = make_ulid_values(&["not-a-ulid"]);
+            let result = process_stream(&vals, "validate", 100, "full", false, test_span());
+            let results = result.unwrap();
+            assert!(!results[0].as_bool().unwrap());
+        }
+
+        #[test]
+        fn test_extract_timestamp_operation() {
+            let vals = make_ulid_values(&[TEST_ULID]);
+            let result =
+                process_stream(&vals, "extract-timestamp", 100, "full", false, test_span());
+            let results = result.unwrap();
+            assert_eq!(results.len(), 1);
+            assert!(results[0].as_int().is_ok());
+        }
+
+        #[test]
+        fn test_parse_operation_full_format() {
+            let vals = make_ulid_values(&[TEST_ULID]);
+            let result = process_stream(&vals, "parse", 100, "full", false, test_span());
+            let results = result.unwrap();
+            assert_eq!(results.len(), 1);
+            assert!(results[0].as_record().is_ok());
+        }
+
+        #[test]
+        fn test_parse_operation_compact_format() {
+            let vals = make_ulid_values(&[TEST_ULID]);
+            let result = process_stream(&vals, "parse", 100, "compact", false, test_span());
+            let results = result.unwrap();
+            let record = results[0].as_record().unwrap();
+            assert!(record.get("ulid").is_some());
+            assert!(record.get("timestamp_ms").is_some());
+            assert!(record.get("randomness").is_some());
+        }
+
+        #[test]
+        fn test_parse_operation_timestamp_only_format() {
+            let vals = make_ulid_values(&[TEST_ULID]);
+            let result = process_stream(&vals, "parse", 100, "timestamp-only", false, test_span());
+            let results = result.unwrap();
+            assert!(results[0].as_int().is_ok());
+        }
+
+        #[test]
+        fn test_transform_operation() {
+            let vals = make_ulid_values(&[TEST_ULID]);
+            let result = process_stream(&vals, "transform", 100, "full", false, test_span());
+            let results = result.unwrap();
+            assert_eq!(results[0].as_str().unwrap(), TEST_ULID);
+        }
+
+        #[test]
+        fn test_transform_compact_format() {
+            let vals = make_ulid_values(&[TEST_ULID]);
+            let result = process_stream(&vals, "transform", 100, "compact", false, test_span());
+            let results = result.unwrap();
+            let record = results[0].as_record().unwrap();
+            assert_eq!(record.get("ulid").unwrap().as_str().unwrap(), TEST_ULID);
+        }
+
+        #[test]
+        fn test_invalid_operation_returns_error() {
+            let vals = make_ulid_values(&[TEST_ULID]);
+            let result = process_stream(&vals, "bogus", 100, "full", false, test_span());
+            assert!(result.is_err());
+        }
+
+        #[test]
+        fn test_multiple_items() {
+            let vals = make_ulid_values(&[TEST_ULID, TEST_ULID]);
+            let result = process_stream(&vals, "validate", 100, "full", false, test_span());
+            assert_eq!(result.unwrap().len(), 2);
+        }
+
+        #[test]
+        fn test_batching_produces_correct_count() {
+            let vals = make_ulid_values(&[TEST_ULID, TEST_ULID, TEST_ULID]);
+            // batch_size=2 means 2 batches (2 + 1)
+            let result = process_stream(&vals, "validate", 2, "full", false, test_span());
+            assert_eq!(result.unwrap().len(), 3);
+        }
+
+        #[test]
+        fn test_continue_on_error() {
+            let vals = make_ulid_values(&["bad-ulid", TEST_ULID]);
+            let result = process_stream(&vals, "extract-timestamp", 100, "full", true, test_span());
+            let results = result.unwrap();
+            assert_eq!(results.len(), 2);
+            // First item should be an error record
+            let error_record = results[0].as_record().unwrap();
+            assert!(error_record.get("error").is_some());
+            assert!(error_record.get("input").is_some());
+            // Second item should succeed
+            assert!(results[1].as_int().is_ok());
+        }
+
+        #[test]
+        fn test_error_without_continue_on_error() {
+            let vals = make_ulid_values(&["bad-ulid"]);
+            let result =
+                process_stream(&vals, "extract-timestamp", 100, "full", false, test_span());
+            assert!(result.is_err());
+        }
+    }
+
+    mod extract_ulid_string_tests {
+        use super::*;
+
+        #[test]
+        fn test_from_string_value() {
+            let val = Value::string(TEST_ULID, test_span());
+            assert_eq!(extract_ulid_string(&val).unwrap(), TEST_ULID);
+        }
+
+        #[test]
+        fn test_from_record_with_ulid_field() {
+            let mut record = nu_protocol::Record::new();
+            record.push("ulid", Value::string(TEST_ULID, test_span()));
+            let val = Value::record(record, test_span());
+            assert_eq!(extract_ulid_string(&val).unwrap(), TEST_ULID);
+        }
+
+        #[test]
+        fn test_from_record_with_id_field() {
+            let mut record = nu_protocol::Record::new();
+            record.push("id", Value::string(TEST_ULID, test_span()));
+            let val = Value::record(record, test_span());
+            assert_eq!(extract_ulid_string(&val).unwrap(), TEST_ULID);
+        }
+
+        #[test]
+        fn test_from_record_missing_field() {
+            let mut record = nu_protocol::Record::new();
+            record.push("other", Value::string("value", test_span()));
+            let val = Value::record(record, test_span());
+            assert!(extract_ulid_string(&val).is_err());
+        }
+
+        #[test]
+        fn test_from_invalid_type() {
+            let val = Value::int(42, test_span());
+            assert!(extract_ulid_string(&val).is_err());
+        }
+    }
+
+    mod generate_stream_command {
+        use super::*;
+
+        #[test]
+        fn test_command_name() {
+            assert_eq!(UlidGenerateStreamCommand.name(), "ulid generate-stream");
+        }
+
+        #[test]
+        fn test_command_signature() {
+            let sig = UlidGenerateStreamCommand.signature();
+            assert_eq!(sig.name, "ulid generate-stream");
+            assert!(sig.named.iter().any(|f| f.long == "batch-size"));
+            assert!(sig.named.iter().any(|f| f.long == "timestamp"));
+            assert!(sig.named.iter().any(|f| f.long == "unique-timestamps"));
+        }
+
+        #[test]
+        fn test_command_examples_not_empty() {
+            assert!(!UlidGenerateStreamCommand.examples().is_empty());
+        }
+    }
+
+    mod generate_batch_tests {
+        use super::*;
+
+        #[test]
+        fn test_generate_batch_random() {
+            let result = generate_batch_random(5, test_span());
+            let results = result.unwrap();
+            assert_eq!(results.len(), 5);
+            for val in &results {
+                assert!(val.as_str().is_ok());
+            }
+        }
+
+        #[test]
+        fn test_generate_batch_with_timestamps() {
+            let mut timestamp = 1_000_000u64;
+            let result = generate_batch_with_timestamps(3, &mut timestamp, false, test_span());
+            let results = result.unwrap();
+            assert_eq!(results.len(), 3);
+            // timestamp should not have changed (unique_timestamps=false)
+            assert_eq!(timestamp, 1_000_000);
+        }
+
+        #[test]
+        fn test_generate_batch_with_unique_timestamps() {
+            let mut timestamp = 1_000_000u64;
+            let result = generate_batch_with_timestamps(3, &mut timestamp, true, test_span());
+            let results = result.unwrap();
+            assert_eq!(results.len(), 3);
+            // timestamp should have been incremented by 3
+            assert_eq!(timestamp, 1_000_003);
+        }
+    }
 }
