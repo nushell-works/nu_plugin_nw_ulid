@@ -18,6 +18,9 @@ pub const CROCKFORD_BASE32_CHARSET: &str = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 /// Nanoseconds per millisecond, used for timestamp conversions.
 pub const NANOS_PER_MILLI: u64 = 1_000_000;
 
+/// Milliseconds per second, used for timestamp conversions.
+pub const MS_PER_SECOND: u64 = 1_000;
+
 /// Bitmask for the 80-bit randomness component of a ULID.
 const ULID_RANDOMNESS_MASK: u128 = 0xFFFF_FFFF_FFFF_FFFF_FFFF;
 
@@ -205,8 +208,8 @@ impl UlidEngine {
         timestamp_record.push("ms", Value::int(components.timestamp_ms as i64, span));
 
         // Convert timestamp to ISO8601 format
-        let timestamp_secs = components.timestamp_ms / 1000;
-        let timestamp_nanos = (components.timestamp_ms % 1000) * NANOS_PER_MILLI;
+        let timestamp_secs = components.timestamp_ms / MS_PER_SECOND;
+        let timestamp_nanos = (components.timestamp_ms % MS_PER_SECOND) * NANOS_PER_MILLI;
 
         if let Some(datetime) =
             chrono::DateTime::from_timestamp(timestamp_secs as i64, timestamp_nanos as u32)

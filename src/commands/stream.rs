@@ -7,7 +7,7 @@ use nu_protocol::{
 
 use crate::{UlidEngine, UlidPlugin};
 
-const DEFAULT_BATCH_SIZE: usize = 1000;
+const DEFAULT_BATCH_SIZE: usize = 1_000;
 const MAX_STREAM_COUNT: usize = 100_000;
 
 /// Stream-processes large datasets of ULIDs with memory-efficient batching.
