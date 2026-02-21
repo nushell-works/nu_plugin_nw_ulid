@@ -428,12 +428,11 @@ mod tests {
                     _ => panic!("Should not reach here for valid format"),
                 };
 
-                match (parsed_format, expected_format) {
-                    (crate::UlidOutputFormat::String, crate::UlidOutputFormat::String)
-                    | (crate::UlidOutputFormat::Json, crate::UlidOutputFormat::Json)
-                    | (crate::UlidOutputFormat::Binary, crate::UlidOutputFormat::Binary) => (),
-                    _ => panic!("Format mismatch for {}", format_str),
-                }
+                assert_eq!(
+                    parsed_format, expected_format,
+                    "Format mismatch for {}",
+                    format_str
+                );
             }
         }
 
@@ -1154,24 +1153,25 @@ mod tests {
         #[test]
         fn test_format_string_validation_execution() {
             // Test format string validation logic used in run methods
-            let valid_formats = vec!["string", "json", "binary"];
             let invalid_formats = vec!["xml", "yaml", "csv", "", "STRING", "JSON"];
 
-            for format in &valid_formats {
-                let parsed_format = match Some(format as &str) {
+            for (format, expected) in [
+                ("string", crate::UlidOutputFormat::String),
+                ("json", crate::UlidOutputFormat::Json),
+                ("binary", crate::UlidOutputFormat::Binary),
+            ] {
+                let parsed_format = match Some(format) {
                     Some("json") => crate::UlidOutputFormat::Json,
                     Some("binary") => crate::UlidOutputFormat::Binary,
                     Some("string") | None => crate::UlidOutputFormat::String,
                     _ => panic!("Should not reach here for valid format"),
                 };
 
-                // Verify format parsing works
-                match (format as &str, parsed_format) {
-                    ("string", crate::UlidOutputFormat::String) => (),
-                    ("json", crate::UlidOutputFormat::Json) => (),
-                    ("binary", crate::UlidOutputFormat::Binary) => (),
-                    _ => panic!("Format parsing mismatch for '{}'", format),
-                }
+                assert_eq!(
+                    parsed_format, expected,
+                    "Format parsing mismatch for '{}'",
+                    format
+                );
             }
 
             // Test invalid format detection
@@ -1336,27 +1336,27 @@ mod tests {
         #[test]
         fn test_valid_formats() {
             let span = create_test_span();
-            assert!(matches!(
+            assert_eq!(
                 parse_output_format(Some("string"), span).unwrap(),
                 crate::UlidOutputFormat::String
-            ));
-            assert!(matches!(
+            );
+            assert_eq!(
                 parse_output_format(Some("json"), span).unwrap(),
                 crate::UlidOutputFormat::Json
-            ));
-            assert!(matches!(
+            );
+            assert_eq!(
                 parse_output_format(Some("binary"), span).unwrap(),
                 crate::UlidOutputFormat::Binary
-            ));
+            );
         }
 
         #[test]
         fn test_none_defaults_to_string() {
             let span = create_test_span();
-            assert!(matches!(
+            assert_eq!(
                 parse_output_format(None, span).unwrap(),
                 crate::UlidOutputFormat::String
-            ));
+            );
         }
 
         #[test]
