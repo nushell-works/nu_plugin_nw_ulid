@@ -219,7 +219,7 @@ impl PluginCommand for UlidTimeMillisCommand {
                     val
                 } else {
                     // Seconds, convert to milliseconds
-                    val * 1000
+                    val * crate::MS_PER_SECOND as i64
                 }
             }
             Some(Value::Float { val, .. }) => {
@@ -228,7 +228,7 @@ impl PluginCommand for UlidTimeMillisCommand {
                     val as i64
                 } else {
                     // Seconds, convert to milliseconds
-                    (val * 1000.0) as i64
+                    (val * crate::MS_PER_SECOND as f64) as i64
                 }
             }
             Some(_) => {
@@ -624,7 +624,7 @@ mod tests {
                 let result = if input > 1_000_000_000_000i64 {
                     input // Already milliseconds
                 } else {
-                    input * 1000 // Convert seconds to milliseconds
+                    input * crate::MS_PER_SECOND as i64 // Convert seconds to milliseconds
                 };
 
                 assert_eq!(result, expected, "Failed conversion for {}", description);
@@ -672,7 +672,7 @@ mod tests {
                 let result = if input > 1_000_000_000_000.0 {
                     input as i64 // Already milliseconds
                 } else {
-                    (input * 1000.0) as i64 // Convert seconds to milliseconds
+                    (input * crate::MS_PER_SECOND as f64) as i64 // Convert seconds to milliseconds
                 };
 
                 assert_eq!(
@@ -763,11 +763,11 @@ mod tests {
 
             for (timestamp_millis, description) in known_values {
                 // Test conversion to seconds
-                let seconds = timestamp_millis / 1000;
-                let reconstructed_millis = seconds * 1000;
+                let seconds = timestamp_millis / crate::MS_PER_SECOND as i64;
+                let reconstructed_millis = seconds * crate::MS_PER_SECOND as i64;
 
                 // Should be able to round-trip for exact seconds
-                if timestamp_millis % 1000 == 0 {
+                if timestamp_millis % crate::MS_PER_SECOND as i64 == 0 {
                     assert_eq!(
                         reconstructed_millis, timestamp_millis,
                         "Round-trip failed for {}",
@@ -1044,7 +1044,7 @@ mod tests {
                 let result = if input > 1_000_000_000_000i64 {
                     input // Already milliseconds  
                 } else {
-                    input * 1000 // Convert seconds
+                    input * crate::MS_PER_SECOND as i64 // Convert seconds
                 };
 
                 assert_eq!(result, expected, "Conversion failed for {}", description);
@@ -1065,7 +1065,7 @@ mod tests {
                 let result = if input > 1_000_000_000_000.0 {
                     input as i64 // Already milliseconds
                 } else {
-                    (input * 1000.0) as i64 // Convert seconds
+                    (input * crate::MS_PER_SECOND as f64) as i64 // Convert seconds
                 };
 
                 assert_eq!(

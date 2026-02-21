@@ -351,8 +351,8 @@ fn build_timestamp_value(
     span: nu_protocol::Span,
 ) -> Option<Value> {
     let timestamp_ms = components.timestamp_ms;
-    let timestamp_secs = timestamp_ms / 1000;
-    let timestamp_nanos = (timestamp_ms % 1000) * crate::NANOS_PER_MILLI;
+    let timestamp_secs = timestamp_ms / crate::MS_PER_SECOND;
+    let timestamp_nanos = (timestamp_ms % crate::MS_PER_SECOND) * crate::NANOS_PER_MILLI;
 
     let datetime = chrono::DateTime::from_timestamp(timestamp_secs as i64, timestamp_nanos as u32)?;
 
