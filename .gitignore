@@ -82,3 +82,6 @@ plugin_registry.msgpack
 
 # Claude Code local settings
 .claude/settings.local.json
+
+.vscode/
+
