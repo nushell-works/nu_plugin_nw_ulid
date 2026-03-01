@@ -1,0 +1,65 @@
+scopes:
+  - name: "cargo"
+    description: "Cargo build configuration and manifests"
+    examples: ["build(cargo): upgrade nushell dependencies to 0.110.0"]
+    file_patterns: ["Cargo.toml", "Cargo.lock"]
+  - name: "ci"
+    description: "CI/CD workflows and configuration"
+    examples: ["ci(ci): add commit validation workflow", "ci(ci): fix release pipeline"]
+    file_patterns: [".github/workflows/**", ".github/**"]
+  - name: "cli"
+    description: "CLI command methods and argument handling"
+    examples: ["refactor(cli): extract helper functions from long command methods"]
+    file_patterns: ["src/commands/**"]
+  - name: "commands"
+    description: "Individual command implementations"
+    examples: ["feat(commands): add --json output to inspect command"]
+    file_patterns: ["src/commands/**"]
+  - name: "config"
+    description: "Project configuration files and tooling setup"
+    examples: ["chore(config): add claude worktrees and vscode to gitignore"]
+    file_patterns: [".gitignore", ".editorconfig", ".vscode/**", ".claude/**", ".omni-dev/**"]
+  - name: "core"
+    description: "Core types, constants, and engine internals"
+    examples: ["refactor(core): replace magic numbers with named constants"]
+    file_patterns: ["src/**"]
+  - name: "deps"
+    description: "Dependency updates"
+    examples: ["deps(deps): bump uuid from 1.20.0 to 1.21.0"]
+    file_patterns: ["Cargo.toml", "Cargo.lock"]
+  - name: "docs"
+    description: "Documentation"
+    examples: ["docs(docs): add ADR for multi-algorithm hash support"]
+    file_patterns: ["docs/**", "*.md", "README.md"]
+  - name: "engine"
+    description: "Core UlidEngine operations"
+    examples: ["feat(engine): add batch generation support"]
+    file_patterns: ["src/ulid_engine.rs"]
+  - name: "error"
+    description: "Error types and conversion"
+    examples: ["refactor(error): consolidate error variants"]
+    file_patterns: ["src/error.rs"]
+  - name: "lib"
+    description: "Library-level utilities and shared code"
+    examples: ["refactor(lib): remove unused error handling and security utilities"]
+    file_patterns: ["src/lib.rs", "src/**"]
+  - name: "plugin"
+    description: "Plugin registration, command dispatch"
+    examples: ["feat(plugin): register new command with plugin"]
+    file_patterns: ["src/plugin.rs", "src/main.rs"]
+  - name: "release"
+    description: "Version bumps, release process"
+    examples: ["chore(release): bump version to 0.1.3"]
+    file_patterns: ["Cargo.toml", ".github/workflows/release.yml", "CHANGELOG.md"]
+  - name: "security"
+    description: "Security warnings, rating system"
+    examples: ["feat(security): add timing attack detection"]
+    file_patterns: ["src/security.rs", ".github/workflows/security.yml"]
+  - name: "style"
+    description: "Style guide rules and conventions"
+    examples: ["docs(style): add command domain grouping guidelines"]
+    file_patterns: ["docs/STYLE_GUIDE.md"]
+  - name: "test"
+    description: "Test infrastructure and test utilities"
+    examples: ["refactor(test): simplify format assertions using PartialEq derive"]
+    file_patterns: ["tests/**", "src/**/*test*"]
