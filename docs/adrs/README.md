@@ -25,3 +25,4 @@ by Michael Nygard.
 |--------------------------|-------------|------------|----------------------------------------------------|
 | [ADR-0000](adr-0000.md)  | ✅ Accepted | 2026-02-10 | Use Architecture Decision Records                  |
 | [ADR-0001](adr-0001.md)  | 🟡 Proposed | 2026-03-01 | Conventional Commits with Project-Specific Scopes  |
+| [ADR-0002](adr-0002.md)  | ✅ Accepted | 2026-03-01 | Supply Chain Security via cargo-deny               |
