@@ -157,15 +157,22 @@ Follow the [Conventional Commits](https://www.conventionalcommits.org/) specific
 
 | Scope      | Covers                                        |
 |------------|-----------------------------------------------|
-| `plugin`   | Plugin registration, command dispatch         |
-| `engine`   | Core UlidEngine operations                    |
-| `commands` | Individual command implementations            |
-| `security` | Security warnings, rating system              |
-| `error`    | Error types and conversion                    |
+| `cargo`    | Cargo build configuration and manifests       |
 | `ci`       | CI/CD workflows and configuration             |
+| `cli`      | CLI command methods and argument handling      |
+| `commands` | Individual command implementations            |
+| `config`   | Project configuration files and tooling setup |
+| `core`     | Core types, constants, and engine internals   |
 | `deps`     | Dependency updates                            |
 | `docs`     | Documentation                                 |
+| `engine`   | Core UlidEngine operations                    |
+| `error`    | Error types and conversion                    |
+| `lib`      | Library-level utilities and shared code       |
+| `plugin`   | Plugin registration, command dispatch         |
 | `release`  | Version bumps, release process                |
+| `security` | Security warnings, rating system              |
+| `style`    | Style guide rules and conventions             |
+| `test`     | Test infrastructure and test utilities        |
 
 **Multi-scope commits** — when a change touches multiple scopes equally, list them
 comma-separated: `style(engine,commands): standardise doc comments`.
