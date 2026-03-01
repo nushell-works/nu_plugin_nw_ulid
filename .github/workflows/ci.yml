@@ -11,6 +11,18 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: dtolnay/rust-toolchain@stable
+      with:
+        components: clippy
+    - uses: Swatinem/rust-cache@v2
+    - name: Run clippy
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
   test:
     name: Test Suite
     runs-on: ${{ matrix.os }}
@@ -34,7 +46,7 @@ jobs:
       uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.rust }}
-        components: rustfmt, clippy
+        components: rustfmt
 
     - name: Cache Cargo registry
       uses: actions/cache@v5
@@ -51,10 +63,6 @@ jobs:
     - name: Check formatting
       if: matrix.rust == 'stable' && matrix.os == 'ubuntu-latest'
       run: cargo fmt --all -- --check
-
-    - name: Run Clippy
-      if: matrix.rust == 'stable'
-      run: cargo clippy --all-targets --all-features -- -D warnings
 
     - name: Build
       run: cargo build --verbose --all-features
