@@ -61,7 +61,8 @@ highlight = "all"
 allow = []
 # List of crates to deny
 deny = [
-    # Deny crates with known security issues
+    # openssl brings in C bindings with a complex build matrix and has historically
+    # carried security advisories; the project prefers pure-Rust TLS implementations.
     { name = "openssl", version = "*" },
 ]
 # Certain crates/versions that will be skipped when doing duplicate detection
