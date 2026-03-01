@@ -459,8 +459,13 @@ Literals that do **not** need extraction:
 - **Known-safe constructor arguments** — `FixedOffset::east_opt(0)` (covered by STYLE-0001).
 - **Test assertions** — `assert_eq!(result.len(), 3)` where the value is local to the test.
 
+Before defining a new constant, check whether one already exists for the same value — reuse it
+rather than introducing a duplicate. Domain-wide constants (e.g., `ULID_STRING_LENGTH`,
+`MS_PER_SECOND`) live as `pub const` in `ulid_engine.rs`; grep there first.
+
 Place constants at the narrowest useful scope: module-level `const` if used across functions in
-the same module, crate-level if shared across modules, or function-local `const` if truly local.
+the same module, crate-level `pub const` in `ulid_engine.rs` if shared across modules, or
+function-local `const` if truly local.
 
 ### Motivation
 
