@@ -977,9 +977,9 @@ checksum = "dae608c151f68243f2b000364e1f7b186d9c29845f7d2d85bd31b9ad77ad552b"
 
 [[package]]
 name = "memchr"
-version = "2.7.5"
+version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32a282da65faaf38286cf3be983213fcf1d2e2a58700e808f83f4ea9a4804bc0"
+checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
 
 [[package]]
 name = "miette"
@@ -1098,10 +1098,10 @@ dependencies = [
  "fancy-regex",
  "log",
  "nu-experimental",
- "nu-glob",
- "nu-path",
+ "nu-glob 0.110.0",
+ "nu-path 0.110.0",
  "nu-protocol",
- "nu-utils",
+ "nu-utils 0.110.0",
 ]
 
 [[package]]
@@ -1121,10 +1121,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2903117d41a34ba425ab738f78029999a09622818a1adb3b1e93d1fd8ab18ec6"
 
 [[package]]
+name = "nu-glob"
+version = "0.111.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "01ee787f61353c9c90581ddf4c0602a07b991cdd06c97dac8b6d323a1a52c43a"
+
+[[package]]
 name = "nu-path"
 version = "0.110.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd60527bc50bd087a4086e0330f4b37a9325a202784aeda4fc113f03ecb63a35"
+dependencies = [
+ "dirs",
+ "omnipath",
+ "pwd",
+ "ref-cast",
+]
+
+[[package]]
+name = "nu-path"
+version = "0.111.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c01d110cb931acf56237ce572e5b156e8e1134227c90deeffb92eedda9482c23"
 dependencies = [
  "dirs",
  "omnipath",
@@ -1144,7 +1162,7 @@ dependencies = [
  "nu-plugin-core",
  "nu-plugin-protocol",
  "nu-protocol",
- "nu-utils",
+ "nu-utils 0.110.0",
  "thiserror 2.0.15",
 ]
 
@@ -1171,7 +1189,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea618fb7656e2c95c4f0aa5178eddd2b6c713b2cc65ac18e0ffe879bbb4d4705"
 dependencies = [
  "nu-protocol",
- "nu-utils",
+ "nu-utils 0.110.0",
  "rmp-serde",
  "semver",
  "serde",
@@ -1200,10 +1218,10 @@ dependencies = [
  "nix",
  "nu-derive-value",
  "nu-experimental",
- "nu-glob",
- "nu-path",
+ "nu-glob 0.110.0",
+ "nu-path 0.110.0",
  "nu-system",
- "nu-utils",
+ "nu-utils 0.110.0",
  "num-format",
  "os_pipe",
  "rmp-serde",
@@ -1240,13 +1258,13 @@ dependencies = [
 
 [[package]]
 name = "nu-test-support"
-version = "0.110.0"
+version = "0.111.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1e329cb9a0e5065e0b9e2d81784e5a290ca295eba6e10243af8d5aa049728bd"
+checksum = "3007dd1702769fd631c0303a6ab25eedf1fb47efcce5b1b949859be9e62d34a1"
 dependencies = [
- "nu-glob",
- "nu-path",
- "nu-utils",
+ "nu-glob 0.111.0",
+ "nu-path 0.111.0",
+ "nu-utils 0.111.0",
  "num-format",
  "tempfile",
  "which",
@@ -1257,6 +1275,29 @@ name = "nu-utils"
 version = "0.110.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "17feaeb5f4e8d44b8dabd3abf4dc226dc711d2c18683dc68f5b39a2884c693d4"
+dependencies = [
+ "byteyarn",
+ "crossterm",
+ "crossterm_winapi",
+ "fancy-regex",
+ "lean_string",
+ "log",
+ "lscolors",
+ "memchr",
+ "nix",
+ "num-format",
+ "serde",
+ "serde_json",
+ "strip-ansi-escapes",
+ "sys-locale",
+ "unicase",
+]
+
+[[package]]
+name = "nu-utils"
+version = "0.111.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df85a8a4bb28c84d5f7c096c02c859ac454dfac59fd0296ab5eb6ed86619219e"
 dependencies = [
  "byteyarn",
  "crossterm",
@@ -1639,18 +1680,18 @@ dependencies = [
 
 [[package]]
 name = "ref-cast"
-version = "1.0.24"
+version = "1.0.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a0ae411dbe946a674d89546582cea4ba2bb8defac896622d6496f14c23ba5cf"
+checksum = "f354300ae66f76f1c85c5f84693f0ce81d747e2c3f21a45fef496d89c960bf7d"
 dependencies = [
  "ref-cast-impl",
 ]
 
 [[package]]
 name = "ref-cast-impl"
-version = "1.0.24"
+version = "1.0.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1165225c21bff1f3bbce98f5a1f889949bc902d3575308cc7b0de30b4f6d27c7"
+checksum = "b7186006dcb21920990093f30e3dea63b7d6e977bf1256be20c3563a5db070da"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1800,14 +1841,15 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.142"
+version = "1.0.149"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "030fedb782600dcbd6f02d479bf0d817ac3bb40d644745b769d6a96bc3afc5a7"
+checksum = "83fc039473c5595ace860d8c4fafa220ff474b3fc6bfdb4293327f1a37e94d86"
 dependencies = [
  "itoa",
  "memchr",
- "ryu",
  "serde",
+ "serde_core",
+ "zmij",
 ]
 
 [[package]]
@@ -2853,3 +2895,9 @@ dependencies = [
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "zmij"
+version = "1.0.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8848ee67ecc8aedbaf3e4122217aff892639231befc6a1b58d29fff4c2cabaa"
