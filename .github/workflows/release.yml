@@ -166,7 +166,7 @@ jobs:
         7z a ../../../${{ matrix.asset_name }} ${{ matrix.artifact_name }}
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ matrix.asset_name }}
         path: ${{ matrix.asset_name }}
