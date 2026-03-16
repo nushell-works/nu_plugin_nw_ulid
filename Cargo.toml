@@ -54,8 +54,8 @@ name = "nu_plugin_nw_ulid"
 path = "src/lib.rs"
 
 [dependencies]
-nu-plugin = "0.110.0"
-nu-protocol = "0.110.0"
+nu-plugin = "0.111.0"
+nu-protocol = "0.111.0"
 
 # Production dependencies for Phase 3+
 ulid = { version = "1.1", features = ["serde"] }
