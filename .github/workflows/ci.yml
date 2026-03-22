@@ -11,6 +11,17 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
+  read-msrv:
+    name: Read MSRV
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.msrv.outputs.version }}
+    steps:
+    - uses: actions/checkout@v6
+    - name: Read MSRV from Cargo.toml
+      id: msrv
+      run: echo "version=$(sed -n 's/^rust-version = "\(.*\)"/\1/p' Cargo.toml)" >> "$GITHUB_OUTPUT"
+
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
@@ -25,6 +36,7 @@ jobs:
 
   test:
     name: Test Suite
+    needs: [read-msrv]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -33,7 +45,7 @@ jobs:
         rust: [stable, beta]
         include:
           - os: ubuntu-latest
-            rust: 1.89.0  # MSRV required by Nushell 0.110.0
+            rust: ${{ needs.read-msrv.outputs.version }}
         exclude:
           - os: macos-latest
             rust: beta
@@ -134,13 +146,16 @@ jobs:
 
   msrv:
     name: Minimum Supported Rust Version
+    needs: [read-msrv]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v6
 
     - name: Install MSRV Rust toolchain
-      uses: dtolnay/rust-toolchain@1.89.0
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ needs.read-msrv.outputs.version }}
 
     - name: Cache Cargo registry
       uses: actions/cache@v5
