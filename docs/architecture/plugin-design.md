@@ -72,13 +72,13 @@ The nu_plugin_nw_ulid plugin follows a modular, enterprise-grade architecture de
 - `UlidSortCommand`: Sort data by ULID order
 - `UlidTimeCommand`: Extract timestamps from ULIDs
 
-### ULID Core Module (`src/ulid/` - Planned)
+### ULID Core Module (`src/ulid_engine.rs`)
 
 **Responsibilities:**
 - Core ULID operations (generate, parse, validate)
 - Cryptographically secure random number generation
-- Base32 encoding/decoding (Crockford variant)
-- Timestamp handling and validation
+- Timestamp and randomness extraction
+- Error type definitions (`UlidError`)
 
 **Design Principles:**
 - Pure functions where possible
@@ -86,13 +86,13 @@ The nu_plugin_nw_ulid plugin follows a modular, enterprise-grade architecture de
 - Performance optimization
 - Security by design
 
-### Error Handling (`src/error.rs` - Planned)
+### Error Handling (`src/ulid_engine.rs`)
 
-**Error Strategy:**
-- Structured error types for different failure modes
-- User-friendly error messages
-- Proper error propagation
-- Diagnostic information for debugging
+The `UlidError` enum defines four structured variants (`InvalidFormat`, `InvalidInput`,
+`TimestampOutOfRange`, `GenerationError`). Engine functions return `Result<_, UlidError>`,
+keeping the core logic free of `nu-protocol` dependencies. Commands convert to
+`LabeledError` at the call boundary via `.map_err()` with the call span — see STYLE-0016
+for the convention.
 
 ## Security Architecture
 

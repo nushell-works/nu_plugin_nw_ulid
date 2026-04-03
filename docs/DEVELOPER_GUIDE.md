@@ -27,105 +27,37 @@ nu_plugin_nw_ulid follows enterprise-grade development principles:
 
 ### Component Architecture
 
-```
-nu_plugin_nw_ulid/
-├── src/
-│   ├── lib.rs              # Plugin registration and main entry point
-│   ├── commands/           # Command implementations
-│   │   ├── mod.rs         # Command module exports
-│   │   ├── generate.rs    # ULID generation commands
-│   │   ├── validate.rs    # ULID validation commands
-│   │   ├── parse.rs       # ULID parsing commands
-│   │   ├── sort.rs        # ULID sorting commands
-│   │   ├── stream.rs      # Streaming operations
-│   │   ├── time.rs        # Time-related operations
-│   │   ├── encode.rs      # Encoding/decoding operations
-│   │   ├── hash.rs        # Cryptographic operations
-│   │   ├── uuid.rs        # UUID compatibility
-│   │   └── info.rs        # Plugin information
-│   ├── ulid/              # Core ULID functionality
-│   │   ├── mod.rs         # ULID module exports
-│   │   ├── generator.rs   # ULID generation logic
-│   │   ├── validator.rs   # ULID validation logic
-│   │   ├── parser.rs      # ULID parsing logic
-│   │   ├── encoder.rs     # Base32 encoding/decoding
-│   │   └── security.rs    # Security context handling
-│   ├── config/            # Configuration management
-│   │   ├── mod.rs         # Config module exports
-│   │   └── settings.rs    # Plugin settings
-│   └── error/             # Error handling
-│       ├── mod.rs         # Error module exports
-│       └── types.rs       # Error type definitions
-├── tests/                 # Test suite
-│   ├── integration_tests.rs    # Integration tests
-│   ├── security_tests.rs       # Security validation tests
-│   └── performance_tests.rs    # Performance benchmark tests
-└── benches/               # Performance benchmarks
-    └── performance_benchmarks.rs
-```
+The plugin entry point is `lib.rs`, which registers the `UlidPlugin` struct and its 23
+commands with the Nushell plugin host. Each subcommand lives in its own file under
+`commands/`, grouped by domain (see STYLE-0014 for the grouping convention). Core ULID
+logic — generation, parsing, validation, and error types — lives in `ulid_engine.rs`.
+Security rating and advisory logic lives in `security.rs`.
 
 ### Core Components
 
 #### 1. Command Framework (`src/commands/`)
 
-Each command follows a consistent pattern:
+Each command implements the `PluginCommand` trait. See the code example in
+[Command Implementation Pattern](#command-implementation-pattern) below.
 
-```rust
-use nu_plugin::{EvaluatedCall, LabeledError, Plugin};
-use nu_protocol::{Category, PluginSignature, Signature, Value};
+#### 2. ULID Engine (`src/ulid_engine.rs`)
 
-pub struct UlidCommandName;
+Core ULID operations — generation, parsing, validation, timestamp/randomness extraction —
+are implemented as associated functions on `UlidEngine`. Error types are co-located in the
+same file.
 
-impl UlidCommandName {
-    pub fn new() -> Self {
-        Self
-    }
-    
-    pub fn signature(&self) -> PluginSignature {
-        PluginSignature::build("ulid command-name")
-            .usage("Command description")
-            .category(Category::Generators)
-            // Add parameters and flags
-    }
-    
-    pub fn run(
-        &self,
-        call: &EvaluatedCall,
-        input: &Value,
-    ) -> Result<Value, LabeledError> {
-        // Implementation
-    }
-}
-```
+#### 3. Error Handling (`src/ulid_engine.rs`)
 
-#### 2. ULID Engine (`src/ulid/`)
-
-The core ULID functionality is separated into focused modules:
-
-- **Generator**: Cryptographically secure ULID generation
-- **Validator**: Format and integrity validation
-- **Parser**: Component extraction and analysis
-- **Encoder**: Base32 encoding/decoding
-- **Security**: Context-aware security validation
-
-#### 3. Error Handling (`src/error/`)
-
-Centralized error handling with user-friendly messages:
+Engine functions return `UlidError`, keeping the core logic free of `nu-protocol`
+dependencies. Commands convert to `LabeledError` at the call boundary (see STYLE-0016):
 
 ```rust
 #[derive(Debug, Clone)]
 pub enum UlidError {
-    InvalidFormat(String),
-    InvalidTimestamp(i64),
-    InvalidRandomness(String),
-    SecurityWarning(String),
-    IoError(String),
-}
-
-impl UlidError {
-    pub fn to_labeled_error(&self, span: Span) -> LabeledError {
-        // Convert to Nushell LabeledError
-    }
+    InvalidFormat { input: String, reason: String },
+    InvalidInput { message: String },
+    TimestampOutOfRange { timestamp: u64, max_timestamp: u64 },
+    GenerationError { reason: String },
 }
 ```
 
@@ -213,90 +145,49 @@ impl UlidError {
 Every command follows this structure:
 
 ```rust
-// src/commands/example.rs
-use nu_plugin::{EvaluatedCall, LabeledError, Plugin};
-use nu_protocol::{Category, PluginSignature, Signature, Value, Type};
-use crate::ulid::{UlidGenerator, UlidValidator};
-use crate::error::UlidError;
+// src/commands/inspect.rs (simplified)
+use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
+use nu_protocol::{
+    Category, LabeledError, PipelineData, Signature, SyntaxShape, Type, Value,
+};
 
-pub struct UlidExample;
+use crate::{UlidEngine, UlidPlugin};
 
-impl UlidExample {
-    pub fn new() -> Self {
-        Self
+pub struct UlidInspectCommand;
+
+impl PluginCommand for UlidInspectCommand {
+    type Plugin = UlidPlugin;
+
+    fn name(&self) -> &str {
+        "ulid inspect"
     }
-    
-    pub fn signature(&self) -> PluginSignature {
-        PluginSignature::build("ulid example")
-            .usage("Example ULID command")
-            .category(Category::Generators)
-            .input_output_types(vec![
-                (Type::Nothing, Type::String),
-                (Type::List(Box::new(Type::String)), Type::List(Box::new(Type::String))),
-            ])
-            .named("param", SyntaxShape::String, "Parameter description", Some('p'))
-            .switch("flag", "Flag description", Some('f'))
+
+    fn signature(&self) -> Signature {
+        Signature::build(self.name())
+            .required("ulid", SyntaxShape::String, "The ULID to analyze")
+            .input_output_types(vec![(Type::Nothing, Type::Record(vec![].into()))])
+            .category(Category::Strings)
     }
-    
-    pub fn run(
+
+    fn run(
         &self,
+        _plugin: &Self::Plugin,
+        _engine: &EngineInterface,
         call: &EvaluatedCall,
-        input: &Value,
-    ) -> Result<Value, LabeledError> {
-        // 1. Extract parameters
-        let param = call.get_flag::<String>("param")?;
-        let flag = call.has_flag("flag")?;
-        
-        // 2. Validate inputs
-        if let Some(p) = &param {
-            if p.is_empty() {
-                return Err(UlidError::InvalidFormat("Parameter cannot be empty".to_string())
-                    .to_labeled_error(call.head));
-            }
-        }
-        
-        // 3. Process input
-        match input {
-            Value::Nothing { .. } => {
-                // Handle single operation
-                self.handle_single(call, param, flag)
-            }
-            Value::List { vals, .. } => {
-                // Handle batch operation
-                self.handle_batch(call, vals, param, flag)
-            }
-            _ => Err(LabeledError::new("Invalid input type")
-                .with_label("Expected string or list", input.span()))
-        }
-    }
-    
-    fn handle_single(
-        &self,
-        call: &EvaluatedCall,
-        param: Option<String>,
-        flag: bool,
-    ) -> Result<Value, LabeledError> {
-        // Single operation implementation
-        Ok(Value::string("result", call.head))
-    }
-    
-    fn handle_batch(
-        &self,
-        call: &EvaluatedCall,
-        vals: &[Value],
-        param: Option<String>,
-        flag: bool,
-    ) -> Result<Value, LabeledError> {
-        // Batch operation implementation
-        let results: Result<Vec<Value>, LabeledError> = vals
-            .iter()
-            .map(|val| {
-                // Process each value
-                Ok(Value::string("result", val.span()))
-            })
-            .collect();
-        
-        Ok(Value::list(results?, call.head))
+        _input: PipelineData,
+    ) -> Result<PipelineData, LabeledError> {
+        let ulid_str: String = call.req(0)?;
+
+        // Engine returns UlidError; convert to LabeledError at the boundary
+        let components = UlidEngine::parse(&ulid_str)
+            .map_err(|e| LabeledError::new("Parse failed")
+                .with_label(e.to_string(), call.head))?;
+
+        let mut record = nu_protocol::Record::new();
+        record.push("ulid", Value::string(&components.ulid, call.head));
+        record.push("valid", Value::bool(components.valid, call.head));
+        // ...
+        Ok(Value::record(record, call.head).into_pipeline_data())
     }
 }
 ```
@@ -471,7 +362,7 @@ cargo machete
 
 ### Extending ULID Functionality
 
-1. **Core functionality goes in `src/ulid/`**
+1. **Core functionality goes in `src/ulid_engine.rs`**
 2. **Follow security-first principles**
 3. **Add comprehensive error handling**
 4. **Include performance considerations**
@@ -617,12 +508,11 @@ cargo bench -- --profile-time=10
 1. **Input Validation:**
    ```rust
    fn validate_ulid_format(ulid: &str) -> Result<(), UlidError> {
-       if ulid.len() != 26 {
-           return Err(UlidError::InvalidFormat("ULID must be 26 characters".to_string()));
-       }
-       
-       if !ulid.chars().all(|c| CROCKFORD_BASE32.contains(c)) {
-           return Err(UlidError::InvalidFormat("Invalid characters in ULID".to_string()));
+       if ulid.len() != ULID_STRING_LENGTH {
+           return Err(UlidError::InvalidFormat {
+               input: ulid.to_string(),
+               reason: "ULID must be 26 characters".to_string(),
+           });
        }
        
        Ok(())
