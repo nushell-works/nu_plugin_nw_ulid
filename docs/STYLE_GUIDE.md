@@ -12,7 +12,7 @@ A new convention needs to be added to this style guide.
 
 ### Guidance
 
-Assign the next sequential ID (currently next is `STYLE-0016`) and include:
+Assign the next sequential ID (currently next is `STYLE-0017`) and include:
 
 1. A **Tags** line immediately after the heading — a comma-separated list of category labels
    from the tag vocabulary below.
@@ -767,3 +767,47 @@ upgrade burden, and version conflict surface. When `std` offers equivalent funct
 these costs can be eliminated entirely. The Rust ecosystem follows a well-established pattern
 of absorbing popular crate APIs into the standard library — aligning with this trend keeps
 the dependency tree lean and reduces long-term maintenance.
+
+---
+
+## STYLE-0016: Error boundary conversion
+
+**Tags:** `error-handling`
+
+### Situation
+
+A command calls an `UlidEngine` method that returns `Result<_, UlidError>`.
+
+### Guidance
+
+Engine functions return `UlidError` — they must not depend on `nu-protocol`. Commands
+convert to `LabeledError` at the call boundary using `.map_err()` with the call span:
+
+```rust
+// Standard commands — return Result<PipelineData, LabeledError>
+let components = UlidEngine::parse(&ulid_str)
+    .map_err(|e| LabeledError::new("Parse failed")
+        .with_label(e.to_string(), call.head))?;
+```
+
+Stream helpers that return `Result<_, Box<LabeledError>>` box the error instead:
+
+```rust
+// Stream helpers — return Result<_, Box<LabeledError>>
+let ulid = UlidEngine::generate_with_timestamp(ts).map_err(|e| {
+    Box::new(LabeledError::new("Generation failed")
+        .with_label(e.to_string(), call_head))
+})?;
+```
+
+The `LabeledError::new()` message should be a short category (e.g., "Parse failed",
+"Generation failed"). The `.with_label()` carries the detailed `UlidError` display string
+and the span for Nushell's error rendering.
+
+### Motivation
+
+Keeping `UlidError` free of `nu-protocol` means the engine can be tested and reused without
+pulling in Nushell types. Converting at the command boundary — rather than inside the engine
+or via a blanket `impl From` — makes the span available for error labels and keeps the
+conversion visible at each call site. The pattern is consistent across ~8 call sites in
+`ulid.rs`, `inspect.rs`, `time.rs`, and `stream.rs`.
