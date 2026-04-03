@@ -31,14 +31,13 @@ Generate cryptographically secure ULIDs with optional parameters.
 
 **Full Syntax:**
 ```nu
-ulid generate [--count <int>] [--timestamp <int>] [--format <string>] [--context <string>]
+ulid generate [--count <int>] [--timestamp <int>] [--format <string>]
 ```
 
 **Parameters:**
 - `--count <int>`: Number of ULIDs to generate (1-100,000, default: 1)
 - `--timestamp <int>`: Custom timestamp in milliseconds since Unix epoch (optional)
 - `--format <string>`: Output format - "standard" (default), "compact", "json"
-- `--context <string>`: Security context for validation ("user-session", "api-keys", etc.)
 
 **Input Types:**
 - `Nothing`: Generate based on parameters
@@ -77,9 +76,6 @@ let current_id = ulid generate
 # Generate batch with custom timestamp
 let batch_ids = ulid generate --count 100 --timestamp 1692000000000
 
-# Generate with security context validation
-let secure_id = ulid generate --context "api-keys"
-
 # Generate in JSON format for detailed output
 let detailed_ulid = ulid generate --format json
 
@@ -95,21 +91,18 @@ let ordered_ids = (0..5 | each { |i|
 **Error Conditions:**
 - `InvalidParameter`: Count exceeds maximum (100,000)
 - `InvalidTimestamp`: Timestamp is negative or too large
-- `SecurityWarning`: Context indicates potential security risk
-
 ### `ulid validate`
 Validate ULID format, structure, and integrity.
 
 **Full Syntax:**
 ```nu
-ulid validate <ulid> [--strict] [--details] [--context <string>]
+ulid validate <ulid> [--strict] [--details]
 ```
 
 **Parameters:**
 - `<ulid>`: ULID string to validate (required)
 - `--strict`: Enable strict validation (checks timestamp bounds)
 - `--details`: Return detailed validation results instead of boolean
-- `--context <string>`: Security context for validation
 
 **Input Types:**
 - `String`: Single ULID to validate
@@ -173,11 +166,6 @@ let valid_ulids = $mixed_data
     | where { ulid validate $in.id }
     | get id
 
-# Security context validation
-let secure_validation = ulid validate $api_key --context "api-keys" --details
-if ($secure_validation.warnings | length) > 0 {
-    print $"Security warnings: ($secure_validation.warnings)"
-}
 ```
 
 **Error Conditions:**
@@ -535,16 +523,13 @@ Get security recommendations for ULID usage.
 
 **Syntax:**
 ```nu
-ulid security-advice [--context <string>] [--format <string>]
+ulid security-advice
 ```
 
 **Scripting Examples:**
 ```nu
-# Check security for context
-let advice = ulid security-advice --context "user-session"
-
-# Compact security info
-let warning = ulid security-advice --format compact | get warning_level
+# Get security advice
+let advice = ulid security-advice
 ```
 
 ## Error Handling Patterns
@@ -757,16 +742,13 @@ def cached_ulid_parse [ulid: string] {
 
 #### Context-Sensitive Validation
 ```nu
-def secure_ulid_validator [ulids: list, context: string] {
+def secure_ulid_validator [ulids: list] {
     $ulids | each { |ulid|
         # Basic validation
         let basic_valid = ulid validate $ulid
         
-        # Security context check
-        let security_check = ulid security-advice --context $context
-        
-        # Enhanced validation for sensitive contexts
-        let enhanced_valid = if $context in ["api-keys", "session-tokens"] {
+        # Enhanced validation
+        let enhanced_valid = if $basic_valid {
             let inspection = ulid inspect $ulid --security-check
             $basic_valid and ($inspection.security.predictability_risk != "high")
         } else {
@@ -777,8 +759,6 @@ def secure_ulid_validator [ulids: list, context: string] {
             ulid: $ulid,
             basic_valid: $basic_valid,
             security_valid: $enhanced_valid,
-            context: $context,
-            warnings: $security_check.warnings
         }
     }
 }

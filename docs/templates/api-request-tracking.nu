@@ -52,12 +52,12 @@ const CONFIG = {
 
 # Generate correlation ID for request chain
 def generate_correlation_id [context: string = "api-request"] {
-    ulid generate --context $context
+    ulid generate
 }
 
 # Generate trace ID for individual request
 def generate_trace_id [correlation_id: string] {
-    ulid generate --context "api-trace"
+    ulid generate
 }
 
 # Log request trace

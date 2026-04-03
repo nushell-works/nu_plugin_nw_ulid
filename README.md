@@ -15,7 +15,7 @@ Production-grade ULID (Universally Unique Lexicographically Sortable Identifier)
 - **🏢 Enterprise Grade**: Security audit (A- rating), 90% test coverage, comprehensive testing, and quality assurance
 - **🌊 Streaming Support**: Memory-efficient processing of large datasets with configurable batch sizes
 - **🐚 Nushell Native**: Full integration with Nushell's structured data and pipeline model
-- **🎯 Security First**: Built-in security context detection and warnings for sensitive operations
+- **🎯 Security First**: Built-in security advice and warnings for sensitive operations
 - **🚀 Production Ready**: Zero clippy warnings, memory safety, and competitive performance vs reference implementations
 
 ## Installation
@@ -67,16 +67,16 @@ echo ["01AN4Z07BY79KA1307SR9X4MV3", "invalid"] | ulid stream validate
 ulid generate-stream --count 1000 --batch-size 100
 
 # Security context checking
-ulid security-advice --context "api-keys"   # Get security recommendations
+ulid security-advice                        # Get security recommendations
 ```
 
 ## Production Commands (23 Commands Available)
 
 ### Core ULID Operations
-- `ulid generate [--count] [--timestamp] [--format] [--context]` - Generate ULIDs with options
+- `ulid generate [--count] [--timestamp] [--format]` - Generate ULIDs with options
 - `ulid validate <ulid>` - Validate ULID format and integrity
 - `ulid parse <ulid>` - Parse ULID into timestamp and randomness components
-- `ulid security-advice [--context]` - Get security recommendations for ULID usage
+- `ulid security-advice` - Get security recommendations for ULID usage
 
 ### Analysis & Sorting
 - `ulid sort [--reverse] [--natural]` - Sort data by ULID timestamp order
@@ -194,7 +194,7 @@ Based on benchmarking against reference implementations:
 
 - **A- Security Rating**: Comprehensive security audit completed
 - **Cryptographic Randomness**: Uses secure system entropy for ULID generation
-- **Context-Aware Warnings**: Built-in security advice for sensitive use cases
+- **Security Advice**: Built-in security advice for ULID usage
 - **Input Validation**: Comprehensive attack resistance testing
 - **Memory Safety**: Rust's memory guarantees prevent buffer overflows
 - **Zero Information Leakage**: Sanitized error messages

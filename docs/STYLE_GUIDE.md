@@ -116,7 +116,7 @@ Naming a new type, function, CLI command, or constant.
 
 | Element           | Convention            | Examples                                      |
 |-------------------|-----------------------|-----------------------------------------------|
-| Structs / Enums   | PascalCase            | `UlidEngine`, `UlidError`, `SecurityRating`   |
+| Structs / Enums   | PascalCase            | `UlidEngine`, `UlidError`, `SecurityWarnings` |
 | Traits            | PascalCase (adj/verb) | `PluginCommand`, `Serialize`, `Display`       |
 | Functions/Methods | snake_case            | `extract_timestamp()`, `validate()`           |
 | Type aliases      | PascalCase            | `Result<T>` (for crate-local aliases)         |
