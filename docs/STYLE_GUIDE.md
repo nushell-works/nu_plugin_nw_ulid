@@ -12,7 +12,7 @@ A new convention needs to be added to this style guide.
 
 ### Guidance
 
-Assign the next sequential ID (currently next is `STYLE-0017`) and include:
+Assign the next sequential ID (currently next is `STYLE-0018`) and include:
 
 1. A **Tags** line immediately after the heading — a comma-separated list of category labels
    from the tag vocabulary below.
@@ -36,6 +36,7 @@ Assign the next sequential ID (currently next is `STYLE-0017`) and include:
 | `api-design`         | Ownership, must_use, string params                 |
 | `dependencies`       | Dependency selection and management                |
 | `unsafe`             | Unsafe code policy                                 |
+| `feature-scoping`    | Feature justification and scope discipline         |
 
 A rule may have **multiple tags** — e.g., a rule about error messages in tests could be
 tagged `error-handling, testing`.
@@ -811,3 +812,46 @@ pulling in Nushell types. Converting at the command boundary — rather than ins
 or via a blanket `impl From` — makes the span available for error labels and keeps the
 conversion visible at each call site. The pattern is consistent across ~8 call sites in
 `ulid.rs`, `inspect.rs`, `time.rs`, and `stream.rs`.
+
+---
+
+## STYLE-0017: Feature justification
+
+**Tags:** `feature-scoping`
+
+### Situation
+
+Proposing or implementing a new feature, command, flag, or module.
+
+### Guidance
+
+Every feature must solve a real problem for the user. Before building a feature, describe
+a concrete user scenario where it provides value. If no such scenario exists, do not build
+it.
+
+**Design principles are not features.** Principles like security, performance, or
+correctness describe *how* code should be written, not *what* to build. Apply them to the
+code you are already writing:
+
+- **Security:** do not introduce vulnerabilities (e.g., avoid `unsafe`, validate external
+  input at system boundaries, use constant-time comparison where needed).
+- **Performance:** choose efficient algorithms and data structures; avoid unnecessary
+  allocations.
+- **Correctness:** handle edge cases, propagate errors, write tests.
+
+Do not create standalone features (new modules, commands, flags, or output fields) solely
+to demonstrate compliance with a principle.
+
+**Questions to ask before adding a feature:**
+
+1. What user problem does this solve?
+2. Can the user already solve it with existing commands or Nushell primitives?
+3. Is the complexity proportional to the value delivered?
+
+### Motivation
+
+Vague principle-level directives (e.g., "prioritise security") can be misinterpreted as
+feature requests, leading to invented functionality that provides no real value — such as
+runtime keyword detection systems or advisory flags that no user asked for. This happened
+in #69 and #91. Requiring a concrete user scenario as a prerequisite for every feature
+prevents speculative artifacts and keeps the codebase focused on genuine user needs.
