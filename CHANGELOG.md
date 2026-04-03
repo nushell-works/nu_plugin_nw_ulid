@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-04-03
+
+### Changed
+- Updated Nushell dependencies (nu-plugin, nu-protocol, nu-test-support) from 0.110.0 to 0.111.0
+- Updated `sha2` from 0.10.9 to 0.11.0
+- Updated `uuid` from 1.19.0 to 1.23.0
+- Updated `rand` from 0.9.2 to 0.10.0
+- Updated `criterion` from 0.7.0 to 0.8.2
+- Updated GitHub Actions: codecov/codecov-action v5 to v6, actions/download-artifact v7 to v8, actions/upload-artifact v6 to v7
+- Extracted clippy into a dedicated CI job
+- Extracted MSRV from Cargo.toml instead of hardcoding in CI
+
+### Removed
+- Removed unused error handling and security utilities
+- Removed parallel processing stub from stream command
+
+### Refactored
+- Replaced magic numbers with named constants for time conversions
+- Simplified format assertions using PartialEq derive
+
+### Added
+- Added comprehensive style guide with rules STYLE-0003 through STYLE-0017
+- Added Architecture Decision Records (ADR-0001 through ADR-0003)
+- Added CLAUDE.md with nushell dependency versioning guidance
+- Added commit message validation workflow
+- Added comprehensive test coverage for ULID operations
+
+### Notes
+- This is a maintenance release focused on dependency updates, internal cleanup, and documentation
+- Users on Nushell 0.111.x should upgrade to this version for compatibility
+- All existing plugin commands work identically to previous versions
+
 ## [0.1.2] - 2025-12-20
 
 ### Changed
