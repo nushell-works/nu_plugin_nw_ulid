@@ -103,7 +103,7 @@ Always use the security advice command when working with ULIDs in sensitive cont
 
 ```nu
 # Check security context before ULID operations
-ulid security-advice --context "user-session"
+ulid security-advice
 ```
 
 ## Enterprise Automation Patterns
@@ -113,7 +113,7 @@ ulid security-advice --context "user-session"
 ```nu
 # Orchestrate microservices with ULID correlation tracking
 def orchestrate_service_chain [request_data: record] {
-    let correlation_id = ulid generate --context "service-orchestration"
+    let correlation_id = ulid generate
     
     # Step 1: Authentication service
     let auth_result = call_auth_service $request_data $correlation_id
@@ -215,7 +215,7 @@ def process_user_signup [event: record] {
     print $"Processing user signup: ($event.id)"
     
     # Create user record with ULID
-    let user_id = ulid generate --context "user-registration"
+    let user_id = ulid generate
     
     # Store user data
     {
@@ -234,7 +234,7 @@ def process_user_signup [event: record] {
 ```nu
 # Manage batch jobs with ULID-based job tracking
 def run_batch_job [job_definition: record] {
-    let job_id = ulid generate --context "batch-processing"
+    let job_id = ulid generate
     let start_time = date now | into int
     
     print $"Starting batch job ($job_id): ($job_definition.name)"
@@ -396,34 +396,19 @@ def benchmark_ulid_operations [ulids: list] {
 
 ```nu
 # Generate ULIDs with security context validation
-def secure_ulid_generator [context: string, count: int = 1] {
-    # Check security context
-    let security_advice = ulid security-advice --context $context
-    
-    if ($security_advice.warning_level == "high") {
-        print $"WARNING: High security risk for context: ($context)"
-        print $"Recommendations: ($security_advice.recommendations)"
-        
-        let confirmation = input "Continue with ULID generation? (y/N): "
-        if $confirmation != "y" {
-            error make { msg: "ULID generation cancelled due to security concerns" }
-        }
-    }
-    
-    # Generate ULIDs with security tracking
+def secure_ulid_generator [count: int = 1] {
+    # Generate ULIDs
     let ulids = if $count == 1 {
-        [ulid generate --context $context]
+        [ulid generate]
     } else {
-        ulid generate-stream $count --context $context
+        ulid generate-stream $count
     }
     
-    # Log security event
+    # Log generation event
     let audit_entry = {
         timestamp: (date now | into int),
         action: "ulid_generation",
-        context: $context,
         count: $count,
-        security_level: $security_advice.warning_level,
         user: (whoami),
         ulids: $ulids
     }
@@ -458,7 +443,7 @@ def secure_ulid_validator [ulids: list, context: string] {
 const AUDIT_LOG_PATH = "ulid_audit.jsonl"
 
 def log_ulid_operation [operation: string, ulids: list, context: string, metadata: record] {
-    let audit_id = ulid generate --context "audit-logging"
+    let audit_id = ulid generate
     let timestamp = date now
     
     let audit_entry = {
@@ -504,7 +489,7 @@ def query_audit_trail [--operation: string, --context: string, --user: string, -
 # Track API requests across microservices
 def api_request_tracker [] {
     # Generate correlation ID for request chain
-    let correlation_id = ulid generate --context "api-request"
+    let correlation_id = ulid generate
     
     # Mock API call chain
     let api_calls = [
@@ -515,7 +500,7 @@ def api_request_tracker [] {
     ]
     
     let results = $api_calls | each { |call|
-        let request_id = ulid generate --context "api-request"
+        let request_id = ulid generate
         let start_time = date now | into int
         
         # Simulate API call
@@ -572,7 +557,7 @@ def database_record_manager [] {
     
     # Add ULIDs and metadata
     let records_with_ids = $records | each { |record|
-        let id = ulid generate --context "database-record"
+        let id = ulid generate
         let timestamp = ulid parse $id | get timestamp
         
         $record 
@@ -670,7 +655,7 @@ def analyze_log_patterns [log_file: string] {
 ```nu
 # Generate build artifacts with ULID tracking
 def generate_build_artifacts [project_info: record] {
-    let build_id = ulid generate --context "ci-cd-build"
+    let build_id = ulid generate
     let timestamp = date now
     
     # Create build manifest
@@ -692,7 +677,7 @@ def generate_build_artifacts [project_info: record] {
     ]
     
     let artifacts_with_ids = $artifacts | each { |artifact|
-        $artifact | upsert id (ulid generate --context "build-artifact")
+        $artifact | upsert id (ulid generate)
     }
     
     $build_manifest | upsert artifacts $artifacts_with_ids
@@ -700,7 +685,7 @@ def generate_build_artifacts [project_info: record] {
 
 # Deploy with tracking
 def deploy_with_tracking [build_manifest: record, environment: string] {
-    let deployment_id = ulid generate --context "deployment"
+    let deployment_id = ulid generate
     
     {
         deployment_id: $deployment_id,
@@ -718,7 +703,7 @@ def deploy_with_tracking [build_manifest: record, environment: string] {
 ```nu
 # Monitor system health with ULID-based event tracking
 def system_health_monitor [] {
-    let check_id = ulid generate --context "health-check"
+    let check_id = ulid generate
     
     # Perform health checks
     let checks = [
@@ -738,7 +723,7 @@ def system_health_monitor [] {
         let end = date now | into int
         
         {
-            check_id: (ulid generate --context "health-check-item"),
+            check_id: (ulid generate),
             name: $check.name,
             healthy: $result.healthy,
             duration_ms: ($end - $start),

@@ -7,7 +7,7 @@ use nu_protocol::{
 
 use crate::{SecurityWarnings, UlidEngine, UlidPlugin};
 
-/// Generates new ULIDs with optional count, timestamp, format, and security context.
+/// Generates new ULIDs with optional count, timestamp, and format.
 pub struct UlidGenerateCommand;
 
 impl PluginCommand for UlidGenerateCommand {
@@ -40,12 +40,6 @@ impl PluginCommand for UlidGenerateCommand {
                 SyntaxShape::String,
                 "Output format: string, json, binary",
                 Some('f'),
-            )
-            .named(
-                "context",
-                SyntaxShape::String,
-                "Usage context for security validation",
-                None,
             )
             .input_output_types(vec![
                 (Type::Nothing, Type::String),
@@ -90,14 +84,6 @@ impl PluginCommand for UlidGenerateCommand {
         let count: Option<i64> = call.get_flag("count")?;
         let timestamp: Option<i64> = call.get_flag("timestamp")?;
         let format_str: Option<String> = call.get_flag("format")?;
-        let context: Option<String> = call.get_flag("context")?;
-
-        if let Some(ref ctx) = context
-            && SecurityWarnings::is_security_sensitive_context(ctx)
-        {
-            let warning = SecurityWarnings::create_context_warning(ctx, call.head);
-            return Ok(PipelineData::Value(warning, None));
-        }
 
         let format = parse_output_format(format_str.as_deref(), call.head)?;
 
@@ -381,7 +367,6 @@ mod tests {
             assert!(signature.named.iter().any(|flag| flag.long == "count"));
             assert!(signature.named.iter().any(|flag| flag.long == "timestamp"));
             assert!(signature.named.iter().any(|flag| flag.long == "format"));
-            assert!(signature.named.iter().any(|flag| flag.long == "context"));
         }
 
         #[test]
@@ -642,81 +627,6 @@ mod tests {
                     .iter()
                     .any(|ex| ex.example.contains("ulid security-advice"))
             );
-        }
-    }
-
-    mod security_context_detection {
-        use super::*;
-
-        #[test]
-        fn test_security_sensitive_contexts() {
-            let sensitive_contexts = vec![
-                "auth",
-                "authentication",
-                "authorize",
-                "authorization",
-                "token",
-                "session",
-                "password",
-                "secret",
-                "key",
-                "credential",
-                "login",
-                "signin",
-                "signup",
-                "api_key",
-                "apikey",
-                "access_token",
-                "refresh_token",
-                "jwt",
-                "oauth",
-            ];
-
-            for context in sensitive_contexts {
-                assert!(
-                    SecurityWarnings::is_security_sensitive_context(context),
-                    "Context '{}' should be detected as security sensitive",
-                    context
-                );
-
-                // Test case insensitive detection
-                assert!(
-                    SecurityWarnings::is_security_sensitive_context(&context.to_uppercase()),
-                    "Context '{}' should be detected as security sensitive (uppercase)",
-                    context.to_uppercase()
-                );
-            }
-        }
-
-        #[test]
-        fn test_non_security_contexts() {
-            let non_sensitive_contexts = vec![
-                "user_id",
-                "transaction",
-                "order",
-                "product",
-                "cache",
-                "temp",
-                "log",
-                "debug",
-                "test",
-            ];
-
-            for context in non_sensitive_contexts {
-                assert!(
-                    !SecurityWarnings::is_security_sensitive_context(context),
-                    "Context '{}' should not be detected as security sensitive",
-                    context
-                );
-            }
-        }
-
-        #[test]
-        fn test_context_edge_cases() {
-            // Test edge cases
-            assert!(!SecurityWarnings::is_security_sensitive_context(""));
-            assert!(!SecurityWarnings::is_security_sensitive_context("   "));
-            assert!(SecurityWarnings::is_security_sensitive_context("  auth  ")); // Should trim and detect
         }
     }
 
@@ -1090,78 +1000,6 @@ mod tests {
             // Test parsing invalid ULID
             let invalid_result = UlidEngine::parse("invalid-ulid");
             assert!(invalid_result.is_err(), "Should fail to parse invalid ULID");
-        }
-
-        #[test]
-        fn test_security_context_execution() {
-            // Test security context detection logic from run method
-            let sensitive_contexts = vec![
-                "auth_token",
-                "session_id",
-                "password_reset",
-                "api_key",
-                "jwt_secret",
-                "oauth_token",
-            ];
-
-            let safe_contexts = vec![
-                "user_id",
-                "transaction_id",
-                "log_correlation",
-                "temp_file",
-                "product_id",
-            ];
-
-            // Test sensitive context detection
-            for context in &sensitive_contexts {
-                assert!(
-                    SecurityWarnings::is_security_sensitive_context(context),
-                    "Should detect '{}' as sensitive",
-                    context
-                );
-            }
-
-            // Test safe context detection
-            for context in &safe_contexts {
-                assert!(
-                    !SecurityWarnings::is_security_sensitive_context(context),
-                    "Should not detect '{}' as sensitive",
-                    context
-                );
-            }
-
-            // Test warning creation
-            let span = create_test_span();
-            for context in &sensitive_contexts {
-                let warning = SecurityWarnings::create_context_warning(context, span);
-                match warning {
-                    Value::Record { .. } => {
-                        // Warning should be a structured record
-                    }
-                    _ => panic!("Security warning should be a Record value"),
-                }
-            }
-        }
-
-        #[test]
-        fn test_security_advice_execution() {
-            // Test security advice generation from UlidSecurityAdviceCommand
-            let span = create_test_span();
-            let advice = SecurityWarnings::get_security_advice(span);
-
-            match advice {
-                Value::Record { val, .. } => {
-                    let record = val.into_owned();
-
-                    // Should contain key security advice fields
-                    assert!(record.contains("safe_use_cases") || record.contains("overview"));
-
-                    // Verify the structure contains useful information
-                    let keys: Vec<_> = record.columns().collect();
-                    assert!(!keys.is_empty(), "Security advice should have content");
-                }
-                _ => panic!("Security advice should return Record value"),
-            }
         }
 
         #[test]

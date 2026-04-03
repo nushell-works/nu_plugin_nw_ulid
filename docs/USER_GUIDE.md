@@ -73,9 +73,6 @@ ULIDs (Universally Unique Lexicographically Sortable Identifiers) are 128-bit id
 > ulid generate --timestamp 1692000000000
 01H4QG7XG00000000000000000
 
-# Generate for specific context with security validation
-> ulid generate --context "user-session"
-01K2W41TWG3FKYYSK430SR8KWA
 ```
 
 ### Validating ULIDs
@@ -432,11 +429,9 @@ def check_rate_limit [request_id: string, rate_limit_per_minute: int] {
 
 ### Security Best Practices
 
-1. **Use security advice** for sensitive contexts:
+1. **Use security advice** for guidance:
    ```nushell
-   ulid security-advice --context "user-session"
-   ulid security-advice --context "api-keys"
-   ulid security-advice --context "database-ids"
+   ulid security-advice
    ```
 
 2. **Validate inputs** before processing:
@@ -473,15 +468,11 @@ def check_rate_limit [request_id: string, rate_limit_per_minute: int] {
 
 ### Context-Aware Security
 
-The plugin provides security warnings for different use contexts:
+The plugin provides security guidance for ULID usage:
 
 ```nushell
-# Check security implications for different contexts
-ulid security-advice --context "user-session"    # User session tracking
-ulid security-advice --context "api-keys"        # API key generation
-ulid security-advice --context "database-ids"    # Database primary keys
-ulid security-advice --context "file-names"      # File naming
-ulid security-advice --context "public-urls"     # Public URL generation
+# Get security advice for ULID usage
+ulid security-advice
 ```
 
 ## Troubleshooting
@@ -555,7 +546,7 @@ $data | ulid stream parse --batch-size 100
 
 4. **Check for security warnings**:
    ```nushell
-   ulid security-advice --context "your-use-case"
+   ulid security-advice
    ```
 
 ### Getting Help

@@ -94,17 +94,10 @@ def log [level: string, message: string] {
 }
 ```
 
-### ULID Generation with Context
+### ULID Generation
 ```nu
-def generate_contextual_ulid [context: string] {
-    # Check security context
-    let security_advice = ulid security-advice --context $context
-    
-    if ($security_advice.warning_level == "high") {
-        print $"WARNING: High security risk for context: ($context)"
-    }
-    
-    ulid generate --context $context
+def generate_ulid [] {
+    ulid generate
 }
 ```
 
@@ -152,20 +145,10 @@ def process_file_in_chunks [file_path: string] {
 
 ## Security Best Practices
 
-### 1. Context-Aware ULID Generation
+### 1. Secure ULID Generation
 ```nu
-def secure_ulid_generation [context: string] {
-    # Always check security context first
-    let security_check = ulid security-advice --context $context
-    
-    if ($security_check.warning_level in ["high", "critical"]) {
-        let confirmation = input $"Security warning for context ($context). Continue? (y/N): "
-        if $confirmation != "y" {
-            error make { msg: "Operation cancelled due to security concerns" }
-        }
-    }
-    
-    ulid generate --context $context
+def secure_ulid_generation [] {
+    ulid generate
 }
 ```
 
@@ -186,15 +169,14 @@ def validate_ulid_input [ulid: string] {
 
 ### 3. Audit Trail Implementation
 ```nu
-def log_ulid_operation [operation: string, ulids: list, context: string] {
+def log_ulid_operation [operation: string, ulids: list] {
     let audit_entry = {
-        audit_id: (ulid generate --context "audit"),
+        audit_id: (ulid generate),
         timestamp: (date now),
         operation: $operation,
-        context: $context,
         ulid_count: ($ulids | length),
         user: (whoami),
-        checksum: ([$operation, ($ulids | str join ","), $context] | str join "|" | hash sha256)
+        checksum: ([$operation, ($ulids | str join ",")] | str join "|" | hash sha256)
     }
     
     $audit_entry | to json | save --append audit.jsonl
@@ -220,7 +202,7 @@ def test_ulid_generation [] {
 ```nu
 def test_end_to_end_workflow [] {
     # Test complete workflow
-    let correlation_id = ulid generate --context "test"
+    let correlation_id = ulid generate
     
     # Simulate operations
     let results = [
@@ -333,7 +315,7 @@ def custom_validator [data: any] {
 ### With External APIs
 ```nu
 def call_external_api [endpoint: string, data: record] {
-    let correlation_id = ulid generate --context "external-api"
+    let correlation_id = ulid generate
     
     let response = http post $endpoint {
         body: $data,
@@ -350,7 +332,7 @@ def call_external_api [endpoint: string, data: record] {
 ### With Databases
 ```nu
 def insert_with_ulid [table: string, data: record] {
-    let id = ulid generate --context "database"
+    let id = ulid generate
     let record_with_id = $data | upsert id $id | upsert created_at (date now)
     
     # Simulate database insert
@@ -363,7 +345,7 @@ def insert_with_ulid [table: string, data: record] {
 ### With File Processing
 ```nu
 def process_file_with_tracking [file_path: string] {
-    let processing_id = ulid generate --context "file-processing"
+    let processing_id = ulid generate
     
     let result = {
         processing_id: $processing_id,

@@ -500,7 +500,7 @@ def migrate_database [
 ] {
     log_migration "info" "Starting complete database migration to ULID"
     
-    let migration_id = ulid generate --context "database-migration"
+    let migration_id = ulid generate
     let migration_start = date now | into int
     
     # Load source data

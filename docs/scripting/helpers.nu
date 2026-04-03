@@ -124,11 +124,6 @@ def verify_ulid_ordering [ulids: list] {
     $timestamps == $sorted_timestamps
 }
 
-# Security check for ULID context
-def check_ulid_security [context: string] {
-    ulid security-advice --context $context --format compact | get warning_level
-}
-
 # Example usage function
 def example_ulid_workflow [] {
     print "ULID Helper Functions Example Workflow"
@@ -146,7 +141,4 @@ def example_ulid_workflow [] {
     let is_ordered = (verify_ulid_ordering $test_ulids)
     print $"ULIDs are chronologically ordered: ($is_ordered)"
     
-    # Security check
-    let security_level = (check_ulid_security "example")
-    print $"Security warning level: ($security_level)"
 }
