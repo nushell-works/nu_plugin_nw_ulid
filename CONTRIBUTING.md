@@ -38,8 +38,8 @@ Examples of behavior that contributes to creating a positive environment include
 
 Ensure you have the required tools installed:
 
-- **Rust 1.89.0+**: [Install Rust](https://rustup.rs/) (required for Nushell 0.109.1)
-- **Nushell 0.109.1+**: [Install Nushell](https://nushell.sh/book/installation.html)
+- **Rust 1.89.0+**: [Install Rust](https://rustup.rs/) (required for Nushell 0.111.0)
+- **Nushell 0.111.0+**: [Install Nushell](https://nushell.sh/book/installation.html)
 - **Git**: [Install Git](https://git-scm.com/downloads)
 
 ### Fork and Clone
@@ -315,6 +315,28 @@ We follow [Semantic Versioning](https://semver.org/):
      - Crates.io publication
      - GitHub release creation
      - Documentation deployment
+
+## Upgrading the Nushell SDK
+
+When a new Nushell release is available (typically via a Dependabot PR), the following files must
+be updated in a single PR to avoid version drift:
+
+1. **`Cargo.toml`** — bump `nu-plugin`, `nu-protocol`, and `nu-test-support` to the new version.
+   Update `rust-version` if the new release raises the MSRV.
+2. **`ci.yml`** — update the `cargo install nu --version` line in the integration test job to
+   match the new Nushell release.
+3. **`deny.toml`** — review advisory exceptions. Transitive dependencies may have changed;
+   remove stale exceptions and add new ones with inline comments explaining why they are safe.
+4. **API migrations** — if the new release changes the plugin API (e.g., new `Value` constructors,
+   renamed traits), apply the migration in the same PR and document the changes in the PR
+   description.
+5. **Documentation** — update version references in `CONTRIBUTING.md` (the Prerequisites section)
+   and any other prose that mentions specific Nushell or MSRV versions.
+6. **Verify** — run `make ci` (or the equivalent manual steps: `cargo clippy`, `cargo test`,
+   `cargo deny check`, `cargo audit`) before merging.
+
+The MSRV in `Cargo.toml` is the single source of truth — CI reads it automatically via the
+`read-msrv` job (see ADR-0003 and #112 for context).
 
 ## Development Guidelines
 
