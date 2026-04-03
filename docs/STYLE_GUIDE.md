@@ -12,7 +12,7 @@ A new convention needs to be added to this style guide.
 
 ### Guidance
 
-Assign the next sequential ID (currently next is `STYLE-0015`) and include:
+Assign the next sequential ID (currently next is `STYLE-0016`) and include:
 
 1. A **Tags** line immediately after the heading — a comma-separated list of category labels
    from the tag vocabulary below.
@@ -34,6 +34,7 @@ Assign the next sequential ID (currently next is `STYLE-0015`) and include:
 | `testing`            | Test structure, fixtures, snapshots                |
 | `code-style`         | Imports, clippy, constants, function length        |
 | `api-design`         | Ownership, must_use, string params                 |
+| `dependencies`       | Dependency selection and management                |
 | `unsafe`             | Unsafe code policy                                 |
 
 A rule may have **multiple tags** — e.g., a rule about error messages in tests could be
@@ -721,3 +722,48 @@ flagging files that are large *because* they mix concerns.
 Grouping commands by domain rather than putting all 23 commands in one file or giving each
 its own file strikes a balance: related commands share helpers and constants without
 cross-domain coupling, while the file tree remains compact enough to scan at a glance.
+
+---
+
+## STYLE-0015: Prefer standard library over external crates
+
+**Tags:** `dependencies`
+
+### Situation
+
+Adding a new dependency, or a Rust release has stabilised functionality that an existing
+dependency provides.
+
+### Guidance
+
+Before adding an external crate, check whether `std` already provides equivalent
+functionality at the project's current MSRV. If it does, use `std`.
+
+When a new Rust release absorbs a crate's functionality into `std` and the MSRV supports it,
+migrate existing usage to the `std` equivalent and remove the external dependency.
+
+This applies only where `std` provides a **genuine equivalent**. Domain-specific crates with
+no `std` counterpart (e.g., `chrono`, `serde`, `blake3`, `ulid`) are unaffected.
+
+```rust
+// Good — std::sync::LazyLock (stable since 1.80.0)
+use std::sync::LazyLock;
+
+static PATTERN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"...").unwrap());
+
+// Avoid — once_cell when std equivalent is available at MSRV
+use once_cell::sync::Lazy;
+
+static PATTERN: Lazy<Regex> = Lazy::new(|| Regex::new(r"...").unwrap());
+```
+
+If a crate's API is significantly more ergonomic or feature-rich than its `std` equivalent,
+evaluate on a case-by-case basis whether the ergonomic benefit justifies the dependency cost.
+
+### Motivation
+
+Each external dependency carries costs: supply chain risk (see ADR-0002), compilation time,
+upgrade burden, and version conflict surface. When `std` offers equivalent functionality,
+these costs can be eliminated entirely. The Rust ecosystem follows a well-established pattern
+of absorbing popular crate APIs into the standard library — aligning with this trend keeps
+the dependency tree lean and reduces long-term maintenance.
