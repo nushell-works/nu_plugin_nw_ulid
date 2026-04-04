@@ -103,13 +103,12 @@ def generate_ulid [] {
 
 ## Performance Optimization Tips
 
-### 1. Streaming for Large Datasets
+### 1. Chunked Processing for Large Datasets
 ```nu
-# Instead of loading everything into memory
-$large_dataset | each { |item| process_item $item }
-
-# Use streaming operations
-$large_dataset | ulid stream validate --batch-size 1000 --parallel
+# Use chunked processing for large datasets
+$large_dataset | chunks 1000 | each { |chunk|
+    $chunk | each { |ulid| ulid validate $ulid }
+} | flatten
 ```
 
 ### 2. Adaptive Batch Sizing
@@ -259,18 +258,20 @@ def safe_ulid_parse [ulid: string] {
 ### 2. Memory Issues with Large Datasets
 ```nu
 # Problem: Running out of memory with large datasets
-# Solution: Use streaming and reduce batch sizes
+# Solution: Process in smaller chunks
 let large_dataset = open huge_file.json | get ulids
 $large_dataset | chunks 100 | each { |chunk|
-    $chunk | ulid stream validate --batch-size 50
+    $chunk | each { |ulid| ulid validate $ulid }
 } | flatten
 ```
 
 ### 3. Performance Issues
 ```nu
 # Problem: Slow processing
-# Solution: Enable parallel processing and optimize batch sizes
-$data | ulid stream parse --parallel --batch-size 2000
+# Solution: Enable parallel processing with par-each
+$data | chunks 1000 | par-each { |chunk|
+    $chunk | each { |ulid| ulid parse $ulid }
+} | flatten
 ```
 
 ## Template Customization

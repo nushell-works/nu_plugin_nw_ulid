@@ -907,7 +907,7 @@ def diagnose_ulid_generation_performance [] {
     let test_count = 10000
     let start = date now | into int
 
-    let test_ulids = ulid generate-stream $test_count
+    let test_ulids = 1..$test_count | each { ulid generate }
 
     let end = date now | into int
     let duration = $end - $start
@@ -917,7 +917,7 @@ def diagnose_ulid_generation_performance [] {
 
     if $rate < 1000 {
         print "❌ ISSUE: ULID generation is too slow"
-        print "💡 SOLUTION: Use batch generation with ulid generate-stream"
+        print "💡 SOLUTION: Use ulid generate --count for bulk generation"
     } else {
         print "✅ ULID generation performance is acceptable"
     }
@@ -925,9 +925,8 @@ def diagnose_ulid_generation_performance [] {
 ```
 
 **Solutions:**
-- Use `ulid generate-stream` for batch generation
+- Use `ulid generate --count` for bulk generation
 - Implement parallel processing for large datasets
-- Optimize batch sizes based on available memory
 
 #### Issue 2: Foreign Key Orphans
 

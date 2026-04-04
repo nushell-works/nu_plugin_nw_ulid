@@ -27,7 +27,7 @@ nu_plugin_nw_ulid delivers enterprise-grade performance with the following chara
 - **ULID Validation**: ~12ns per operation (83M ops/sec)
 - **ULID Parsing**: ~120ns per operation (8.3M ops/sec)
 - **Bulk Operations**: Optimized batch processing with configurable sizes
-- **Memory Usage**: Efficient allocation patterns with streaming support
+- **Memory Usage**: Efficient allocation patterns
 - **Concurrency**: Thread-safe with parallel processing capabilities
 
 ### Performance Rating: ⭐⭐⭐⭐⭐ Excellent
@@ -62,17 +62,6 @@ Based on comprehensive benchmarking against reference implementations and produc
 | 100K ULIDs | Parse | 260s | 385 ops/sec | 280MB |
 | 1M ULIDs | Parse | 2600s | 385 ops/sec | 2.5GB |
 
-### Streaming Operation Performance
-
-| Dataset Size | Batch Size | Operation | Processing Time | Throughput | Peak Memory |
-|-------------|------------|-----------|----------------|------------|-------------|
-| 100K ULIDs | 1K | Stream Validate | 800ms | 125K ops/sec | 50MB |
-| 100K ULIDs | 5K | Stream Validate | 600ms | 167K ops/sec | 120MB |
-| 100K ULIDs | 10K | Stream Validate | 550ms | 182K ops/sec | 200MB |
-| 1M ULIDs | 1K | Stream Validate | 7.5s | 133K ops/sec | 50MB |
-| 1M ULIDs | 5K | Stream Validate | 5.8s | 172K ops/sec | 120MB |
-| 1M ULIDs | 10K | Stream Validate | 5.2s | 192K ops/sec | 200MB |
-
 ### Parallel Processing Performance
 
 | Dataset Size | Workers | Operation | Processing Time | Speedup | Efficiency |
@@ -96,7 +85,6 @@ Based on comprehensive benchmarking against reference implementations and produc
 | ULID Parsing | O(1) | O(1) | Fixed-size parsing |
 | Bulk Validation | O(n) | O(1) | Linear with input size |
 | Bulk Parsing | O(n) | O(n) | Linear scaling |
-| Stream Processing | O(n) | O(b) | Space bounded by batch size |
 
 ### Memory Allocation Patterns
 
@@ -133,22 +121,21 @@ Memory Usage Pattern (100K ULID Parsing):
 
 ## Optimization Techniques
 
-### 1. Batch Size Optimization
+### 1. Chunked Processing
 
-Choose optimal batch sizes based on your workload:
+Process large datasets in chunks to keep memory usage bounded:
 
 ```nushell
-# Memory-constrained environments
-let batch_size = 100
-
-# Balanced performance
-let batch_size = 1000
-
-# High-memory, high-performance environments
-let batch_size = 10000
-
-# Process with optimal batch size
-$large_dataset | ulid stream validate --batch-size $batch_size
+# Process large files without loading everything into memory
+def process_large_ulid_file [file_path: string] {
+    open $file_path
+    | lines
+    | chunks 1000  # Process in small chunks
+    | each { |chunk|
+        $chunk | each { |ulid| ulid validate $ulid }
+    }
+    | flatten
+}
 ```
 
 ### 2. Parallel Processing Configuration
@@ -163,53 +150,13 @@ def optimal_workers [] {
     [$cpu_count, ($memory_gb / 2 | math floor), 8] | math min
 }
 
-# Use parallel processing
-$data | ulid stream parse --parallel --batch-size (optimal_batch_size $data)
+# Use parallel processing with par-each
+$data | chunks 1000 | par-each { |chunk|
+    $chunk | each { |ulid| ulid parse $ulid }
+} | flatten
 ```
 
-### 3. Memory-Efficient Streaming
-
-```nushell
-# Process large files without loading everything into memory
-def process_large_ulid_file [file_path: string] {
-    open $file_path
-    | lines
-    | chunks 1000  # Process in small chunks
-    | each { |chunk|
-        $chunk | ulid stream validate --batch-size 500
-    }
-    | flatten
-}
-```
-
-### 4. Adaptive Performance Tuning
-
-```nushell
-def adaptive_ulid_processing [data: list] {
-    let count = ($data | length)
-    let available_memory = (sys | get memory.available)
-    
-    # Adaptive batch sizing
-    let batch_size = if $count > 1000000 {
-        if $available_memory > 4GB { 10000 } else { 2000 }
-    } else if $count > 100000 {
-        if $available_memory > 2GB { 5000 } else { 1000 }
-    } else {
-        500
-    }
-    
-    # Adaptive parallel processing
-    let use_parallel = $count > 10000 and $available_memory > 1GB
-    
-    if $use_parallel {
-        $data | ulid stream validate --batch-size $batch_size --parallel
-    } else {
-        $data | ulid stream validate --batch-size $batch_size
-    }
-}
-```
-
-### 5. Caching and Memoization
+### 3. Caching and Memoization
 
 ```nushell
 # Cache parsed ULID results for repeated access
@@ -227,7 +174,7 @@ def cached_ulid_parse [ulid: string] {
 
 # Batch cache warming
 def warm_ulid_cache [ulids: list] {
-    let parsed_batch = $ulids | ulid stream parse --batch-size 1000
+    let parsed_batch = $ulids | each { |ulid| ulid parse $ulid }
     for item in $parsed_batch {
         $ulid_cache = ($ulid_cache | upsert $item.ulid $item)
     }
@@ -265,14 +212,9 @@ $small_dataset | each { ulid validate $in }
 **Recommendations:**
 ```nushell
 # Optimal configuration for medium datasets
-let config = {
-    batch_size: 1000,
-    parallel: true,
-    workers: 4,
-    memory_limit: "512MB"
-}
-
-$medium_dataset | ulid stream validate --batch-size $config.batch_size --parallel
+$medium_dataset | chunks 1000 | par-each { |chunk|
+    $chunk | each { |ulid| ulid validate $ulid }
+} | flatten
 ```
 
 ### Large Scale (1M+ operations)
@@ -285,21 +227,12 @@ $medium_dataset | ulid stream validate --batch-size $config.batch_size --paralle
 **Recommendations:**
 ```nushell
 # Optimal configuration for large datasets
-let config = {
-    batch_size: 5000,
-    parallel: true,
-    workers: 8,
-    streaming: true,
-    memory_limit: "2GB"
-}
-
-# Stream processing for large datasets
 $large_file_path 
 | open 
 | lines 
-| chunks $config.batch_size
+| chunks 5000
 | par-each { |chunk|
-    $chunk | ulid stream validate --batch-size ($config.batch_size / 2)
+    $chunk | each { |ulid| ulid validate $ulid }
 }
 | flatten
 ```
@@ -332,7 +265,7 @@ def enterprise_ulid_processing [data_source: string] {
         
         # Process chunk with full optimization
         let chunk_result = $chunk_data 
-            | ulid stream validate --batch-size 10000 --parallel
+            | each { |ulid| ulid validate $ulid }
         
         $processed = $processed + ($chunk_result | length)
         
@@ -376,22 +309,16 @@ def enterprise_ulid_processing [data_source: string] {
 - **Peak Usage**: During result collection
 - **Cleanup**: Manual cleanup recommended for large datasets
 
-#### Streaming Operations
-- **Base Memory**: Constant (~50MB regardless of dataset size)
-- **Scaling**: Bounded by batch size
-- **Peak Usage**: During batch processing
-- **Cleanup**: Automatic per batch
-
 ### Memory Optimization Strategies
 
-#### 1. Streaming for Large Datasets
+#### 1. Chunked Processing for Large Datasets
 ```nushell
 # Memory-efficient processing
 def memory_efficient_processing [data: list] {
     $data 
     | chunks 1000  # Keep memory usage bounded
     | each { |chunk|
-        $chunk | ulid stream validate
+        $chunk | each { |ulid| ulid validate $ulid }
     }
     | flatten
 }
@@ -445,9 +372,9 @@ def monitor_ulid_performance [operation: string, data: list] {
     let start_memory = (sys | get memory.used)
     
     let result = match $operation {
-        "validate" => ($data | ulid stream validate --batch-size 1000),
-        "parse" => ($data | ulid stream parse --batch-size 1000),
-        "generate" => (ulid generate-stream ($data | length)),
+        "validate" => ($data | each { |ulid| ulid validate $ulid }),
+        "parse" => ($data | each { |ulid| ulid parse $ulid }),
+        "generate" => (1..($data | length) | each { ulid generate }),
         _ => (error make { msg: $"Unknown operation: ($operation)" })
     }
     
@@ -483,7 +410,7 @@ def benchmark_ulid_operations [sizes: list = [100, 1000, 10000]] {
             let test_data = if $op == "generate" {
                 0..<$size
             } else {
-                ulid generate-stream $size
+                1..$size | each { ulid generate }
             }
             
             # Run benchmark
@@ -564,7 +491,7 @@ def diagnose_validation_performance [ulids: list] {
     
     if $throughput < 50000 {
         print "ISSUE: Validation performance is below expected"
-        print "SOLUTION: Use streaming validation: ulid stream validate"
+        print "SOLUTION: Use par-each for parallel validation across chunks"
     }
 }
 ```
@@ -597,15 +524,13 @@ def diagnose_memory_usage [operation: closure] {
     
     if ($memory_increase / 1MB) > 1000 {
         print "ISSUE: High memory usage detected"
-        print "SOLUTION: Use streaming operations with smaller batch sizes"
+        print "SOLUTION: Process data in smaller chunks"
     }
 }
 ```
 
 **Solutions:**
-- Use streaming operations (`ulid stream`)
-- Reduce batch sizes
-- Process data in chunks
+- Process data in smaller chunks
 - Enable garbage collection between batches
 
 #### 3. Throughput Bottlenecks
@@ -623,7 +548,7 @@ def diagnose_throughput [data: list] {
     
     let parallel_benchmark = {
         let start = (date now | into int)
-        let result = $data | ulid stream validate --parallel
+        let result = $data | chunks 1000 | par-each { |chunk| $chunk | each { ulid validate $in } } | flatten
         let end = (date now | into int)
         
         {
@@ -651,9 +576,9 @@ def diagnose_throughput [data: list] {
 
 ### Performance Tuning Checklist
 
-- [ ] **Use streaming operations** for datasets > 10K items
-- [ ] **Enable parallel processing** for CPU-intensive operations
-- [ ] **Optimize batch sizes** based on available memory
+- [ ] **Use chunked processing** for datasets > 10K items
+- [ ] **Enable parallel processing** with `par-each` for CPU-intensive operations
+- [ ] **Choose appropriate chunk sizes** based on available memory
 - [ ] **Monitor memory usage** and implement cleanup strategies
 - [ ] **Profile operations** to identify bottlenecks
 - [ ] **Use caching** for frequently accessed ULIDs

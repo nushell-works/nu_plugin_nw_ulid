@@ -307,8 +307,7 @@ def test_nushell_compatibility [] {
     let test_cases = [
         { test: "generation", command: { ulid generate } },
         { test: "validation", command: { ulid validate "01ARZ3NDEKTSV4RRFFQ69G5FAV" } },
-        { test: "parsing", command: { ulid parse "01ARZ3NDEKTSV4RRFFQ69G5FAV" } },
-        { test: "stream", command: { ["01ARZ3NDEKTSV4RRFFQ69G5FAV"] | ulid stream validate } }
+        { test: "parsing", command: { ulid parse "01ARZ3NDEKTSV4RRFFQ69G5FAV" } }
     ]
 
     let results = ($test_cases | each { |case|

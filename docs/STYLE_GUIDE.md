@@ -120,7 +120,7 @@ Naming a new type, function, CLI command, or constant.
 | Traits            | PascalCase (adj/verb) | `PluginCommand`, `Serialize`, `Display`       |
 | Functions/Methods | snake_case            | `extract_timestamp()`, `validate()`           |
 | Type aliases      | PascalCase            | `Result<T>` (for crate-local aliases)         |
-| Constants         | UPPER_SNAKE_CASE      | `ULID_STRING_LENGTH`, `DEFAULT_BATCH_SIZE`    |
+| Constants         | UPPER_SNAKE_CASE      | `ULID_STRING_LENGTH`, `MAX_BULK_GENERATION`   |
 | CLI commands      | kebab-case            | `ulid generate`, `ulid encode-base32`         |
 | Modules / files   | snake_case            | `ulid_engine.rs`, `security.rs`               |
 
@@ -586,8 +586,8 @@ for:
 
 **Acceptable silent discards:**
 
-- Best-effort error reporting in streaming mode, where the stream should continue processing
-  remaining items (see `stream.rs` for the existing pattern).
+- Best-effort error reporting when processing lists, where iteration should continue with
+  remaining items.
 - Optional metadata that may be absent and has a sensible default (e.g., timezone info from
   a parsed timestamp).
 
@@ -697,7 +697,6 @@ The current domains in `src/commands/` are:
 | `hash.rs`     | hash     | hash sha256, hash sha512, hash blake3, hash random   |
 | `time.rs`     | time     | time now, time parse, time millis                    |
 | `uuid.rs`     | uuid     | uuid generate, uuid validate, uuid parse             |
-| `stream.rs`   | stream   | stream, generate-stream                              |
 | `sort.rs`     | sort     | sort                                                 |
 | `inspect.rs`  | inspect  | inspect                                              |
 | `info.rs`     | info     | info                                                 |
@@ -810,8 +809,8 @@ and the span for Nushell's error rendering.
 Keeping `UlidError` free of `nu-protocol` means the engine can be tested and reused without
 pulling in Nushell types. Converting at the command boundary — rather than inside the engine
 or via a blanket `impl From` — makes the span available for error labels and keeps the
-conversion visible at each call site. The pattern is consistent across ~8 call sites in
-`ulid.rs`, `inspect.rs`, `time.rs`, and `stream.rs`.
+conversion visible at each call site. The pattern is consistent across call sites in
+`ulid.rs`, `inspect.rs`, and `time.rs`.
 
 ---
 
