@@ -65,7 +65,7 @@ ulid inspect "01AN4Z07BY79KA1307SR9X4MV3"   # Detailed ULID analysis
 ulid security-advice                        # Get security recommendations
 ```
 
-## Production Commands (23 Commands Available)
+## Production Commands (19 Commands Available)
 
 ### Core ULID Operations
 - `ulid generate [--count] [--timestamp] [--format]` - Generate ULIDs with options
@@ -87,12 +87,6 @@ ulid security-advice                        # Get security recommendations
 - `ulid decode base32 <data> [--text]` - Decode Crockford Base32
 - `ulid encode hex <data> [--uppercase]` - Hexadecimal encoding
 - `ulid decode hex <data> [--text]` - Hexadecimal decoding
-
-### Cryptographic Operations
-- `ulid hash sha256 <data>` - SHA-256 hashing
-- `ulid hash sha512 <data>` - SHA-512 hashing
-- `ulid hash blake3 <data> [--length]` - BLAKE3 hashing with variable length
-- `ulid hash random [--length]` - Cryptographically secure random bytes
 
 ### Legacy UUID Support
 - `ulid uuid generate` - Generate UUID v4 (compatibility)

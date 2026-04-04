@@ -223,26 +223,6 @@ Hello World
 Hello World
 ```
 
-### Cryptographic Operations
-
-```nushell
-# Generate secure random bytes
-> ulid hash random --length 32
-d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5
-
-# SHA-256 hashing
-> ulid hash sha256 "Hello World"
-a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e
-
-# SHA-512 hashing
-> ulid hash sha512 "Hello World"
-2c74fd17edafd80e8447b0d46741ee243b7eb74dd2149a0ab1b9246fb30382f27e853d8585719e0e67cbda0daa8f51671064615d645ae27acb15bfb1447f459b
-
-# BLAKE3 hashing with custom length
-> ulid hash blake3 "Hello World" --length 16
-d74981efa70a0c880b8d8c1985d075b2
-```
-
 ## Practical Examples
 
 ### Example 1: Database Record Management

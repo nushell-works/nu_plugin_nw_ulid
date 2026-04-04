@@ -18,7 +18,6 @@ Complete reference for all ULID plugin commands and their programmatic usage. Th
 | `ulid security-advice` | Security recommendations | Nothing | Record |
 | `ulid time` | Time operations | Various | Record |
 | `ulid encode/decode` | Encoding operations | String, Binary | String, Binary |
-| `ulid hash` | Cryptographic operations | String, Binary | String |
 | `ulid uuid` | UUID compatibility | String | String, Bool, Record |
 | `ulid info` | Plugin information | Nothing | Record |
 
@@ -659,7 +658,7 @@ def create_ulid_audit_trail [operations: list] {
             result: $op.result,
             security_context: $op.context,
             user: (whoami),
-            checksum: ([$op.ulid, $op.result, $timestamp] | str join "|" | hash sha256)
+            checksum: ([$op.ulid, $op.result, $timestamp] | str join "|")
         }
     }
 }

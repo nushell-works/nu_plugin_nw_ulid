@@ -38,11 +38,6 @@ impl Plugin for UlidPlugin {
             Box::new(UlidDecodeBase32Command),
             Box::new(UlidEncodeHexCommand),
             Box::new(UlidDecodeHexCommand),
-            // Hashing utilities
-            Box::new(UlidHashSha256Command),
-            Box::new(UlidHashSha512Command),
-            Box::new(UlidHashBlake3Command),
-            Box::new(UlidHashRandomCommand),
         ]
     }
 }
@@ -61,7 +56,7 @@ mod tests {
     fn test_plugin_commands() {
         let plugin = UlidPlugin;
         let commands = plugin.commands();
-        assert_eq!(commands.len(), 18);
+        assert_eq!(commands.len(), 14);
 
         // Test key commands to ensure they're registered correctly
         let command_names: Vec<&str> = commands.iter().map(|cmd| cmd.name()).collect();
@@ -74,6 +69,5 @@ mod tests {
         assert!(command_names.contains(&"ulid info"));
         assert!(command_names.contains(&"ulid time now"));
         assert!(command_names.contains(&"ulid encode base32"));
-        assert!(command_names.contains(&"ulid hash sha256"));
     }
 }
