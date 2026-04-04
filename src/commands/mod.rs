@@ -7,7 +7,6 @@ pub mod inspect;
 pub mod sort;
 pub mod time;
 pub mod ulid;
-pub mod uuid;
 
 pub use encode::{
     UlidDecodeBase32Command, UlidDecodeHexCommand, UlidEncodeBase32Command, UlidEncodeHexCommand,
@@ -22,4 +21,3 @@ pub use time::{UlidTimeMillisCommand, UlidTimeNowCommand, UlidTimeParseCommand};
 pub use ulid::{
     UlidGenerateCommand, UlidParseCommand, UlidSecurityAdviceCommand, UlidValidateCommand,
 };
-pub use uuid::{UlidUuidGenerateCommand, UlidUuidParseCommand, UlidUuidValidateCommand};

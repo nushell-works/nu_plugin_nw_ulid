@@ -1416,7 +1416,6 @@ dependencies = [
  "serde",
  "sha2",
  "ulid",
- "uuid",
 ]
 
 [[package]]
@@ -2346,17 +2345,6 @@ checksum = "daa291a52608ac5a2f8539e119666e021baa6b8c01f22f02ed201bbae54cbbc0"
 dependencies = [
  "proc-macro2",
  "quote",
-]
-
-[[package]]
-name = "uuid"
-version = "1.23.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ac8b6f42ead25368cf5b098aeb3dc8a1a2c05a3eee8a9a1a68c640edbfc79d9"
-dependencies = [
- "getrandom 0.4.1",
- "js-sys",
- "wasm-bindgen",
 ]
 
 [[package]]

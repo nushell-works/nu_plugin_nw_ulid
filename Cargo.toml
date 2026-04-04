@@ -8,7 +8,7 @@ license = "BSD-3-Clause"
 repository = "https://github.com/nushell-works/nu_plugin_nw_ulid"
 homepage = "https://github.com/nushell-works/nu_plugin_nw_ulid"
 documentation = "https://docs.rs/nu_plugin_nw_ulid"
-keywords = ["nushell", "ulid", "uuid", "identifier", "plugin"]
+keywords = ["nushell", "ulid", "identifier", "plugin"]
 categories = ["command-line-utilities", "development-tools", "cryptography", "data-structures"]
 readme = "README.md"
 rust-version = "1.89.0"
@@ -66,7 +66,6 @@ blake3 = "1.8.2"
 sha2 = "0.11.0"
 base32 = "0.5.1"
 hex = "0.4.3"
-uuid = { version = "1.23.0", features = ["v4"] }
 base64 = "0.22.1"
 
 [dev-dependencies]
