@@ -175,41 +175,6 @@ false
 
 ## Advanced Features
 
-### Streaming Operations for Large Datasets
-
-When working with thousands or millions of ULIDs, use streaming commands for optimal performance:
-
-```nushell
-# Validate large datasets efficiently
-> $large_ulid_list | ulid stream validate --batch-size 1000
-╭─────┬─────────────────────────────┬───────╮
-│  #  │            ulid             │ valid │
-├─────┼─────────────────────────────┼───────┤
-│   0 │ 01K2W41TWG3FKYYSK430SR8KW6  │ true  │
-│   1 │ 01K2W41TWG3FKYYSK430SR8KW7  │ true  │
-│ ... │ ...                         │ ...   │
-╰─────┴─────────────────────────────┴───────╯
-
-# Parse large datasets with error handling
-> $ulid_list | ulid stream parse --continue-on-error --parallel
-╭─────┬─────────────────────────────┬─────────────┬─────────────╮
-│  #  │            ulid             │  timestamp  │ randomness  │
-├─────┼─────────────────────────────┼─────────────┼─────────────┤
-│   0 │ 01K2W41TWG3FKYYSK430SR8KW6  │ {...}       │ {...}       │
-│   1 │ invalid-ulid                │ null        │ null        │
-│ ... │ ...                         │ ...         │ ...         │
-╰─────┴─────────────────────────────┴─────────────┴─────────────╯
-
-# Generate large quantities efficiently
-> ulid generate-stream 10000 --batch-size 500
-╭─────┬─────────────────────────────╮
-│  0  │ 01K2W41TWG3FKYYSK430SR8KW6 │
-│  1  │ 01K2W41TWG3FKYYSK430SR8KW7 │
-│ ... │ ...                        │
-│9999 │ 01K2W41TWG3FKYYSK430SR8KX5 │
-╰─────┴─────────────────────────────╯
-```
-
 ### Time-based Operations
 
 ```nushell
@@ -286,7 +251,7 @@ d74981efa70a0c880b8d8c1985d075b2
 # Create records with ULIDs
 def add_record_ids [records: list] {
     let count = ($records | length)
-    let ids = (ulid generate-stream $count)
+    let ids = (1..$count | each { ulid generate })
     $records | enumerate | each { |row|
         $row.item | upsert id ($ids | get $row.index)
     }
@@ -381,48 +346,24 @@ def check_rate_limit [request_id: string, rate_limit_per_minute: int] {
 
 ### Performance Guidelines
 
-1. **Use streaming for large datasets** (>1000 items):
-   ```nushell
-   # Good: Use streaming for large datasets
-   $large_dataset | ulid stream validate --batch-size 1000
-
-   # Avoid: Individual validation for large datasets
-   $large_dataset | each { |item| ulid validate $item.id }
-   ```
-
-2. **Batch ULID generation**:
+1. **Batch ULID generation**:
    ```nushell
    # Good: Generate in bulk
-   ulid generate-stream 1000
+   ulid generate --count 1000
 
-   # Avoid: Individual generation in loops
-   0..999 | each { ulid generate }
+   # Alternative: Generate with each for custom logic
+   1..1000 | each { ulid generate }
    ```
 
-3. **Configure batch sizes** based on memory:
+2. **Validate efficiently**:
    ```nushell
-   # For high memory systems
-   ulid stream parse --batch-size 5000
-
-   # For constrained systems
-   ulid stream parse --batch-size 100
+   # Validate ULIDs in a dataset
+   $dataset | each { |item| ulid validate $item.id }
    ```
-
-4. **Use parallel processing** for CPU-intensive operations:
-   ```nushell
-   $large_dataset | ulid stream parse --parallel
-   ```
-
-### Memory Optimization
-
-- **Stream processing**: Prevents loading entire datasets into memory
-- **Configurable batching**: Adjust batch sizes based on available memory
-- **Lazy evaluation**: Process data as needed, not all at once
 
 ### CPU Optimization
 
-- **Parallel processing**: Enable `--parallel` for multi-core utilization
-- **Bulk operations**: Use bulk commands instead of loops
+- **Bulk operations**: Use `--count` flag for generating multiple ULIDs at once
 - **Efficient algorithms**: Optimized parsing and validation routines
 
 ## Security Considerations
@@ -508,16 +449,20 @@ if (ulid validate $ulid) {
 **Problem:** Slow processing of large ULID datasets
 **Solution:**
 ```nushell
-# Use streaming with appropriate batch size
-$large_dataset | ulid stream validate --batch-size 1000 --parallel
+# Process in chunks to manage memory
+$large_dataset | chunks 1000 | each { |chunk|
+    $chunk | each { |item| ulid validate $item }
+} | flatten
 ```
 
 #### 4. Memory Usage Issues
 **Problem:** High memory usage with large datasets
 **Solution:**
 ```nushell
-# Reduce batch size and use streaming
-$data | ulid stream parse --batch-size 100
+# Process data in smaller chunks
+$data | chunks 100 | each { |chunk|
+    $chunk | each { |item| ulid parse $item }
+} | flatten
 ```
 
 ### Debugging

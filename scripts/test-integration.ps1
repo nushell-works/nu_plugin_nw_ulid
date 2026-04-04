@@ -171,24 +171,19 @@ if (-not (Test-Command "Test 6: Bulk generation" {
     & nu -c "plugin use nw_ulid; ulid generate --count 3"
 })) { exit 1 }
 
-# Test 7: Stream processing
-if (-not (Test-Command "Test 7: Stream processing" {
-    & nu -c "plugin use nw_ulid; echo ['$ulid', 'invalid'] | ulid stream validate"
-})) { exit 1 }
-
-# Test 8: Security advice
-if (-not (Test-Command "Test 8: Security advice" {
+# Test 7: Security advice
+if (-not (Test-Command "Test 7: Security advice" {
     & nu -c "plugin use nw_ulid; ulid security-advice"
 })) { exit 1 }
 
-# Test 9: Inspect command
-if (-not (Test-Command "Test 9: ULID inspection" {
+# Test 8: Inspect command
+if (-not (Test-Command "Test 8: ULID inspection" {
     & nu -c "plugin use nw_ulid; ulid inspect '$ulid'"
 })) { exit 1 }
 
-# Test 10: Sort command
+# Test 9: Sort command
 $ulid2 = & nu -c "plugin use nw_ulid; ulid generate" 2>$null
-if (-not (Test-Command "Test 10: ULID sorting" {
+if (-not (Test-Command "Test 9: ULID sorting" {
     & nu -c "plugin use nw_ulid; echo ['$ulid', '$ulid2'] | ulid sort"
 })) { exit 1 }
 

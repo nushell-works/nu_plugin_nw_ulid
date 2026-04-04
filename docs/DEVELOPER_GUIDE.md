@@ -21,7 +21,7 @@ nu_plugin_nw_ulid follows enterprise-grade development principles:
 
 - **Modular Design**: Each command is implemented as a separate module
 - **Security First**: All operations include security validation and context awareness
-- **Performance Optimized**: Streaming operations and bulk processing for large datasets
+- **Performance Optimized**: Bulk processing for large datasets
 - **Error Resilient**: Comprehensive error handling and graceful degradation
 - **Nushell Native**: Full integration with Nushell's type system and pipeline model
 
@@ -370,47 +370,8 @@ cargo machete
 
 ### Performance Optimization
 
-#### Streaming Implementation
-
-For large dataset operations:
-
-```rust
-fn process_stream(
-    &self,
-    call: &EvaluatedCall,
-    input: &Value,
-    batch_size: usize,
-    parallel: bool,
-) -> Result<Value, LabeledError> {
-    match input {
-        Value::List { vals, .. } => {
-            let results = if parallel {
-                self.process_parallel_batches(vals, batch_size)?
-            } else {
-                self.process_sequential_batches(vals, batch_size)?
-            };
-            Ok(Value::list(results, call.head))
-        }
-        _ => Err(/* error */)
-    }
-}
-
-fn process_sequential_batches(
-    &self,
-    vals: &[Value],
-    batch_size: usize,
-) -> Result<Vec<Value>, LabeledError> {
-    vals.chunks(batch_size)
-        .map(|chunk| self.process_chunk(chunk))
-        .collect::<Result<Vec<_>, _>>()
-        .map(|batches| batches.into_iter().flatten().collect())
-}
-```
-
 #### Memory Management
 
-- Use streaming for large datasets
-- Implement configurable batch sizes
 - Avoid loading entire datasets into memory
 - Use iterators instead of collecting intermediate results
 
@@ -441,11 +402,9 @@ fn process_sequential_batches(
 
 ### Performance Guidelines
 
-1. **Prefer streaming for large datasets**
-2. **Use bulk operations when possible**
-3. **Implement configurable batch sizes**
-4. **Enable parallel processing for CPU-intensive operations**
-5. **Profile performance-critical code**
+1. **Use bulk operations when possible**
+2. **Enable parallel processing for CPU-intensive operations**
+3. **Profile performance-critical code**
 
 ### Security Guidelines
 
@@ -553,7 +512,6 @@ cargo bench -- --profile-time=10
 2. **Resource Exhaustion Protection:**
    - Implement batch size limits
    - Add timeout protection for long operations
-   - Monitor memory usage in streaming operations
 
 3. **Input Sanitization:**
    - Validate all input parameters

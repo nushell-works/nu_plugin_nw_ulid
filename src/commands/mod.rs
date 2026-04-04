@@ -5,7 +5,6 @@ pub mod hash;
 pub mod info;
 pub mod inspect;
 pub mod sort;
-pub mod stream;
 pub mod time;
 pub mod ulid;
 pub mod uuid;
@@ -19,7 +18,6 @@ pub use hash::{
 pub use info::UlidInfoCommand;
 pub use inspect::UlidInspectCommand;
 pub use sort::UlidSortCommand;
-pub use stream::{UlidGenerateStreamCommand, UlidStreamCommand};
 pub use time::{UlidTimeMillisCommand, UlidTimeNowCommand, UlidTimeParseCommand};
 pub use ulid::{
     UlidGenerateCommand, UlidParseCommand, UlidSecurityAdviceCommand, UlidValidateCommand,

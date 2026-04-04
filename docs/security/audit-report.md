@@ -59,13 +59,12 @@ This security audit evaluates the nu_plugin_nw_ulid codebase for potential vulne
 
 ### Finding 2: Memory Usage in Bulk Operations
 **Severity**: Medium  
-**Component**: Streaming commands, bulk generation  
+**Component**: Bulk generation  
 
 **Description**: Large batch operations (100,000+ ULIDs) could consume significant memory without explicit limits.
 
 **Current Mitigations**: 
 - Batch size limits implemented (max 100,000)
-- Memory-efficient streaming with configurable batch sizes
 - Progress indication to prevent indefinite operations
 
 **Recommendation**: Add memory monitoring and adaptive batch sizing.

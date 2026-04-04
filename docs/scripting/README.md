@@ -25,7 +25,7 @@ This comprehensive guide demonstrates how to integrate ULID functionality into y
 let id = ulid generate
 
 # Generate multiple ULIDs
-let ids = ulid generate-stream 100
+let ids = 1..100 | each { ulid generate }
 
 # Validate ULIDs from data
 $data | each { |row| ulid validate $row.id }
@@ -57,11 +57,11 @@ $data | each { |row|
 
 ### Bulk Processing
 ```nu
-# Process large datasets efficiently
-$large_dataset | ulid stream validate --batch-size 1000 --continue-on-error
+# Process large datasets
+$large_dataset | each { |item| ulid validate $item }
 
 # Generate ULIDs in batches for large datasets
-ulid generate-stream 50000 --batch-size 500 | save ulid_batch.json
+1..50000 | each { ulid generate } | save ulid_batch.json
 ```
 
 ## Advanced Integration Patterns
@@ -90,7 +90,7 @@ def validate_ulid_age [ulid: string, max_age_hours: int] {
 ```nu
 def generate_ids_for_records [records: list] {
     let count = ($records | length)
-    let ids = (ulid generate-stream $count)
+    let ids = (1..$count | each { ulid generate })
     $records | enumerate | each { |row|
         $row.item | upsert id ($ids | get $row.index)
     }
@@ -302,14 +302,13 @@ def run_batch_job [job_definition: record] {
 
 ## Performance Optimization
 
-### Memory-Efficient Streaming
+### Memory-Efficient Processing
 
 ```nu
 # Process large ULID datasets without memory exhaustion
-def stream_process_large_dataset [file_path: string, processor: closure] {
+def process_large_dataset [file_path: string, processor: closure] {
     let chunk_size = 1000
     mut total_processed = 0
-    mut errors = []
     
     # Process file in chunks
     open $file_path 
@@ -317,9 +316,7 @@ def stream_process_large_dataset [file_path: string, processor: closure] {
         | chunks $chunk_size 
         | each { |chunk|
             let chunk_results = $chunk 
-                | ulid stream validate --batch-size 500 --continue-on-error
-                | where valid == true
-                | get ulid
+                | where { ulid validate $in }
                 | each $processor
             
             $total_processed = $total_processed + ($chunk_results | length)
@@ -343,7 +340,7 @@ let processor = { |ulid|
     }
 }
 
-let results = stream_process_large_dataset "large_ulid_file.txt" $processor
+let results = process_large_dataset "large_ulid_file.txt" $processor
 ```
 
 ### Parallel Processing Optimization
@@ -357,8 +354,8 @@ def parallel_ulid_processor [ulids: list, operation: string, num_workers: int = 
         | chunks $chunk_size
         | par-each { |chunk|
             match $operation {
-                "validate" => $chunk | ulid stream validate --parallel,
-                "parse" => $chunk | ulid stream parse --parallel,
+                "validate" => $chunk | each { ulid validate $in },
+                "parse" => $chunk | each { ulid parse $in },
                 "analyze" => $chunk | each { |ulid| ulid inspect $ulid --stats },
                 _ => error make { msg: $"Unknown operation: ($operation)" }
             }
@@ -370,9 +367,7 @@ def parallel_ulid_processor [ulids: list, operation: string, num_workers: int = 
 def benchmark_ulid_operations [ulids: list] {
     let operations = [
         { name: "validate", func: { $ulids | each { ulid validate $in } } },
-        { name: "validate_stream", func: { $ulids | ulid stream validate } },
-        { name: "parse", func: { $ulids | each { ulid parse $in } } },
-        { name: "parse_stream", func: { $ulids | ulid stream parse } }
+        { name: "parse", func: { $ulids | each { ulid parse $in } } }
     ]
     
     $operations | each { |op|
@@ -401,7 +396,7 @@ def secure_ulid_generator [count: int = 1] {
     let ulids = if $count == 1 {
         [ulid generate]
     } else {
-        ulid generate-stream $count
+        1..$count | each { ulid generate }
     }
     
     # Log generation event
@@ -819,12 +814,11 @@ def debug_performance [operation: closure, data: list] {
 
 ## Performance Tips
 
-1. **Use streaming commands** for large datasets (>1000 items)
-2. **Enable parallel processing** for CPU-intensive operations
-3. **Use batch processing** to manage memory usage
+1. **Use chunked processing** for large datasets to manage memory
+2. **Enable parallel processing** with `par-each` for CPU-intensive operations
+3. **Use `ulid generate --count`** for generating multiple ULIDs at once
 4. **Cache parsed ULID components** when processing the same ULIDs multiple times
-5. **Implement adaptive batch sizing** based on dataset size and available resources
-6. **Monitor performance metrics** and adjust parameters based on actual usage patterns
+5. **Monitor performance metrics** and adjust parameters based on actual usage patterns
 
 ## See Also
 

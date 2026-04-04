@@ -116,17 +116,8 @@ else
     exit 1
 fi
 
-# Test 7: Stream processing
-echo -e "${YELLOW}🧪 Test 7: Stream processing${NC}"
-if nu -c "plugin use nw_ulid; echo ['$ULID', 'invalid'] | ulid stream validate" &> /dev/null; then
-    echo -e "${GREEN}✅ Stream processing successful${NC}"
-else
-    echo -e "${RED}❌ Stream processing failed${NC}"
-    exit 1
-fi
-
-# Test 8: Security advice
-echo -e "${YELLOW}🧪 Test 8: Security advice${NC}"
+# Test 7: Security advice
+echo -e "${YELLOW}🧪 Test 7: Security advice${NC}"
 if nu -c "plugin use nw_ulid; ulid security-advice" &> /dev/null; then
     echo -e "${GREEN}✅ Security advice command works${NC}"
 else
@@ -134,8 +125,8 @@ else
     exit 1
 fi
 
-# Test 9: Inspect command
-echo -e "${YELLOW}🧪 Test 9: ULID inspection${NC}"
+# Test 8: Inspect command
+echo -e "${YELLOW}🧪 Test 8: ULID inspection${NC}"
 if nu -c "plugin use nw_ulid; ulid inspect '$ULID'" &> /dev/null; then
     echo -e "${GREEN}✅ ULID inspection successful${NC}"
 else
@@ -143,8 +134,8 @@ else
     exit 1
 fi
 
-# Test 10: Sort command
-echo -e "${YELLOW}🧪 Test 10: ULID sorting${NC}"
+# Test 9: Sort command
+echo -e "${YELLOW}🧪 Test 9: ULID sorting${NC}"
 ULID2=$(nu -c "plugin use nw_ulid; ulid generate" 2>/dev/null)
 if nu -c "plugin use nw_ulid; echo ['$ULID', '$ULID2'] | ulid sort" &> /dev/null; then
     echo -e "${GREEN}✅ ULID sorting successful${NC}"

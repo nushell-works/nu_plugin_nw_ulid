@@ -142,12 +142,12 @@ def test_ulid_generation [] {
 
 ### 5. Performance Optimization
 ```nu
-# Use streaming for large datasets
+# Use chunked processing for large datasets
 def process_large_dataset [data: list] {
     $data
     | chunks $CONFIG.batch_size
     | each { |chunk|
-        $chunk | ulid stream validate --parallel
+        $chunk | each { |ulid| ulid validate $ulid }
     }
     | flatten
 }

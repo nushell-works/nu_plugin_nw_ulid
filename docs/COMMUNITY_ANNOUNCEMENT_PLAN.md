@@ -153,8 +153,8 @@ We're excited to announce the first release of nu_plugin_nw_ulid - a production-
 
 ## 🚀 What's New
 
-### 23 Production Commands
-Complete ULID functionality including generation, validation, parsing, streaming operations, and cryptographic utilities.
+### Production Commands
+Complete ULID functionality including generation, validation, parsing, and cryptographic utilities.
 
 ### Enterprise-Grade Security
 - A- security rating from comprehensive audit
@@ -165,7 +165,6 @@ Complete ULID functionality including generation, validation, parsing, streaming
 ### High Performance
 - ULID generation: ~40ns per operation
 - Competitive with reference implementations
-- Memory-efficient streaming for large datasets
 - Parallel processing support
 
 ### Professional Quality
@@ -210,7 +209,7 @@ I'm excited to share **nu_plugin_nw_ulid** - a production-grade ULID plugin for 
 **What are ULIDs?** Universally Unique Lexicographically Sortable Identifiers - like UUIDs but sortable by creation time! Perfect for database keys, log correlation, and distributed systems.
 
 **✨ Highlights:**
-• 23 comprehensive commands (generate, validate, parse, stream processing)
+• Comprehensive commands (generate, validate, parse, and more)
 • Enterprise security (A- rating, cryptographically secure)
 • High performance (~40ns ULID generation)
 • Complete automation support with scripting API
@@ -253,7 +252,7 @@ Perfect for database primary keys, log correlation, and distributed system ident
 
 ## Key Features
 
-- **23 Production Commands**: Complete ULID ecosystem (generate, validate, parse, stream processing)
+- **Production Commands**: Complete ULID ecosystem (generate, validate, parse, and more)
 - **Enterprise Security**: A- security rating, cryptographically secure operations
 - **High Performance**: ~40ns ULID generation, competitive with reference implementations
 - **Nushell Native**: Seamless pipeline integration with structured data
@@ -270,9 +269,6 @@ echo "01K2W41TWG3FKYYSK430SR8KW6" | ulid parse
 
 # Sort data by ULID timestamp
 $data | ulid sort
-
-# Stream processing for large datasets
-$large_dataset | ulid stream validate --batch-size 1000
 ```
 
 ## Resources

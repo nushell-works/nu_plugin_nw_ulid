@@ -15,8 +15,6 @@ Complete reference for all ULID plugin commands and their programmatic usage. Th
 | `ulid parse` | Parse ULID components | String, List<String> | Record, List<Record> |
 | `ulid inspect` | Detailed ULID analysis | String | Record |
 | `ulid sort` | Sort by ULID timestamp | List<String>, Table | List<String>, Table |
-| `ulid stream` | Stream process large datasets | List<Any> | List<Record> |
-| `ulid generate-stream` | Bulk ULID generation | Number | List<String> |
 | `ulid security-advice` | Security recommendations | Nothing | Record |
 | `ulid time` | Time operations | Various | Record |
 | `ulid encode/decode` | Encoding operations | String, Binary | String, Binary |
@@ -396,126 +394,6 @@ $records | ulid sort --column id
 $ulids | ulid sort --reverse
 ```
 
-## Streaming Commands
-
-### `ulid stream`
-High-performance streaming operations for large ULID datasets with memory-efficient processing.
-
-**Full Syntax:**
-```nu
-ulid stream <operation> [--batch-size <int>] [--parallel] [--continue-on-error] [--output-format <string>] [--progress] [--max-errors <int>]
-```
-
-**Operations:**
-- `validate`: Validate ULID format and integrity
-- `parse`: Parse ULIDs into components
-- `extract-timestamp`: Extract timestamps only
-- `extract-randomness`: Extract randomness components only
-- `transform`: Transform ULIDs with custom formatting
-- `analyze`: Statistical analysis of ULID patterns
-
-**Parameters:**
-- `<operation>`: Stream operation to perform (required)
-- `--batch-size <int>`: Processing batch size (100-10000, default: 1000)
-- `--parallel`: Enable parallel processing across CPU cores
-- `--continue-on-error`: Continue processing after errors
-- `--output-format <string>`: Output format - "standard", "compact", "json"
-- `--progress`: Show progress indicator for large datasets
-- `--max-errors <int>`: Maximum errors before stopping (default: unlimited)
-
-**Input Types:**
-- `List<String>`: ULIDs to process
-- `List<Record>`: Records containing ULID fields
-- `Table`: Structured data with ULID columns
-
-**Output Types:**
-- `List<Record>`: Processed results with status information
-
-**Return Value Schema:**
-```nu
-# Stream validation
-[
-    { ulid: "01K2W41TWG3FKYYSK430SR8KW6", valid: true, batch: 0 },
-    { ulid: "01K2W41TWG3FKYYSK430SR8KW7", valid: true, batch: 0 },
-    { ulid: "invalid-ulid", valid: false, error: "Invalid format", batch: 0 }
-]
-
-# Stream parsing
-[
-    {
-        ulid: "01K2W41TWG3FKYYSK430SR8KW6",
-        timestamp: 1692817394611,
-        randomness: "F2Y5SK430SR8KW6",
-        success: true,
-        batch: 0
-    }
-]
-
-# Stream analysis
-{
-    processed: 10000,
-    valid: 9987,
-    invalid: 13,
-    errors: 0,
-    processing_time_ms: 1234,
-    throughput_per_sec: 8103,
-    batches: 10
-}
-```
-
-**Advanced Examples:**
-```nu
-# High-performance validation of large dataset
-let validation_results = $million_ulids 
-    | ulid stream validate --batch-size 5000 --parallel --progress
-
-# Parse with comprehensive error handling
-let parsed_data = $ulid_dataset 
-    | ulid stream parse --continue-on-error --max-errors 100
-    | where success == true
-
-# Extract timestamps for time-series analysis
-let timestamps = $log_ulids 
-    | ulid stream extract-timestamp --parallel
-    | get timestamp
-    | sort
-
-# Memory-efficient processing of huge datasets
-let processed = open huge_ulid_file.json
-    | get ulids
-    | ulid stream validate --batch-size 1000 --output-format compact
-
-# Transform ULIDs with custom formatting
-let formatted = $ulids 
-    | ulid stream transform --output-format json
-    | each { |item| $item | upsert formatted_id $"ULID_($item.ulid)" }
-
-# Statistical analysis of ULID patterns
-let analysis = $dataset 
-    | ulid stream analyze --parallel
-    | get statistics
-```
-
-### `ulid generate-stream`
-Generate large quantities of ULIDs efficiently.
-
-**Syntax:**
-```nu
-ulid generate-stream <count> [--batch-size <int>] [--timestamp <int>] [--unique-timestamps]
-```
-
-**Scripting Examples:**
-```nu
-# Generate 10,000 ULIDs
-let bulk_ids = ulid generate-stream 10000
-
-# Time-ordered ULIDs
-let ordered_ids = ulid generate-stream 1000 --unique-timestamps
-
-# Custom batch size
-let ids = ulid generate-stream 50000 --batch-size 1000
-```
-
 ## Utility Commands
 
 ### `ulid security-advice`
@@ -574,9 +452,8 @@ def process_ulid_list [ulids: list] {
 ## Performance Guidelines
 
 ### Memory Efficiency
-- Use streaming commands for datasets > 1000 items
-- Adjust batch sizes based on available memory
 - Process data in chunks rather than loading everything at once
+- Cache parsed results when processing the same ULIDs multiple times
 
 ### CPU Optimization
 - Enable parallel processing for CPU-intensive operations
@@ -599,7 +476,7 @@ $data
 ```nu
 def add_ids_to_records [records: list] {
     let count = ($records | length)
-    let ids = (ulid generate-stream $count)
+    let ids = (1..$count | each { ulid generate })
     $records | enumerate | each { |row|
         $row.item | upsert id ($ids | get $row.index)
     }
@@ -638,26 +515,29 @@ def process_ulid_file [file_path: string] {
     | get ulids
     | chunks 1000  # Process in 1000-item chunks
     | each { |chunk|
-        $chunk | ulid stream validate --batch-size 500 --parallel
+        $chunk | each { |ulid|
+            try {
+                { ulid: $ulid, valid: (ulid validate $ulid) }
+            } catch {
+                { ulid: $ulid, valid: false }
+            }
+        }
     }
     | flatten
 }
 ```
 
-#### Adaptive Batch Sizing
+#### Batch Processing
 ```nu
-# Adjust batch size based on available memory and dataset size
-def adaptive_ulid_processing [ulids: list] {
-    let count = ($ulids | length)
-    let batch_size = if $count > 100000 {
-        5000  # Large batches for huge datasets
-    } else if $count > 10000 {
-        1000  # Medium batches for large datasets
-    } else {
-        100   # Small batches for smaller datasets
+# Process a list of ULIDs with error handling
+def batch_ulid_processing [ulids: list] {
+    $ulids | each { |ulid|
+        try {
+            { ulid: $ulid, parsed: (ulid parse $ulid), valid: true }
+        } catch {
+            { ulid: $ulid, error: "Invalid", valid: false }
+        }
     }
-    
-    $ulids | ulid stream parse --batch-size $batch_size --parallel
 }
 ```
 
@@ -716,7 +596,7 @@ def parallel_ulid_analysis [ulids: list, num_workers: int = 4] {
     $ulids 
     | chunks $chunk_size
     | par-each { |chunk|
-        $chunk | ulid stream parse --parallel --batch-size 1000
+        $chunk | each { |ulid| ulid parse $ulid }
     }
     | flatten
 }

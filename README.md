@@ -5,15 +5,14 @@
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE)
 [![Crates.io](https://img.shields.io/crates/v/nu_plugin_nw_ulid.svg)](https://crates.io/crates/nu_plugin_nw_ulid)
 
-Production-grade ULID (Universally Unique Lexicographically Sortable Identifier) utilities plugin for Nushell. Generate, parse, validate & manipulate ULIDs with cryptographically secure operations, enterprise-grade security, streaming support, and seamless integration with Nushell's structured data model.
+Production-grade ULID (Universally Unique Lexicographically Sortable Identifier) utilities plugin for Nushell. Generate, parse, validate & manipulate ULIDs with cryptographically secure operations, enterprise-grade security, and seamless integration with Nushell's structured data model.
 
 ## Features
 
 - **🔒 Cryptographically Secure**: Uses secure randomness for ULID generation with comprehensive security validation
-- **⚡ High Performance**: Optimized for bulk operations and streaming data with benchmarked performance
-- **🔧 Complete ULID Support**: 23 production commands for generating, parsing, validating, and manipulating ULIDs
+- **⚡ High Performance**: Optimized for bulk operations with benchmarked performance
+- **🔧 Complete ULID Support**: Production commands for generating, parsing, validating, and manipulating ULIDs
 - **🏢 Enterprise Grade**: Security audit (A- rating), 90% test coverage, comprehensive testing, and quality assurance
-- **🌊 Streaming Support**: Memory-efficient processing of large datasets with configurable batch sizes
 - **🐚 Nushell Native**: Full integration with Nushell's structured data and pipeline model
 - **🎯 Security First**: Built-in security advice and warnings for sensitive operations
 - **🚀 Production Ready**: Zero clippy warnings, memory safety, and competitive performance vs reference implementations
@@ -62,10 +61,6 @@ ulid parse "01AN4Z07BY79KA1307SR9X4MV3"     # Parse into components
 echo ["01BN4Z07BY79KA1307SR9X4MV3", "01AN4Z07BY79KA1307SR9X4MV3"] | ulid sort
 ulid inspect "01AN4Z07BY79KA1307SR9X4MV3"   # Detailed ULID analysis
 
-# Stream processing for large datasets
-echo ["01AN4Z07BY79KA1307SR9X4MV3", "invalid"] | ulid stream validate
-ulid generate-stream --count 1000 --batch-size 100
-
 # Security context checking
 ulid security-advice                        # Get security recommendations
 ```
@@ -81,10 +76,6 @@ ulid security-advice                        # Get security recommendations
 ### Analysis & Sorting
 - `ulid sort [--reverse] [--natural]` - Sort data by ULID timestamp order
 - `ulid inspect <ulid>` - Extract detailed metadata and statistics from ULIDs
-
-### Streaming Operations (High Performance)
-- `ulid stream <operation> [--batch-size] [--parallel] [--continue-on-error]` - Stream-process large datasets
-- `ulid generate-stream [--count] [--batch-size] [--timestamp]` - Generate continuous ULID streams
 
 ### Time Operations
 - `ulid time now [--format]` - Current timestamp in various formats
@@ -149,14 +140,6 @@ true
 │ 2 │ 01K2W41TWG3FKYYSK430SR8KW9 │
 ╰───┴────────────────────────────╯
 
-# Stream processing for large datasets
-> echo ["01K2W41TWG3FKYYSK430SR8KW6", "invalid"] | ulid stream validate
-╭───┬─────────────────────────────┬───────╮
-│ # │ ulid                        │ valid │
-├───┼─────────────────────────────┼───────┤
-│ 0 │ 01K2W41TWG3FKYYSK430SR8KW6  │ true  │
-│ 1 │ invalid                     │ false │
-╰───┴─────────────────────────────┴───────╯
 ```
 
 ## What are ULIDs?
@@ -187,7 +170,7 @@ Based on benchmarking against reference implementations:
 - **ULID Generation**: ~40ns per operation (release mode)
 - **ULID Validation**: ~12ns per operation
 - **Bulk Operations**: Efficient batch processing with configurable sizes
-- **Memory Usage**: Optimized allocation patterns with streaming support
+- **Memory Usage**: Optimized allocation patterns
 - **Concurrent Operations**: Thread-safe with parallel processing support
 
 ### Security Features
@@ -204,7 +187,6 @@ Based on benchmarking against reference implementations:
 - **90% Test Coverage**: Comprehensive test suite with security and performance testing
 - **Zero Clippy Warnings**: Production-quality code standards
 - **Cross-Platform**: Supports Linux, macOS, Windows
-- **Streaming Support**: Memory-efficient processing of large datasets
 - **Quality Assurance**: Automated security scanning and dependency auditing
 
 ## Development
