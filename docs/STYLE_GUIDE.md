@@ -341,7 +341,7 @@ This project should not require `unsafe` code. If `unsafe` is ever needed, it mu
 ### Motivation
 
 This project has no need for `unsafe` — it delegates low-level operations to well-audited
-dependencies (`ulid`, `chrono`, `sha2`, `blake3`). Requiring an ADR for any exception
+dependencies (`ulid`, `chrono`). Requiring an ADR for any exception
 ensures the decision is reviewed and documented.
 
 ---
@@ -684,9 +684,9 @@ For plugin commands specifically, group by **command domain** — the shared sub
 in the command name. Commands that share a domain noun typically share private helpers,
 constants, and error-handling logic, making them cohesive within a single file.
 
-For example, `ulid hash sha256`, `ulid hash sha512`, and `ulid hash blake3` all belong to
-the `hash` domain and live together in `hash.rs`. A single-command domain like `ulid sort`
-still gets its own file (`sort.rs`).
+For example, `ulid encode base32`, `ulid encode hex`, `ulid decode base32`, and
+`ulid decode hex` all belong to the `encode` domain and live together in `encode.rs`.
+A single-command domain like `ulid sort` still gets its own file (`sort.rs`).
 
 The current domains in `src/commands/` are:
 
@@ -694,7 +694,6 @@ The current domains in `src/commands/` are:
 |---------------|----------|------------------------------------------------------|
 | `ulid.rs`     | core     | generate, validate, parse, security-advice           |
 | `encode.rs`   | encode   | encode base32, decode base32, encode hex, decode hex |
-| `hash.rs`     | hash     | hash sha256, hash sha512, hash blake3, hash random   |
 | `time.rs`     | time     | time now, time parse, time millis                    |
 | `uuid.rs`     | uuid     | uuid generate, uuid validate, uuid parse             |
 | `sort.rs`     | sort     | sort                                                 |
