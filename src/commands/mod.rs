@@ -9,6 +9,7 @@ pub mod ulid;
 
 pub use encode::{
     UlidDecodeBase32Command, UlidDecodeHexCommand, UlidEncodeBase32Command, UlidEncodeHexCommand,
+    UlidToBytesCommand,
 };
 pub use info::UlidInfoCommand;
 pub use inspect::UlidInspectCommand;

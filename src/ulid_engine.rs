@@ -46,17 +46,6 @@ pub struct UlidComponents {
     pub valid: bool,
 }
 
-/// Output format options for ULID operations.
-#[derive(Debug, Clone, PartialEq)]
-pub enum UlidOutputFormat {
-    /// Plain string representation.
-    String,
-    /// JSON record with structured fields.
-    Json,
-    /// Raw 16-byte binary representation.
-    Binary,
-}
-
 impl UlidEngine {
     /// Generates a single ULID.
     pub fn generate() -> Result<Ulid, UlidError> {
@@ -136,25 +125,9 @@ impl UlidEngine {
         }
     }
 
-    /// Converts a ULID to a Nushell `Value` based on the output format.
-    pub fn to_value(ulid: &Ulid, format: &UlidOutputFormat, span: Span) -> Value {
-        match format {
-            UlidOutputFormat::String => Value::string(ulid.to_string(), span),
-            UlidOutputFormat::Json => {
-                let mut record = Record::new();
-                record.push("ulid", Value::string(ulid.to_string(), span));
-                record.push("timestamp_ms", Value::int(ulid.timestamp_ms() as i64, span));
-                record.push(
-                    "randomness",
-                    Value::string(format!("{:x}", ulid.random()), span),
-                );
-                Value::record(record, span)
-            }
-            UlidOutputFormat::Binary => {
-                let bytes = ulid.to_bytes();
-                Value::binary(bytes.to_vec(), span)
-            }
-        }
+    /// Converts a ULID to its native 16-byte binary representation.
+    pub fn to_bytes(ulid: &Ulid) -> Vec<u8> {
+        ulid.to_bytes().to_vec()
     }
 
     /// Converts `UlidComponents` to a Nushell `Value`.

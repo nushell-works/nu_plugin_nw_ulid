@@ -43,10 +43,9 @@ ulid generate --timestamp "2024-01-01T00:00:00Z"
 # Monotonic generation (same millisecond handling)
 ulid generate --monotonic --count 10
 
-# Output format options
-ulid generate --format json     # Structured output
-ulid generate --format string   # Default string format
-ulid generate --format binary   # Binary representation
+# Structured output via pipeline
+ulid generate | ulid parse $in  # Parse into components
+ulid generate | ulid to-bytes   # Binary representation
 ```
 
 **Security Integration**:
@@ -112,12 +111,8 @@ ulid generate --help
 "01AN4Z07BY79KA1307SR9X4MV3" | ulid timestamp
 # 1469918176000
 
-# Convert timestamp to different formats
-"01AN4Z07BY79KA1307SR9X4MV3" | ulid timestamp --format iso8601
-# "2016-07-30T23:36:16.000Z"
-
-"01AN4Z07BY79KA1307SR9X4MV3" | ulid timestamp --format unix
-# 1469918176
+# Parse for structured timestamp info
+ulid parse "01AN4Z07BY79KA1307SR9X4MV3" | get timestamp
 
 # Generate ULID for specific timestamp
 "2024-01-01T00:00:00Z" | ulid timestamp generate
@@ -130,13 +125,8 @@ ulid generate --help
 "01AN4Z07BY79KA1307SR9X4MV3" | ulid random
 # "79KA1307SR9X4MV3"
 
-# Get as hex bytes
-"01AN4Z07BY79KA1307SR9X4MV3" | ulid random --format hex
-# "796b61313037537239583456"
-
-# Get as binary
-"01AN4Z07BY79KA1307SR9X4MV3" | ulid random --format binary
-# [121, 75, 161, 48, 112, 83, 169, 216, 77, 86]
+# Get randomness as hex
+ulid parse "01AN4Z07BY79KA1307SR9X4MV3" | get randomness.hex
 ```
 
 ### Utility Commands
@@ -216,17 +206,18 @@ ulid generate
 
 #### ULID as Structured Record
 ```nushell
-ulid generate --format json
+ulid generate | ulid parse $in
 # {
 #   ulid: "01AN4Z07BY79KA1307SR9X4MV3",
-#   timestamp_ms: 1469918176000,
-#   randomness: "79KA1307SR9X4MV3"
+#   timestamp: { ms: 1469918176000, ... },
+#   randomness: { hex: "..." },
+#   valid: true
 # }
 ```
 
 #### ULID as Binary
 ```nushell
-ulid generate --format binary
+ulid generate | ulid to-bytes
 # 0x[01, 6A, 2D, 3E, 4D, B0, 79, 6B, 61, 31, 30, 37, 53, 72, 39, 58]
 ```
 

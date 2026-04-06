@@ -68,7 +68,7 @@ ulid security-advice                        # Get security recommendations
 ## Production Commands (19 Commands Available)
 
 ### Core ULID Operations
-- `ulid generate [--count] [--timestamp] [--format]` - Generate ULIDs with options
+- `ulid generate [--count] [--timestamp]` - Generate ULIDs with options
 - `ulid validate <ulid>` - Validate ULID format and integrity
 - `ulid parse <ulid>` - Parse ULID into timestamp and randomness components
 - `ulid security-advice` - Get security recommendations for ULID usage
@@ -87,6 +87,7 @@ ulid security-advice                        # Get security recommendations
 - `ulid decode base32 <data> [--text]` - Decode Crockford Base32
 - `ulid encode hex <data> [--uppercase]` - Hexadecimal encoding
 - `ulid decode hex <data> [--text]` - Hexadecimal decoding
+- `ulid to-bytes <ulid>` - Convert ULID to native 16-byte binary representation
 
 ### Legacy UUID Support
 - `ulid uuid generate` - Generate UUID v4 (compatibility)
