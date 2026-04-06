@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-06
+
+### Removed
+- **BREAKING**: Removed `--format` flag from `ulid generate`; use pipeline-native commands instead (`ulid parse` for structured output, `ulid to-bytes` for binary)
+- **BREAKING**: Removed `--detailed` flag from `ulid validate`
+- **BREAKING**: Removed hash commands (`hash sha256`, `hash sha512`, `hash blake3`, `hash random`)
+- **BREAKING**: Removed uuid compatibility commands (`uuid generate`, `uuid validate`, `uuid parse`)
+- **BREAKING**: Removed `ulid stream` and `ulid generate-stream` commands
+- **BREAKING**: Removed `--context` flag and context-based security detection from `security-advice`
+
+### Added
+- `ulid to-bytes` command for converting ULID strings to native 16-byte binary representation
+
+### Changed
+- `ulid generate` now always returns a plain string (predictable return type)
+- `ulid validate` now returns a simple boolean result
+
+### Notes
+- This is a major simplification release that removes features redundant with Nushell's built-in pipeline capabilities
+- See ADR-0004 for the rationale behind replacing `--format` with pipeline-native commands
+- Migration: `ulid generate --format json` becomes `ulid generate | ulid parse $in`
+- Migration: `ulid generate --format binary` becomes `ulid generate | ulid to-bytes`
+
 ## [0.1.4] - 2026-04-03
 
 ### Changed
