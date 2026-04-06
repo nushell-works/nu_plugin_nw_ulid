@@ -94,7 +94,7 @@ impl PluginCommand for UlidGenerateCommand {
     }
 }
 
-/// Validates whether a string is a valid ULID, with optional detailed output.
+/// Validates whether a string is a valid ULID.
 pub struct UlidValidateCommand;
 
 impl PluginCommand for UlidValidateCommand {
@@ -111,15 +111,7 @@ impl PluginCommand for UlidValidateCommand {
     fn signature(&self) -> Signature {
         Signature::build(self.name())
             .required("ulid", SyntaxShape::String, "The ULID string to validate")
-            .switch(
-                "detailed",
-                "Return detailed validation information",
-                Some('d'),
-            )
-            .input_output_types(vec![
-                (Type::Nothing, Type::Bool),
-                (Type::Nothing, Type::Record(vec![].into())),
-            ])
+            .input_output_types(vec![(Type::Nothing, Type::Bool)])
             .category(Category::Strings)
     }
 
@@ -135,11 +127,6 @@ impl PluginCommand for UlidValidateCommand {
                 description: "Validate an invalid ULID string",
                 result: Some(Value::bool(false, Span::test_data())),
             },
-            Example {
-                example: "ulid validate '01AN4Z07BY79KA1307SR9X4MV3' --detailed",
-                description: "Get detailed validation information",
-                result: None,
-            },
         ]
     }
 
@@ -151,39 +138,8 @@ impl PluginCommand for UlidValidateCommand {
         _input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
         let ulid_str: String = call.req(0)?;
-        let detailed: bool = call.has_flag("detailed")?;
-
-        if detailed {
-            let validation_result = UlidEngine::validate_detailed(&ulid_str);
-
-            let mut record = nu_protocol::Record::new();
-            record.push("valid", Value::bool(validation_result.valid, call.head));
-            record.push(
-                "length",
-                Value::int(validation_result.length as i64, call.head),
-            );
-            record.push(
-                "charset_valid",
-                Value::bool(validation_result.charset_valid, call.head),
-            );
-            record.push(
-                "timestamp_valid",
-                Value::bool(validation_result.timestamp_valid, call.head),
-            );
-
-            let errors: Vec<Value> = validation_result
-                .errors
-                .into_iter()
-                .map(|err| Value::string(err, call.head))
-                .collect();
-
-            record.push("errors", Value::list(errors, call.head));
-
-            Ok(PipelineData::Value(Value::record(record, call.head), None))
-        } else {
-            let is_valid = UlidEngine::validate(&ulid_str);
-            Ok(PipelineData::Value(Value::bool(is_valid, call.head), None))
-        }
+        let is_valid = UlidEngine::validate(&ulid_str);
+        Ok(PipelineData::Value(Value::bool(is_valid, call.head), None))
     }
 }
 
@@ -461,7 +417,14 @@ mod tests {
             assert_eq!(signature.name, "ulid validate");
             assert_eq!(signature.required_positional.len(), 1);
             assert_eq!(signature.required_positional[0].name, "ulid");
-            assert!(signature.named.iter().any(|flag| flag.long == "detailed"));
+            // Verify no --detailed flag exists (removed for type-consistency)
+            assert!(
+                !signature.named.iter().any(|flag| flag.long == "detailed"),
+                "The --detailed flag should not exist"
+            );
+            // Verify output type is exclusively Bool
+            assert_eq!(signature.input_output_types.len(), 1);
+            assert_eq!(signature.input_output_types[0], (Type::Nothing, Type::Bool));
         }
 
         #[test]
@@ -483,19 +446,18 @@ mod tests {
             let cmd = UlidValidateCommand;
             let examples = cmd.examples();
 
-            assert!(!examples.is_empty());
-            assert!(
-                examples
-                    .iter()
-                    .any(|ex| ex.example.contains("ulid validate"))
-            );
+            assert_eq!(examples.len(), 2);
 
             // Check that examples include both valid and invalid cases
-            let example_strings: Vec<&str> = examples.iter().map(|ex| ex.example).collect();
+            assert!(examples[0].example.contains("01AN4Z07BY79KA1307SR9X4MV3"));
+            assert!(examples[0].result.is_some());
+            assert!(examples[1].example.contains("invalid-ulid"));
+            assert!(examples[1].result.is_some());
+
+            // Verify no --detailed example exists
             assert!(
-                example_strings
-                    .iter()
-                    .any(|ex| ex.contains("01AN4Z07BY79KA1307SR9X4MV3"))
+                !examples.iter().any(|ex| ex.example.contains("--detailed")),
+                "No example should reference --detailed"
             );
         }
 
@@ -938,34 +900,6 @@ mod tests {
                     ulid_str
                 );
             }
-
-            // Test detailed validation
-            for ulid_str in &valid_ulids {
-                let result = UlidEngine::validate_detailed(ulid_str);
-                assert!(
-                    result.valid,
-                    "Detailed validation should pass: {}",
-                    ulid_str
-                );
-                assert_eq!(result.length, crate::ULID_STRING_LENGTH);
-                assert!(result.charset_valid);
-                assert!(result.timestamp_valid);
-                assert!(result.errors.is_empty());
-            }
-
-            for ulid_str in &invalid_ulids {
-                let result = UlidEngine::validate_detailed(ulid_str);
-                assert!(
-                    !result.valid,
-                    "Detailed validation should fail: {}",
-                    ulid_str
-                );
-                assert!(
-                    !result.errors.is_empty(),
-                    "Should have errors: {}",
-                    ulid_str
-                );
-            }
         }
 
         #[test]
@@ -1106,19 +1040,6 @@ mod tests {
                     !UlidEngine::validate(input),
                     "Should reject {}: {}",
                     input,
-                    description
-                );
-
-                // Test detailed validation includes errors
-                let detailed = UlidEngine::validate_detailed(input);
-                assert!(
-                    !detailed.valid,
-                    "Detailed validation should fail for {}",
-                    description
-                );
-                assert!(
-                    !detailed.errors.is_empty(),
-                    "Should have error messages for {}",
                     description
                 );
 
