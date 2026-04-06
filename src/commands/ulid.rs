@@ -7,7 +7,7 @@ use nu_protocol::{
 
 use crate::{SecurityWarnings, UlidEngine, UlidPlugin};
 
-/// Generates new ULIDs with optional count, timestamp, and format.
+/// Generates new ULIDs with optional count and timestamp.
 pub struct UlidGenerateCommand;
 
 impl PluginCommand for UlidGenerateCommand {
@@ -35,16 +35,9 @@ impl PluginCommand for UlidGenerateCommand {
                 "Custom timestamp in milliseconds",
                 Some('t'),
             )
-            .named(
-                "format",
-                SyntaxShape::String,
-                "Output format: string, json, binary",
-                Some('f'),
-            )
             .input_output_types(vec![
                 (Type::Nothing, Type::String),
                 (Type::Nothing, Type::List(Box::new(Type::String))),
-                (Type::Nothing, Type::Record(vec![].into())),
             ])
             .category(Category::Generators)
     }
@@ -59,11 +52,6 @@ impl PluginCommand for UlidGenerateCommand {
             Example {
                 example: "ulid generate --count 5",
                 description: "Generate 5 ULIDs",
-                result: None,
-            },
-            Example {
-                example: "ulid generate --format json",
-                description: "Generate a ULID with detailed information",
                 result: None,
             },
             Example {
@@ -83,13 +71,10 @@ impl PluginCommand for UlidGenerateCommand {
     ) -> Result<PipelineData, LabeledError> {
         let count: Option<i64> = call.get_flag("count")?;
         let timestamp: Option<i64> = call.get_flag("timestamp")?;
-        let format_str: Option<String> = call.get_flag("format")?;
-
-        let format = parse_output_format(format_str.as_deref(), call.head)?;
 
         match count {
-            Some(c) => generate_bulk_ulids(c, timestamp, &format, call.head),
-            None => generate_single_ulid(timestamp, &format, call.head),
+            Some(c) => generate_bulk_ulids(c, timestamp, call.head),
+            None => generate_single_ulid(timestamp, call.head),
         }
     }
 }
@@ -231,24 +216,8 @@ impl PluginCommand for UlidSecurityAdviceCommand {
     }
 }
 
-fn parse_output_format(
-    format_str: Option<&str>,
-    span: nu_protocol::Span,
-) -> Result<crate::UlidOutputFormat, LabeledError> {
-    match format_str {
-        Some("json") => Ok(crate::UlidOutputFormat::Json),
-        Some("binary") => Ok(crate::UlidOutputFormat::Binary),
-        Some("string") | None => Ok(crate::UlidOutputFormat::String),
-        Some(f) => Err(LabeledError::new("Invalid format").with_label(
-            format!("Unknown format '{}'. Use 'string', 'json', or 'binary'", f),
-            span,
-        )),
-    }
-}
-
 fn generate_single_ulid(
     timestamp: Option<i64>,
-    format: &crate::UlidOutputFormat,
     span: nu_protocol::Span,
 ) -> Result<PipelineData, LabeledError> {
     let ulid = match timestamp {
@@ -257,14 +226,15 @@ fn generate_single_ulid(
     }
     .map_err(|e| LabeledError::new("Generation failed").with_label(e.to_string(), span))?;
 
-    let value = UlidEngine::to_value(&ulid, format, span);
-    Ok(PipelineData::Value(value, None))
+    Ok(PipelineData::Value(
+        Value::string(ulid.to_string(), span),
+        None,
+    ))
 }
 
 fn generate_bulk_ulids(
     count: i64,
     timestamp: Option<i64>,
-    format: &crate::UlidOutputFormat,
     span: nu_protocol::Span,
 ) -> Result<PipelineData, LabeledError> {
     let count_usize = if count < 0 {
@@ -296,7 +266,7 @@ fn generate_bulk_ulids(
 
     let values: Vec<Value> = ulids
         .iter()
-        .map(|ulid| UlidEngine::to_value(ulid, format, span))
+        .map(|ulid| Value::string(ulid.to_string(), span))
         .collect();
 
     Ok(PipelineData::Value(Value::list(values, span), None))
@@ -322,7 +292,11 @@ mod tests {
             assert_eq!(signature.name, "ulid generate");
             assert!(signature.named.iter().any(|flag| flag.long == "count"));
             assert!(signature.named.iter().any(|flag| flag.long == "timestamp"));
-            assert!(signature.named.iter().any(|flag| flag.long == "format"));
+            // Verify no --format flag exists (removed in favour of pipeline commands)
+            assert!(
+                !signature.named.iter().any(|flag| flag.long == "format"),
+                "The --format flag should not exist"
+            );
         }
 
         #[test]
@@ -350,32 +324,6 @@ mod tests {
                     .iter()
                     .any(|ex| ex.example.contains("ulid generate"))
             );
-        }
-
-        #[test]
-        fn test_format_parsing_valid() {
-            // Test that valid format strings are parsed correctly
-            // This tests the format parsing logic without full command execution
-            let valid_formats = vec![
-                ("string", crate::UlidOutputFormat::String),
-                ("json", crate::UlidOutputFormat::Json),
-                ("binary", crate::UlidOutputFormat::Binary),
-            ];
-
-            for (format_str, expected_format) in valid_formats {
-                let parsed_format = match Some(format_str) {
-                    Some("json") => crate::UlidOutputFormat::Json,
-                    Some("binary") => crate::UlidOutputFormat::Binary,
-                    Some("string") | None => crate::UlidOutputFormat::String,
-                    _ => panic!("Should not reach here for valid format"),
-                };
-
-                assert_eq!(
-                    parsed_format, expected_format,
-                    "Format mismatch for {}",
-                    format_str
-                );
-            }
         }
 
         #[test]
@@ -592,48 +540,6 @@ mod tests {
         }
     }
 
-    mod output_format_logic {
-        use super::*;
-
-        #[test]
-        fn test_format_enum_variants() {
-            // Test that we can construct all format variants
-            let _string_format = crate::UlidOutputFormat::String;
-            let _json_format = crate::UlidOutputFormat::Json;
-            let _binary_format = crate::UlidOutputFormat::Binary;
-        }
-
-        #[test]
-        fn test_format_value_conversion() {
-            // Generate a test ULID for format testing
-            if let Ok(test_ulid) = UlidEngine::generate() {
-                let span = create_test_span();
-                let ulid_str = test_ulid.to_string();
-
-                // Test string format
-                let string_value =
-                    UlidEngine::to_value(&test_ulid, &crate::UlidOutputFormat::String, span);
-                match string_value {
-                    Value::String { val, .. } => {
-                        assert_eq!(val, ulid_str);
-                        assert_eq!(val.len(), crate::ULID_STRING_LENGTH);
-                    }
-                    _ => panic!("String format should return String value"),
-                }
-
-                // Test JSON format returns a record
-                let json_value =
-                    UlidEngine::to_value(&test_ulid, &crate::UlidOutputFormat::Json, span);
-                match json_value {
-                    Value::Record { .. } => {
-                        // JSON format should return a structured record
-                    }
-                    _ => panic!("JSON format should return Record value"),
-                }
-            }
-        }
-    }
-
     mod input_validation {
 
         #[test]
@@ -710,7 +616,6 @@ mod tests {
             let test_cases = vec![
                 ("Invalid count", "Count must be positive"),
                 ("Count too large", "Maximum count is 10,000"),
-                ("Invalid format", "Unknown format"),
                 ("Generation failed", "ULID generation"),
                 ("Parse failed", "parsing"),
             ];
@@ -722,19 +627,6 @@ mod tests {
                 // Test error with label
                 let error_with_label = error.with_label(expected_content, create_test_span());
                 assert_eq!(error_with_label.msg, error_type);
-            }
-        }
-
-        #[test]
-        fn test_format_error_conditions() {
-            let invalid_formats = vec![
-                "invalid", "xml", "yaml", "csv", "html", "", "JSON", "BINARY",
-                "STRING", // Case sensitive
-            ];
-
-            for format in invalid_formats {
-                let is_valid_format = matches!(format, "string" | "json" | "binary");
-                assert!(!is_valid_format, "Format '{}' should be invalid", format);
             }
         }
     }
@@ -832,46 +724,6 @@ mod tests {
         }
 
         #[test]
-        fn test_format_parsing_execution() {
-            // Test format parsing logic from run method
-            let test_ulid = UlidEngine::generate().expect("Should generate test ULID");
-            let span = create_test_span();
-
-            // Test string format
-            let string_value =
-                UlidEngine::to_value(&test_ulid, &crate::UlidOutputFormat::String, span);
-            match string_value {
-                Value::String { val, .. } => {
-                    assert_eq!(val.len(), crate::ULID_STRING_LENGTH);
-                    assert_eq!(val, test_ulid.to_string());
-                }
-                _ => panic!("String format should return String value"),
-            }
-
-            // Test JSON format
-            let json_value = UlidEngine::to_value(&test_ulid, &crate::UlidOutputFormat::Json, span);
-            match json_value {
-                Value::Record { val, .. } => {
-                    let record = val.into_owned();
-                    assert!(record.contains("ulid"));
-                    assert!(record.contains("timestamp_ms"));
-                    assert!(record.contains("randomness"));
-                }
-                _ => panic!("JSON format should return Record value"),
-            }
-
-            // Test binary format
-            let binary_value =
-                UlidEngine::to_value(&test_ulid, &crate::UlidOutputFormat::Binary, span);
-            match binary_value {
-                Value::Binary { val, .. } => {
-                    assert_eq!(val.len(), 16); // ULID binary is 16 bytes
-                }
-                _ => panic!("Binary format should return Binary value"),
-            }
-        }
-
-        #[test]
         fn test_ulid_validate_execution() {
             // Test validation logic from UlidValidateCommand run method
             let valid_ulids = vec!["01AN4Z07BY79KA1307SR9X4MV3", "01BX5ZZKBKACTAV9WEVGEMMVRY"];
@@ -934,37 +786,6 @@ mod tests {
             // Test parsing invalid ULID
             let invalid_result = UlidEngine::parse("invalid-ulid");
             assert!(invalid_result.is_err(), "Should fail to parse invalid ULID");
-        }
-
-        #[test]
-        fn test_format_string_validation_execution() {
-            // Test format string validation logic used in run methods
-            let invalid_formats = vec!["xml", "yaml", "csv", "", "STRING", "JSON"];
-
-            for (format, expected) in [
-                ("string", crate::UlidOutputFormat::String),
-                ("json", crate::UlidOutputFormat::Json),
-                ("binary", crate::UlidOutputFormat::Binary),
-            ] {
-                let parsed_format = match Some(format) {
-                    Some("json") => crate::UlidOutputFormat::Json,
-                    Some("binary") => crate::UlidOutputFormat::Binary,
-                    Some("string") | None => crate::UlidOutputFormat::String,
-                    _ => panic!("Should not reach here for valid format"),
-                };
-
-                assert_eq!(
-                    parsed_format, expected,
-                    "Format parsing mismatch for '{}'",
-                    format
-                );
-            }
-
-            // Test invalid format detection
-            for format in &invalid_formats {
-                let is_valid = matches!(format as &str, "string" | "json" | "binary");
-                assert!(!is_valid, "Format '{}' should be invalid", format);
-            }
         }
 
         #[test]
@@ -1067,8 +888,7 @@ mod tests {
             let span = create_test_span();
 
             // Test single ULID value creation
-            let single_value =
-                UlidEngine::to_value(&test_ulid, &crate::UlidOutputFormat::String, span);
+            let single_value = Value::string(test_ulid.to_string(), span);
             match single_value {
                 Value::String { val, .. } => {
                     assert_eq!(val, test_ulid.to_string());
@@ -1080,7 +900,7 @@ mod tests {
             let bulk_ulids = [test_ulid];
             let list_values: Vec<Value> = bulk_ulids
                 .iter()
-                .map(|ulid| UlidEngine::to_value(ulid, &crate::UlidOutputFormat::String, span))
+                .map(|ulid| Value::string(ulid.to_string(), span))
                 .collect();
 
             assert_eq!(list_values.len(), 1);
@@ -1103,50 +923,13 @@ mod tests {
         }
     }
 
-    mod parse_output_format_tests {
-        use super::*;
-
-        #[test]
-        fn test_valid_formats() {
-            let span = create_test_span();
-            assert_eq!(
-                parse_output_format(Some("string"), span).unwrap(),
-                crate::UlidOutputFormat::String
-            );
-            assert_eq!(
-                parse_output_format(Some("json"), span).unwrap(),
-                crate::UlidOutputFormat::Json
-            );
-            assert_eq!(
-                parse_output_format(Some("binary"), span).unwrap(),
-                crate::UlidOutputFormat::Binary
-            );
-        }
-
-        #[test]
-        fn test_none_defaults_to_string() {
-            let span = create_test_span();
-            assert_eq!(
-                parse_output_format(None, span).unwrap(),
-                crate::UlidOutputFormat::String
-            );
-        }
-
-        #[test]
-        fn test_invalid_format_returns_error() {
-            let span = create_test_span();
-            assert!(parse_output_format(Some("xml"), span).is_err());
-        }
-    }
-
     mod generate_single_ulid_tests {
         use super::*;
 
         #[test]
         fn test_generates_without_timestamp() {
             let span = create_test_span();
-            let result =
-                generate_single_ulid(None, &crate::UlidOutputFormat::String, span).unwrap();
+            let result = generate_single_ulid(None, span).unwrap();
             match result {
                 PipelineData::Value(Value::String { val, .. }, _) => {
                     assert_eq!(val.len(), crate::ULID_STRING_LENGTH);
@@ -1158,24 +941,12 @@ mod tests {
         #[test]
         fn test_generates_with_timestamp() {
             let span = create_test_span();
-            let result =
-                generate_single_ulid(Some(1704067200000), &crate::UlidOutputFormat::String, span)
-                    .unwrap();
+            let result = generate_single_ulid(Some(1704067200000), span).unwrap();
             match result {
                 PipelineData::Value(Value::String { val, .. }, _) => {
                     assert_eq!(val.len(), crate::ULID_STRING_LENGTH);
                 }
                 _ => panic!("Expected string pipeline value"),
-            }
-        }
-
-        #[test]
-        fn test_json_format() {
-            let span = create_test_span();
-            let result = generate_single_ulid(None, &crate::UlidOutputFormat::Json, span).unwrap();
-            match result {
-                PipelineData::Value(Value::Record { .. }, _) => {}
-                _ => panic!("Expected record pipeline value for json format"),
             }
         }
     }
@@ -1186,8 +957,7 @@ mod tests {
         #[test]
         fn test_generates_correct_count() {
             let span = create_test_span();
-            let result =
-                generate_bulk_ulids(5, None, &crate::UlidOutputFormat::String, span).unwrap();
+            let result = generate_bulk_ulids(5, None, span).unwrap();
             match result {
                 PipelineData::Value(Value::List { vals, .. }, _) => {
                     assert_eq!(vals.len(), 5);
@@ -1199,27 +969,19 @@ mod tests {
         #[test]
         fn test_negative_count_errors() {
             let span = create_test_span();
-            assert!(generate_bulk_ulids(-1, None, &crate::UlidOutputFormat::String, span).is_err());
+            assert!(generate_bulk_ulids(-1, None, span).is_err());
         }
 
         #[test]
         fn test_over_max_count_errors() {
             let span = create_test_span();
-            assert!(
-                generate_bulk_ulids(10_001, None, &crate::UlidOutputFormat::String, span).is_err()
-            );
+            assert!(generate_bulk_ulids(10_001, None, span).is_err());
         }
 
         #[test]
         fn test_with_timestamp() {
             let span = create_test_span();
-            let result = generate_bulk_ulids(
-                3,
-                Some(1704067200000),
-                &crate::UlidOutputFormat::String,
-                span,
-            )
-            .unwrap();
+            let result = generate_bulk_ulids(3, Some(1704067200000), span).unwrap();
             match result {
                 PipelineData::Value(Value::List { vals, .. }, _) => {
                     assert_eq!(vals.len(), 3);

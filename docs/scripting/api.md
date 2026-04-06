@@ -28,13 +28,12 @@ Generate cryptographically secure ULIDs with optional parameters.
 
 **Full Syntax:**
 ```nu
-ulid generate [--count <int>] [--timestamp <int>] [--format <string>]
+ulid generate [--count <int>] [--timestamp <int>]
 ```
 
 **Parameters:**
-- `--count <int>`: Number of ULIDs to generate (1-100,000, default: 1)
+- `--count <int>`: Number of ULIDs to generate (1-10,000, default: 1)
 - `--timestamp <int>`: Custom timestamp in milliseconds since Unix epoch (optional)
-- `--format <string>`: Output format - "standard" (default), "compact", "json"
 
 **Input Types:**
 - `Nothing`: Generate based on parameters
@@ -56,13 +55,6 @@ ulid generate [--count <int>] [--timestamp <int>] [--format <string>]
     "01K2W41TWG3FKYYSK430SR8KW8"
 ]
 
-# JSON format
-{
-    ulid: "01K2W41TWG3FKYYSK430SR8KW6",
-    timestamp: 1692817394611,
-    randomness: "TWG3FKYYSK430SR8KW6",
-    iso8601: "2023-08-23T18:49:54.611Z"
-}
 ```
 
 **Advanced Examples:**
@@ -73,8 +65,11 @@ let current_id = ulid generate
 # Generate batch with custom timestamp
 let batch_ids = ulid generate --count 100 --timestamp 1692000000000
 
-# Generate in JSON format for detailed output
-let detailed_ulid = ulid generate --format json
+# Generate and parse for structured output
+let detailed_ulid = ulid generate | ulid parse $in
+
+# Generate and convert to binary
+let binary_ulid = ulid generate | ulid to-bytes
 
 # Use in pipeline
 1..10 | each { ulid generate } | str join ","
@@ -175,14 +170,11 @@ Parse ULID into timestamp, randomness, and metadata components.
 
 **Full Syntax:**
 ```nu
-ulid parse <ulid> [--format <string>] [--timezone <string>] [--validate]
+ulid parse <ulid>
 ```
 
 **Parameters:**
 - `<ulid>`: ULID string to parse (required)
-- `--format <string>`: Output format - "standard" (default), "compact", "json", "timestamp-only"
-- `--timezone <string>`: Timezone for timestamp formatting ("UTC", "local", or IANA timezone)
-- `--validate`: Validate ULID before parsing (recommended)
 
 **Input Types:**
 - `String`: Single ULID to parse
@@ -210,53 +202,23 @@ ulid parse <ulid> [--format <string>] [--timezone <string>] [--validate]
     valid: true
 }
 
-# Compact format
-{
-    ulid: "01K2W41TWG3FKYYSK430SR8KW6",
-    ts: 1692817394611,
-    rand: "F2Y5SK430SR8KW6",
-    valid: true
-}
-
-# Timestamp-only format
-{
-    ulid: "01K2W41TWG3FKYYSK430SR8KW6",
-    timestamp: 1692817394611,
-    iso8601: "2023-08-23T18:49:54.611Z"
-}
 ```
 
 **Advanced Examples:**
 ```nu
-# Parse with validation
-let parsed = ulid parse "01K2W41TWG3FKYYSK430SR8KW6" --validate
+# Parse and check validity
+let parsed = ulid parse "01K2W41TWG3FKYYSK430SR8KW6"
 if not $parsed.valid {
     error make { msg: "Invalid ULID" }
 }
 
-# Extract timestamp in local timezone
-let local_time = ulid parse $ulid --timezone local | get timestamp.human
-
 # Batch parsing with error handling
 let parsed_ulids = $ulid_list | each { |id|
     try {
-        ulid parse $id --validate
+        ulid parse $id
     } catch {
         { ulid: $id, valid: false, error: "Parse failed" }
     }
-}
-
-# Extract timestamps for sorting/filtering
-let timestamps = $ulids | each { |id| 
-    ulid parse $id --format timestamp-only | get timestamp 
-}
-
-# Parse and convert to different timezone
-let tokyo_time = ulid parse $ulid --timezone "Asia/Tokyo" | get timestamp.human
-
-# Compact parsing for memory efficiency
-let compact_results = $large_ulid_list | each { |id|
-    ulid parse $id --format compact
 }
 
 # Extract randomness for uniqueness analysis
@@ -275,7 +237,7 @@ Comprehensive ULID analysis with detailed metadata and statistics.
 
 **Full Syntax:**
 ```nu
-ulid inspect <ulid> [--compact] [--timestamp-only] [--stats] [--security-check] [--format <string>]
+ulid inspect <ulid> [--compact] [--timestamp-only] [--stats]
 ```
 
 **Parameters:**
@@ -283,8 +245,6 @@ ulid inspect <ulid> [--compact] [--timestamp-only] [--stats] [--security-check] 
 - `--compact`: Return condensed output format
 - `--timestamp-only`: Return only timestamp-related information
 - `--stats`: Include statistical analysis (entropy, patterns)
-- `--security-check`: Perform security context analysis
-- `--format <string>`: Output format - "standard", "json", "table"
 
 **Input Types:**
 - `String`: Single ULID to inspect

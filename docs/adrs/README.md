@@ -27,3 +27,4 @@ by Michael Nygard.
 | [ADR-0001](adr-0001.md)  | ✅ Accepted | 2026-03-01 | Conventional Commits with Project-Specific Scopes  |
 | [ADR-0002](adr-0002.md)  | ✅ Accepted | 2026-03-01 | Supply Chain Security via cargo-deny               |
 | [ADR-0003](adr-0003.md)  | ✅ Accepted | 2026-03-22 | Aggressive Nushell Version Tracking                |
+| [ADR-0004](adr-0004.md)  | ✅ Accepted | 2026-04-06 | Replace --format Flag with Pipeline-Native Commands |

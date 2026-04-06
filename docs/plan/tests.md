@@ -163,7 +163,7 @@ ulid parse "01AN4Z07BY79KA1307SR9X4MV3"
 ```bash
 # Test commands working together
 ulid generate | ulid validate
-ulid generate --format json | get timestamp | ulid time parse
+ulid generate | ulid parse $in | get timestamp.ms | ulid time parse
 ```
 
 ##### Error Handling Integration

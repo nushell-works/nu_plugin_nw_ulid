@@ -5,7 +5,7 @@ use nu_protocol::{
     Category, Example, LabeledError, PipelineData, Signature, Span, SyntaxShape, Type, Value,
 };
 
-use crate::UlidPlugin;
+use crate::{UlidEngine, UlidPlugin};
 
 /// Encodes data using Crockford Base32.
 pub struct UlidEncodeBase32Command;
@@ -309,6 +309,128 @@ impl PluginCommand for UlidDecodeHexCommand {
             }
             Err(e) => Err(LabeledError::new("Invalid hex")
                 .with_label(format!("Failed to decode hex data: {}", e), call.head)),
+        }
+    }
+}
+
+/// Converts a ULID string to its native 16-byte binary representation.
+pub struct UlidToBytesCommand;
+
+impl PluginCommand for UlidToBytesCommand {
+    type Plugin = UlidPlugin;
+
+    fn name(&self) -> &str {
+        "ulid to-bytes"
+    }
+
+    fn description(&self) -> &str {
+        "Convert a ULID to its native 16-byte binary representation"
+    }
+
+    fn signature(&self) -> Signature {
+        Signature::build(self.name())
+            .optional("ulid", SyntaxShape::String, "The ULID string to convert")
+            .input_output_types(vec![
+                (Type::String, Type::Binary),
+                (Type::Nothing, Type::Binary),
+            ])
+            .category(Category::Hash)
+    }
+
+    fn examples(&self) -> Vec<Example<'_>> {
+        vec![
+            Example {
+                example: "ulid to-bytes '01AN4Z07BY79KA1307SR9X4MV3'",
+                description: "Convert a ULID to its 16-byte binary representation",
+                result: None,
+            },
+            Example {
+                example: "ulid generate | ulid to-bytes",
+                description: "Generate a ULID and convert it to binary via pipeline",
+                result: None,
+            },
+        ]
+    }
+
+    fn run(
+        &self,
+        _plugin: &Self::Plugin,
+        _engine: &EngineInterface,
+        call: &EvaluatedCall,
+        input: PipelineData,
+    ) -> Result<PipelineData, LabeledError> {
+        let ulid_str: String = if let Some(arg) = call.opt(0)? {
+            arg
+        } else {
+            match input {
+                PipelineData::Value(Value::String { val, .. }, _) => val,
+                _ => {
+                    return Err(LabeledError::new("Missing ULID").with_label(
+                        "Provide a ULID string as an argument or via pipeline",
+                        call.head,
+                    ));
+                }
+            }
+        };
+
+        if !UlidEngine::validate(&ulid_str) {
+            return Err(LabeledError::new("Invalid ULID")
+                .with_label(format!("'{}' is not a valid ULID", ulid_str), call.head));
+        }
+
+        let ulid = ulid_str
+            .parse::<ulid::Ulid>()
+            .map_err(|e| LabeledError::new("Parse failed").with_label(e.to_string(), call.head))?;
+
+        let bytes = UlidEngine::to_bytes(&ulid);
+        Ok(PipelineData::Value(Value::binary(bytes, call.head), None))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    mod ulid_to_bytes_command {
+        use super::*;
+
+        #[test]
+        fn test_command_signature() {
+            let cmd = UlidToBytesCommand;
+            let sig = cmd.signature();
+            assert_eq!(sig.name, "ulid to-bytes");
+            assert_eq!(sig.optional_positional.len(), 1);
+        }
+
+        #[test]
+        fn test_command_name() {
+            assert_eq!(UlidToBytesCommand.name(), "ulid to-bytes");
+        }
+
+        #[test]
+        fn test_command_description() {
+            let desc = UlidToBytesCommand.description();
+            assert!(desc.contains("binary"));
+        }
+
+        #[test]
+        fn test_command_examples_not_empty() {
+            assert!(!UlidToBytesCommand.examples().is_empty());
+        }
+
+        #[test]
+        fn test_to_bytes_produces_16_bytes() {
+            let ulid = UlidEngine::generate().unwrap();
+            let bytes = UlidEngine::to_bytes(&ulid);
+            assert_eq!(bytes.len(), 16);
+        }
+
+        #[test]
+        fn test_to_bytes_roundtrip() {
+            let ulid = UlidEngine::generate().unwrap();
+            let bytes = UlidEngine::to_bytes(&ulid);
+            let restored = ulid::Ulid::from_bytes(bytes.try_into().unwrap());
+            assert_eq!(ulid, restored);
         }
     }
 }

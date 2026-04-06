@@ -38,6 +38,8 @@ impl Plugin for UlidPlugin {
             Box::new(UlidDecodeBase32Command),
             Box::new(UlidEncodeHexCommand),
             Box::new(UlidDecodeHexCommand),
+            // Binary conversion
+            Box::new(UlidToBytesCommand),
         ]
     }
 }
@@ -56,7 +58,7 @@ mod tests {
     fn test_plugin_commands() {
         let plugin = UlidPlugin;
         let commands = plugin.commands();
-        assert_eq!(commands.len(), 14);
+        assert_eq!(commands.len(), 15);
 
         // Test key commands to ensure they're registered correctly
         let command_names: Vec<&str> = commands.iter().map(|cmd| cmd.name()).collect();
