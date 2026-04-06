@@ -114,53 +114,6 @@ impl UlidEngine {
         Ulid::from_str(ulid_str).is_ok()
     }
 
-    /// Validates a ULID with detailed error information.
-    pub fn validate_detailed(ulid_str: &str) -> UlidValidationResult {
-        let mut result = UlidValidationResult {
-            valid: true,
-            length: ulid_str.len(),
-            charset_valid: true,
-            timestamp_valid: true,
-            errors: Vec::new(),
-        };
-
-        // Check length
-        if ulid_str.len() != ULID_STRING_LENGTH {
-            result.valid = false;
-            result.errors.push(format!(
-                "Invalid length: expected {} characters, got {}",
-                ULID_STRING_LENGTH,
-                ulid_str.len()
-            ));
-        }
-
-        // Check character set (Crockford Base32)
-        for (i, c) in ulid_str.chars().enumerate() {
-            if !CROCKFORD_BASE32_CHARSET.contains(c) {
-                result.valid = false;
-                result.charset_valid = false;
-                result.errors.push(format!(
-                    "Invalid character '{}' at position {}. Valid characters: {}",
-                    c, i, CROCKFORD_BASE32_CHARSET
-                ));
-            }
-        }
-
-        // Attempt full parsing if basic checks pass
-        if result.valid {
-            match Ulid::from_str(ulid_str) {
-                Ok(_) => {} // Valid ULID
-                Err(e) => {
-                    result.valid = false;
-                    result.timestamp_valid = false;
-                    result.errors.push(format!("Parse error: {}", e));
-                }
-            }
-        }
-
-        result
-    }
-
     /// Extracts the timestamp from a ULID.
     pub fn extract_timestamp(ulid_str: &str) -> Result<u64, UlidError> {
         match Ulid::from_str(ulid_str) {
@@ -241,21 +194,6 @@ impl UlidEngine {
 
         Value::record(record, span)
     }
-}
-
-/// ULID validation result with detailed error information.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct UlidValidationResult {
-    /// Whether the ULID is valid.
-    pub valid: bool,
-    /// Length of the input string.
-    pub length: usize,
-    /// Whether all characters are valid Crockford Base32.
-    pub charset_valid: bool,
-    /// Whether the timestamp component is valid.
-    pub timestamp_valid: bool,
-    /// Descriptions of any validation errors found.
-    pub errors: Vec<String>,
 }
 
 /// Errors produced by ULID operations.
