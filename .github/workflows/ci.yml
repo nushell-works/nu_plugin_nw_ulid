@@ -196,7 +196,7 @@ jobs:
         key: ${{ runner.os }}-cargo-integration-${{ hashFiles('**/Cargo.lock') }}
 
     - name: Install Nushell
-      run: cargo install nu --version 0.111.0 --locked
+      run: cargo install nu --version 0.112.2 --locked
 
     - name: Run integration tests (Unix)
       if: runner.os != 'Windows'
